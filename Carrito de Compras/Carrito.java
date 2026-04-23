@@ -38,12 +38,11 @@ public class Carrito{
             for (Item item : items){
                 montoAPagar += item.getDescuento();
         }
-        return montoAPagar;
         }
         else{
-        for (Item item : items){
-            montoAPagar += item.getPrecio();
-        }
+            for (Item item : items){
+                montoAPagar += item.getPrecio();
+            }
         }
        
         return montoAPagar;
