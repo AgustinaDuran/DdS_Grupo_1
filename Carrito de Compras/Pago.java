@@ -1,14 +1,23 @@
 public class Pago {
+    
     private Carrito carrito;
     private Tarjeta tarjeta;
     private float monto;
 
-    // no lleva a nada por ahora, podria desvalidar el pago en la cuenta del carrito?
+    // Por el momento solo verifica que el saldo de la tarjeta sea mayor al monto a pagar
+
     public boolean verificarTarjeta() {
+
         return tarjeta.getSaldo() >= monto;
     }
 
+    public Carrito getCarrito() {
+
+        return carrito;
+    }
+
     public float getMonto() {
+
         return monto;
     }
 }

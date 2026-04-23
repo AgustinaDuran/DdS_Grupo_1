@@ -1,4 +1,4 @@
-public class Item{
+public class Item {
     
     private Carrito carrito;
     private Producto producto;
@@ -7,6 +7,7 @@ public class Item{
 
 
     public float getPrecio() {
+
         return cantidad * precioUnitario;
     }
 
@@ -24,6 +25,7 @@ public class Item{
     }
 
     public float getDescuento() {
+
         return getPrecio() - getPrecioOficial();
     }
 }
