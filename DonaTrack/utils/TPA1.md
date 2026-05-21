@@ -1,4 +1,11 @@
-# Aqui se muestran las interfaces de usuario y justificaciones de diseño
+# Aqui se muestran las casos de uso, diagrama de clases, interfaces de usuario, y justificaciones de diseño
+
+## Casos de uso:
+![image](.img/casos-de-uso.png)
+
+## Diagrama de clases:
+
+![image](.img/diagrama-de-clases.png)
 
 ## Interfaz de acceso:
 ![image](.img/interfaz-acceso.png)
