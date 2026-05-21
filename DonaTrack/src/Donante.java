@@ -2,19 +2,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Donante {
-    private List<Contacto> contactos = new ArrayList<>();
-    private List<Donacion>  donacionesHistoricas = new ArrayList<>();
+    protected List<Contacto> contactos = new ArrayList<>();
+    protected List<Donacion>  donacionesHistoricas = new ArrayList<>();
 
-    public Donante() {
-    }
+
 
     void agregarContacto(Contacto nuevoContacto) {
         contactos.add(nuevoContacto);
     }
 
-    public List<Donacion> filtrarPorEstado(EstadoDonacion estado){
+    public void filtrarPorEstado(EstadoDonacion estado){
         List<Donacion> donaciones = donacionesHistoricas.stream()
-                .filter(d -> d.getEstadoDonacion == estado)
+                .filter(d -> d.getEstadoDonacion() == estado)
                 .toList();
 
         System.out.println("Donaciones filtradas por " + estado.name());
@@ -24,9 +23,9 @@ public abstract class Donante {
         }
     }
 
-    public List<Donacion> filtrarPorSubcategoria(Subcategoria subcategoria){
+    public void filtrarPorSubcategoria(Subcategoria subcategoria){
         List<Donacion> donaciones = donacionesHistoricas.stream()
-                .filter(d -> d.getSubcategoria == subcategoria)
+                .filter(d -> d.getSubcategoria() == subcategoria)
                 .toList();
 
         System.out.println("Donaciones filtradas por " + subcategoria.getNombre());
@@ -36,7 +35,7 @@ public abstract class Donante {
         }
     }
 
-    public List<Donacion> visualizarDonaciones() {
+    public void visualizarDonaciones() {
 
         System.out.println("Donaciones historicas");
 
@@ -49,7 +48,5 @@ public abstract class Donante {
         return contactos;
     }
 
-    public Mail getMail() {
-        return mail;
-    }
+    
 }

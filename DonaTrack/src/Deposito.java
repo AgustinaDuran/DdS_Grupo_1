@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Deposito {
+public class Deposito { // singleton
 
     private static Deposito instance = null;
     private List<Donacion> donaciones; // a reemplazar por un
@@ -20,6 +20,10 @@ public class Deposito {
 
     public void agregarDonaciones(List<Donacion> donaciones){
         this.donaciones.addAll(donaciones);
+    }
+
+    public List<Donacion> getDonaciones(){
+        return donaciones;
     }
 
 }

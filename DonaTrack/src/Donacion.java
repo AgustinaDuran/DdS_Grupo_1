@@ -27,4 +27,32 @@ public class Donacion {
         itemBienes.add(itemBien);
     }
 
+    public String getDescripcion(){
+        return descripcion;
+    }
+
+    public EstadoDonacion getEstadoDonacion(){
+        return estadoDonacion;
+    }
+
+    public Subcategoria getSubcategoria(){
+        return subcategoria;
+    }
+
+    public int getCantidadTotal(){
+        int total = 0;
+        for (ItemBien item : itemBienes) {
+            total += item.getCantidad();
+        }
+        return total;
+    }
+
+    public Donante getDonante(){
+        return donante;
+    }
+
+    public LocalDateTime getFechaIngreso(){
+        return fechaIngreso;
+    }
+
 }

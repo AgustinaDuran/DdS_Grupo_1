@@ -1,13 +1,28 @@
 abstract class Bien {
     
-    private String nombre;
-    private String descripcion;
-    private String foto;
-    private Subcategoria subcategoria;
+    protected String nombre;
+    protected String descripcion;
+    protected String foto;
+    protected Subcategoria subcategoria;
 
-    public void agregarFoto(String foto){
-        this.foto = foto;
+    public String getNombre(){
+        return this.nombre;
     }
 
+    public String getDescripcion(){
+        return this.descripcion;
+    }
+    
+    public String getFoto(){
+        return this.foto;
+    }
+
+    public Subcategoria getSubcategoria() {
+        return subcategoria;
+    }
+
+    public void agregarFoto(String foto) {
+        this.foto = foto;
+    }
 
 }

@@ -26,7 +26,7 @@ public class GestorUsuario {
                 String[] datos = linea.split(separador);
 
                 String tipoPersona = datos[0];
-                // String tipoDoc = datos[1];
+                // String tipoDoc = datos[1];                
                 String documento = datos[2].replace(".", "").replace("-", "");
                 String nombreRazonSocial = datos[3];
                 String email = datos[4];
@@ -51,7 +51,7 @@ public class GestorUsuario {
                         String[] partesNombre = nombreRazonSocial.split(" ", 2);
                         humana.setNombre(partesNombre[0]);
                         humana.setApellido(partesNombre[1]);
-                        humana.setNroDocumento(Integer.parseInt(documento));
+                        humana.setNroDocumento(documento);
 
                     } else if (donanteExistente instanceof PersonaJuridica) {
                         PersonaJuridica juridica = (PersonaJuridica) donanteExistente;
@@ -62,25 +62,24 @@ public class GestorUsuario {
                 else {
                     Donante nuevoDonante = null;
 
+                    Mail nuevoMail = new Mail(email);
+                    Telefono nuevoTel = new Telefono(telefono);
+
                     if (tipoPersona.equals("HUMANA")) {
-                        PersonaHumana humana = new PersonaHumana();
+                       
                         String[] partesNombre = nombreRazonSocial.split(" ", 2);
-                        humana.setNombre(partesNombre[0]);
-                        humana.setApellido(partesNombre[1]);
-                        humana.setNroDocumento(Integer.parseInt(documento));
-                        nuevoDonante = humana;
+                        String nombre = partesNombre[0];
+                        String apellido = partesNombre[1];
+                        //documento tomado del principio del while
+                        PersonaHumana pHumana = new PersonaHumana(nombre, apellido, documento, nuevoMail, nuevoTel);
+                        nuevoDonante = pHumana;
 
                     } else if (tipoPersona.equals("JURIDICA")) {
-                        nuevoDonante = new PersonaJuridica(nombreRazonSocial);
+                  
+                          PersonaJuridica pJuridica = new PersonaJuridica(nombreRazonSocial, documento, nuevoMail,nuevoTel);                          nuevoDonante = pJuridica;
                     }
 
                     if (nuevoDonante != null) {
-                        Mail nuevoMail = new Mail(email);
-                        Telefono nuevoTel = new Telefono(telefono);
-
-                        nuevoDonante.agregarContacto(nuevoMail);
-                        nuevoDonante.agregarContacto(nuevoTel);
-
                         this.donantes.add(nuevoDonante);
                     }
                 }

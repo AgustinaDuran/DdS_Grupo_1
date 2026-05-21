@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class GestorDonaciones {
+public class GestorDonaciones { 
     
 
     public void agregarDonacion(Donacion donacion){
@@ -36,9 +36,14 @@ public class GestorDonaciones {
 
     private Donacion donacionDeSubcategoria(List<Donacion> donaciones, Subcategoria subcategoria){
         return donaciones.stream()
-            .filter(d -> d.getItemBienes().getBien().getSubcategoria() == subcategoria)
+            .filter(d -> d.getItemBienes().stream().anyMatch(b -> b.getBien().getSubcategoria() == subcategoria))
             .findFirst()
             .orElse(null);
+    }
+
+    public static List<Donacion> getDonaciones() {
+        Deposito deposito = Deposito.GetInstance();
+        return deposito.getDonaciones();
     }
 
 

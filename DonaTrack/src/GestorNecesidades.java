@@ -9,10 +9,12 @@ public class GestorNecesidades {
     }
 
     public Donacion seleccionarDonacionSegun(Necesidad necesidad){
+        
+        List<Donacion> donaciones = GestorDonaciones.getDonaciones();
 
-        for (Donacion donacion : GestorDonaciones.getDonaciones()){
-            if (donacion.getsubcategoria().equals(necesidad.getSubcategoria())) {
-                if (donacion.getCantidad() >= necesidad.getCantidad()) {
+        for (Donacion donacion : donaciones){
+            if (donacion.getSubcategoria().equals(necesidad.getSubcategoria())) {
+                if (donacion.getCantidadTotal() >= necesidad.getCantidad()) {
                     return donacion;
                 }
             }

@@ -1,10 +1,11 @@
 abstract class Necesidad {
     
-    private EntidadBeneficiaria entidad;
-    private Subcategoria subcategoria;
-    private String descripcion;
-    private Integer cantidad;
-    private Boolean activa;
+    protected EntidadBeneficiaria entidad;
+    protected Subcategoria subcategoria;
+    protected String descripcion;
+    protected Integer cantidad;
+    protected Boolean activa;
+
 
     public Integer getCantidad(){
         return cantidad;

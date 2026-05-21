@@ -8,6 +8,24 @@ public class EntidadBeneficiaria {
     private Telefono telefono;
     private List<Mail> correosRepresentantes;
     private List<Necesidad> necesidades;
+    
+    public TipoEntidadBeneficiaria getTipoEntidad() { 
+        return tipoEntidad; }
+
+    public String getRazonSocial() { 
+        return razonSocial; }
+
+    public String getDireccion() { 
+        return direccion; }
+
+    public Telefono getTelefono() { 
+        return telefono; }
+    
+    public List<Mail> getCorreosRepresentantes() { 
+        return correosRepresentantes; }
+
+    public List<Necesidad> getNecesidades() { 
+        return necesidades; }
 
     public void auditarEntidad(){ //para un futuro
 
@@ -21,32 +39,31 @@ public class EntidadBeneficiaria {
         necesidad.marcarComoSaldada();
     }
 
-    public void verEstadoDonaciones(){ //CHEQUEAR
+    public void verEstadoDonaciones(List<Donacion> donaciones){
 
        for (Donacion donacion : donaciones){
-            System.out.println(donacion.getDescripcion() + " -> " + donacion.getEstado());
+            System.out.println(donacion.getDescripcion() + " -> " + donacion.getEstadoDonacion());
         }
     }
 
-    public void seguirEntregasActivas() { //CHEQUEAR
+    public void seguirEntregasActivas(List<Donacion> donaciones) {
         for (Donacion donacion : donaciones) {
-            if (donacion.getEstado() == EstadoDonacion.ENTREGA_ACTIVA) {
+            if (donacion.getEstadoDonacion() == EstadoDonacion.ENTREGA_ACTIVA) {
                 System.out.println("Entrega activa: "+ donacion.getDescripcion());
             }
         }
-    }
-
-    public void visualizarCamiones() {
-
-        //FALTA
     }
 
     public void recibirNotificacion(String mensaje){
         System.out.println("Notificación: " + mensaje);
     }
 
-    public void cargarFotoDonacion(String foto, Bien bien) {
-        bien.agregarFoto(foto);
+
+    public void cargarFotosDonacion(String foto, Bien bien){
+    bien.agregarFoto(foto);
     }
+    
+
+
 }
 
