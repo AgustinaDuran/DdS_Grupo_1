@@ -1,5 +1,9 @@
 # Aqui se muestran las casos de uso, diagrama de clases, interfaces de usuario, y justificaciones de diseño
 
+## Consigna:
+https://suriweb.com.ar/archivos/general/DDS-TP-Anual-2026-CursoK3002-Entrega1.pdf
+
+
 ## Casos de uso:
 ![image](.img/casos-de-uso.png)
 
