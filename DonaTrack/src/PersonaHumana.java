@@ -34,9 +34,6 @@ public class PersonaHumana extends Donante{
 
         this.contactoPredeterminado = contacto;
     }
-    public void cambiarContactoPreferido(Contacto contactoPreferidoNuevo){
-        this.contactoPredeterminado=contactoPreferidoNuevo;
-    }
 
     public String getNombre() {
         return nombre;

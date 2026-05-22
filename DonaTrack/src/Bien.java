@@ -21,7 +21,7 @@ abstract class Bien {
         return subcategoria;
     }
 
-    public void agregarFoto(String foto) {
+    public void setFoto(String foto) {
         this.foto = foto;
     }
 

@@ -1,4 +1,5 @@
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Donacion {
@@ -8,16 +9,20 @@ public class Donacion {
     private Subcategoria subcategoria;
     private List<ItemBien> itemBienes;
     private LocalDateTime fechaIngreso;
+    private String fotoEntrega;
 
-    public Donacion(List<ItemBien> itemBienes){
+    public Donacion(List<ItemBien> itemBienes){ //donacion instanciada por administrador
         this.itemBienes = itemBienes;
+    }
+
+    public Donacion(ItemBien itemBien){ //donacion instanciada por sistema, segmentada
+        List<ItemBien> listaConElPrimerBien = new ArrayList<>();
+        listaConElPrimerBien.add(itemBien);
+        this.itemBienes = listaConElPrimerBien;
         estadoDonacion = EstadoDonacion.DISPONIBLE;
         fechaIngreso = LocalDateTime.now();
     }
 
-    public void asignarSubcategoria(Subcategoria subcategoria){
-        this.subcategoria = subcategoria;
-    }
 
     public List<ItemBien> getItemBienes(){
         return itemBienes;
@@ -39,6 +44,11 @@ public class Donacion {
         return subcategoria;
     }
 
+    public void setSubcategoria(Subcategoria subcategoria){
+        this.subcategoria = subcategoria;
+    }
+
+
     public int getCantidadTotal(){
         int total = 0;
         for (ItemBien item : itemBienes) {
@@ -54,5 +64,14 @@ public class Donacion {
     public LocalDateTime getFechaIngreso(){
         return fechaIngreso;
     }
+
+    public String getFotoEntrega(){
+        return fotoEntrega;
+    }
+
+    public void setFotoEntrega(String foto){
+        fotoEntrega = foto;
+    }
+    
 
 }
