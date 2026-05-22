@@ -59,8 +59,8 @@ public class EntidadBeneficiaria {
     }
 
 
-    public void cargarFotosDonacion(String foto, Bien bien){
-    bien.agregarFoto(foto);
+    public void cargarFotoDonacion(String foto, Donacion donacion){
+        GestorDonaciones.agregarFotoEntrega(foto, donacion);
     }
     
 

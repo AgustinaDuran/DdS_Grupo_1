@@ -11,7 +11,7 @@ public class Deposito { // singleton
         donaciones = new ArrayList<>();
     }
 
-    public static Deposito GetInstance() {
+    public static Deposito getInstance() {
         if (instance == null)
             instance = new Deposito();
 

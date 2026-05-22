@@ -7,7 +7,7 @@ public class GestorDonaciones {
     public void agregarDonacion(Donacion donacion){
         List<Donacion> donacionesSegmentadas = segmentarDonacion(donacion);
     
-        Deposito deposito = Deposito.GetInstance();
+        Deposito deposito = Deposito.getInstance();
         deposito.agregarDonaciones(donacionesSegmentadas);
     }
 
@@ -24,6 +24,7 @@ public class GestorDonaciones {
                 List<ItemBien> primerBienEnLista = new ArrayList<>();
                 primerBienEnLista.add(itemBien);
                 Donacion donacionNueva = new Donacion(primerBienEnLista);
+                donacionNueva.setSubcategoria(subcategoriaBien);
                 donacionesSegmentadas.add(donacionNueva);
             } else{
                 donacionDeSubcategoria.agregarItemBien(itemBien);
@@ -42,8 +43,12 @@ public class GestorDonaciones {
     }
 
     public static List<Donacion> getDonaciones() {
-        Deposito deposito = Deposito.GetInstance();
+        Deposito deposito = Deposito.getInstance();
         return deposito.getDonaciones();
+    }
+
+    public static void agregarFotoEntrega(String foto, Donacion donacion) {
+        donacion.setFotoEntrega(foto);
     }
 
 
