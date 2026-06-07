@@ -2,37 +2,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Donante {
-    protected List<Contacto> contactos = new ArrayList<>();
     protected List<Donacion>  donacionesHistoricas = new ArrayList<>();
 
 
-
-    void agregarContacto(Contacto nuevoContacto) {
-        contactos.add(nuevoContacto);
-    }
-
-    public void filtrarPorEstado(EstadoDonacion estado){
+    public list<Donacion> filtrarPorEstado(EstadoDonacion estado){
         List<Donacion> donaciones = donacionesHistoricas.stream()
                 .filter(d -> d.getEstadoDonacion() == estado)
                 .toList();
+        // System.out.println("Donaciones filtradas por " + estado.name());
 
-        System.out.println("Donaciones filtradas por " + estado.name());
-
-        for(Donacion donacion: donaciones) {
-            System.out.println("Donacion: " + donacion);
-        }
+        // for(Donacion donacion: donaciones) {
+        //     System.out.println("Donacion: " + donacion);
+        // }
+        return donaciones;
     }
 
-    public void filtrarPorSubcategoria(Subcategoria subcategoria){
+    public list<Donacion> filtrarPorSubcategoria(Subcategoria subcategoria){
         List<Donacion> donaciones = donacionesHistoricas.stream()
                 .filter(d -> d.getSubcategoria() == subcategoria)
                 .toList();
 
-        System.out.println("Donaciones filtradas por " + subcategoria.getNombre());
+        // System.out.println("Donaciones filtradas por " + subcategoria.getNombre());
 
-        for(Donacion donacion: donaciones) {
-            System.out.println("Donacion: " + donacion);
-        }
+        // for(Donacion donacion: donaciones) {
+        //     System.out.println("Donacion: " + donacion);
+        // }
+
+        return donaciones;
     }
 
     public void visualizarDonaciones() {
@@ -44,9 +40,8 @@ public abstract class Donante {
         }
     }
 
-    public List<Contacto> getContactos() {
-        return contactos;
+    public void agregarDonacionHistorica(Donacion donacion){
+        this.donacionesHistoricas.push(donacion)
     }
-
     
 }

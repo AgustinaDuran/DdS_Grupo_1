@@ -1,29 +1,21 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class Categoria implements ComponenteCategoria {
+public class Categoria {
     private String nombre;
-    private List<ComponenteCategoria> componentes;
+    private List<Subcategoria> subcategorias;
 
     public Categoria(String nombre){
-        this.nombre= nombre;
-        this.componentes = new ArrayList<>();
+        this.nombre = nombre;
+        this.subcategorias = new ArrayList<>();
     }
 
-    @Override
     public String getNombre(){
         return this.nombre;
     }
 
-    @Override
-    public void agregarComponente(ComponenteCategoria componenteAPoner){
-        this.componentes.add(componenteAPoner);
+    public void agregarSubcategoria(Subcategoria subcategoria){
+        this.subcategorias.add(subcategoria);
+        return 
     }
-
-    @Override
-    public void quitarComponente(ComponenteCategoria componenteAQuitar){
-        this.componentes.remove(componenteAQuitar);
-    }
-
-
 } 

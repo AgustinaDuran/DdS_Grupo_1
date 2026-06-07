@@ -3,26 +3,20 @@ import java.util.List;
 public class EntidadBeneficiaria {
     
     private TipoEntidadBeneficiaria tipoEntidad;
-    private String razonSocial;
     private String direccion;
-    private Telefono telefono;
-    private List<Mail> correosRepresentantes;
     private List<Necesidad> necesidades;
+
+    public EntidadBeneficiaria(TipoEntidadBeneficiaria tipoEntidad, String direccion) {
+        this.tipoEntidad = tipoEntidad;
+        this.direccion = direccion;
+        this.necesidades = new ArrayList<>();
+    }
     
     public TipoEntidadBeneficiaria getTipoEntidad() { 
         return tipoEntidad; }
 
-    public String getRazonSocial() { 
-        return razonSocial; }
-
     public String getDireccion() { 
         return direccion; }
-
-    public Telefono getTelefono() { 
-        return telefono; }
-    
-    public List<Mail> getCorreosRepresentantes() { 
-        return correosRepresentantes; }
 
     public List<Necesidad> getNecesidades() { 
         return necesidades; }
@@ -58,12 +52,9 @@ public class EntidadBeneficiaria {
         System.out.println("Notificación: " + mensaje);
     }
 
-
     public void cargarFotoDonacion(String foto, Donacion donacion){
         GestorDonaciones.agregarFotoEntrega(foto, donacion);
     }
-    
-
 
 }
 

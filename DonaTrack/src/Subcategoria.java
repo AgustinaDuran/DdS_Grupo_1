@@ -1,4 +1,4 @@
-public class Subcategoria implements ComponenteCategoria{
+public class Subcategoria{
     private String nombre;
     private Bien tipoBien;
 
@@ -11,20 +11,8 @@ public class Subcategoria implements ComponenteCategoria{
         return this.tipoBien;
     }
 
-    @Override
     public String getNombre(){
         return this.nombre;
     }
-
-    @Override
-    public void agregarComponente(ComponenteCategoria componenteAPoner){
-        throw new UnsupportedOperationException("No se pueden agregar componentes a una Subcategoría (Es una hoja)");
-    }
-
-    @Override
-    public void quitarComponente(ComponenteCategoria componenteAQuitar){
-       throw new UnsupportedOperationException("Una Subcategoria no tiene componentes(Es una hoja)");
-    }
-
 
 }

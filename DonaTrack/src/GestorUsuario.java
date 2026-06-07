@@ -45,16 +45,16 @@ public class GestorUsuario {
                 }
 
                 if (donanteExistente != null) {
-                    if (donanteExistente instanceof PersonaHumana) {
-                        PersonaHumana humana = (PersonaHumana) donanteExistente;
+                    if (donanteExistente instanceof DonantePersona) {
+                        DonantePersona humana = (DonantePersona) donanteExistente;
 
                         String[] partesNombre = nombreRazonSocial.split(" ", 2);
                         humana.setNombre(partesNombre[0]);
                         humana.setApellido(partesNombre[1]);
                         humana.setNroDocumento(documento);
 
-                    } else if (donanteExistente instanceof PersonaJuridica) {
-                        PersonaJuridica juridica = (PersonaJuridica) donanteExistente;
+                    } else if (donanteExistente instanceof DonanteJuridico) {
+                        DonanteJuridico juridica = (DonanteJuridico) donanteExistente;
                         juridica.setRazonSocial(nombreRazonSocial);
                     }
                 }
@@ -71,12 +71,12 @@ public class GestorUsuario {
                         String nombre = partesNombre[0];
                         String apellido = partesNombre[1];
                         //documento tomado del principio del while
-                        PersonaHumana pHumana = new PersonaHumana(nombre, apellido, documento, nuevoMail, nuevoTel);
+                        DonantePersona pHumana = new DonantePersona(nombre, apellido, documento, nuevoMail, nuevoTel);
                         nuevoDonante = pHumana;
 
                     } else if (tipoPersona.equals("JURIDICA")) {
                   
-                          PersonaJuridica pJuridica = new PersonaJuridica(nombreRazonSocial, documento, nuevoMail,nuevoTel);                          nuevoDonante = pJuridica;
+                        DonanteJuridico pJuridica = new DonanteJuridico(nombreRazonSocial, documento, nuevoMail,nuevoTel);                          nuevoDonante = pJuridica;
                     }
 
                     if (nuevoDonante != null) {
