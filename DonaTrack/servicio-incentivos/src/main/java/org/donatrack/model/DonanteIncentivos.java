@@ -3,12 +3,34 @@ import java.time.YearMonth;
 import java.util.*;
 
 public class DonanteIncentivos {
-    private List<Donacion> donaciones = new ArrayList<>();
+    private List<Donacion> donaciones;
     private String nombreUsuario;
+    public CategoriaDonante categoriaActual;
+    private List<Insignia> insigniasGanadas = new ArrayList<>();
 
+    public DonanteIncentivos(String nombreUsuario, String categoria) {
+        this.nombreUsuario = nombreUsuario;
+        this.categoriaActual = new Colaborador();
+    }
+
+    public void registrarActividad(Donacion nuevaDonacion) {
+        this.donaciones.add(nuevaDonacion);        
+        
+        if (this.categoriaActual.completoTodasLasMisiones(this)) {
+            CategoriaDonante siguiente = this.categoriaActual.getSiguienteCategoria();
+            if (siguiente != null) {
+                this.categoriaActual = siguiente;
+            }
+        }
+    }
 
     public int CalcularTotalDonaciones(){
         return donaciones.size();
+    }
+
+    public int CalcularDonacionesDistintas(){
+        // recorrer donaciones y mirar bienes !=
+        return 0;
     }
 
     public int CalcularOrganizacionesAyudadas(){
@@ -16,9 +38,17 @@ public class DonanteIncentivos {
         return 0;
     }
 
-    public int CalcularImpactoAcumulado(){
-        // ???
+    public Integer CalcularRachaActual(){
+        // calcular cuantos meses seguidos ha donado
         return 0;
+    }
+
+    public int CalcularImpactoAcumulado(){ //cant bienes donados
+        int impacto = 0;
+        for (Donacion d : donaciones) {
+            impacto += d.getCantidadBienes(); 
+        }
+        return impacto;
     }
 
     public double calcularTotalDonadoEn(YearMonth periodo) {
@@ -43,6 +73,12 @@ public class DonanteIncentivos {
     public int ObtenerComparacionMensual() {
         //comparar con el mes anterior, devolver porcentaje
         return 0;
+    }
+
+    public void ganarInsignia(Insignia nuevaInsignia) {
+        if (!this.insigniasGanadas.contains(nuevaInsignia)) {
+            this.insigniasGanadas.add(nuevaInsignia);
+        }
     }
 
 
