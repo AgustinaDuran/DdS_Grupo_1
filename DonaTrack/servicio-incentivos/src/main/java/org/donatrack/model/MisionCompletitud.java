@@ -4,8 +4,7 @@ public class MisionCompletitud extends Mision {
    
    private Integer cantidadDonacionesDistintasRequeridas;
 
-    public MisionCompletitud(String nombre, String descripcion, Insignia insignia, Integer cantidadDonacionesDistintasRequeridas) {
-        this.nombre = nombre;
+    public MisionCompletitud(String descripcion, Insignia insignia, Integer cantidadDonacionesDistintasRequeridas) {
         this.descripcion = descripcion;
         this.insignia = insignia;
         this.cantidadDonacionesDistintasRequeridas = cantidadDonacionesDistintasRequeridas;

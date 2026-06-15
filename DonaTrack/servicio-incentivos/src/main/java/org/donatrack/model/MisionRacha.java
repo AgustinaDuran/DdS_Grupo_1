@@ -1,15 +1,11 @@
 package org.donatrack.model;
 
-import java.util.function.BooleanSupplier;
-
 public class MisionRacha extends Mision {
    
    private Integer mesesConsecutivosRequeridos;
    
-   public MisionRacha(String nombre, String descripcion, Insignia insignia, Integer mesesConsecutivosRequeridos) {
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-        this.insignia = insignia;
+   public MisionRacha(String descripcion, Insignia insignia, Integer mesesConsecutivosRequeridos) {
+        super(descripcion, insignia);
         this.mesesConsecutivosRequeridos = mesesConsecutivosRequeridos;
     }
 

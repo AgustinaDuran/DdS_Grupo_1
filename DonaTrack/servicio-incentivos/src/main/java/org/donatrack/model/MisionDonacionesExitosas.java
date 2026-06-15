@@ -4,9 +4,9 @@ public class MisionDonacionesExitosas extends Mision {
     
     private int cantidadDonacionesExitosasRequerida;
 
-    public MisionDonacionesExitosas(String nombre, String descripcion, Insignia insignia, int cantidadDonacionesRequerida) {
-        super(nombre, descripcion, insignia);
-        this.cantidadDonacionesExitosasRequerida = cantidadDonacionesRequerida;
+    public MisionDonacionesExitosas(String descripcion, Insignia insignia, int cantidadDonacionesExitosasRequerida) {
+        super(descripcion, insignia);
+        this.cantidadDonacionesExitosasRequerida = cantidadDonacionesExitosasRequerida;
     }
 
     @Override

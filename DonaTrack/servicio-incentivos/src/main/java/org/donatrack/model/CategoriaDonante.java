@@ -8,7 +8,7 @@ public abstract class CategoriaDonante {
 
     public abstract CategoriaDonante getSiguienteCategoria();
 
-    public boolean completoTodasLasMisiones(DonanteIncentivos donante) {
+    public Boolean completoTodasLasMisiones(DonanteIncentivos donante) {
         for (Mision mision : misiones) {
             if (!mision.estaCumplidaPor(donante)) {
                 return false; 

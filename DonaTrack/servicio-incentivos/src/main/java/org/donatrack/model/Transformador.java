@@ -5,16 +5,16 @@ import java.util.List;
 public class Transformador extends CategoriaDonante {
     public Transformador() {
       
-        Insignia insigniaRachaOro = new Insignia("Racha - Oro", img);
-        Insignia insigniaCompletitudOro = new Insignia("Completitud - Oro", img);
-        Insignia insigniaHabilDonadorOro = new Insignia("Habil Donador - Oro", img);
-        Insignia insigniaMisionDonacionesExitosasOro = new Insignia("Donaciones Exitosas - Oro", img);
+        Insignia rachaOro = FabricaInsignias.crear(TipoInsignia.RACHA, NivelInsignia.ORO);
+        Insignia completitudOro = FabricaInsignias.crear(TipoInsignia.COMPLETITUD, NivelInsignia.ORO);
+        Insignia habilOro = FabricaInsignias.crear(TipoInsignia.HABIL_DONADOR, NivelInsignia.ORO);
+        Insignia exitosasOro = FabricaInsignias.crear(TipoInsignia.DONACIONES_EXITOSAS, NivelInsignia.ORO);
 
         this.misiones = List.of(
-            new MisionRacha("Realizar una donacion durante X meses seguidos", 12, insigniaRachaOro),
-            new MisionCompletitud("Realizar donaciones de X categorias distintas", 9, insigniaCompletitudOro),
-            new MisionHabilDonador("Donación que supere X cantidad de bienes", 20, insigniaHabilDonadorOro),
-            new MisionDonacionesExitosas("Lograr X donaciones que sean recibidas exitosamente por una entidad beneficiaria", 10, insigniaMisionDonacionesExitosasOro)
+            new MisionRacha("Completa donaciones durante X meses consecutivos", rachaOro, 12),
+            new MisionCompletitud("Donar a X categorías diferentes", completitudOro, 9),
+            new MisionHabilDonador("Realizar una donación que supere X cantidad de bienes", habilOro, 20),
+            new MisionDonacionesExitosas("Realizar X donaciones exitosas", exitosasOro, 10)
         );
     }
 

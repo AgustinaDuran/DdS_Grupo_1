@@ -1,9 +1,13 @@
 package org.donatrack.model;
 
 public abstract class Mision {
-    protected String nombre;
     protected String descripcion;
     protected Insignia insignia;    
+
+    public Mision(String descripcion, Insignia insignia) {
+        this.descripcion = descripcion;
+        this.insignia = insignia;
+    }
 
     public abstract Boolean estaCumplidaPor(DonanteIncentivos donante);
 

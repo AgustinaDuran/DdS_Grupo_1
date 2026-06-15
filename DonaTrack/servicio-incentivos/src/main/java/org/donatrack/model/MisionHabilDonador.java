@@ -4,8 +4,8 @@ public class MisionHabilDonador extends Mision {
     
     private int cantidadBienesRequerida;
 
-    public MisionHabilDonador(String nombre, String descripcion, Insignia insignia, int cantidadBienesRequerida) {
-        super(nombre, descripcion, insignia);
+    public MisionHabilDonador(String descripcion, Insignia insignia, int cantidadBienesRequerida) {
+        super(descripcion, insignia);
         this.cantidadBienesRequerida = cantidadBienesRequerida;
     }
 

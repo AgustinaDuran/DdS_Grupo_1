@@ -1,9 +1,11 @@
 package org.donatrack.model;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 
 public class DonanteIncentivos {
-    private List<Donacion> donaciones;
+    private String nombre;
+    private List<Donacion> donaciones = new ArrayList<>();
     private String nombreUsuario;
     public CategoriaDonante categoriaActual;
     private List<Insignia> insigniasGanadas = new ArrayList<>();
@@ -13,7 +15,7 @@ public class DonanteIncentivos {
         this.categoriaActual = new Colaborador();
     }
 
-    public void registrarActividad(Donacion nuevaDonacion) {
+    public void registrarActividad(Donacion nuevaDonacion) { //agregar en donante que al agregar donacion, se actualice aca
         this.donaciones.add(nuevaDonacion);        
         
         if (this.categoriaActual.completoTodasLasMisiones(this)) {
@@ -24,38 +26,67 @@ public class DonanteIncentivos {
         }
     }
 
-    public int CalcularTotalDonaciones(){
+    public Integer CalcularTotalDonaciones(){
         return donaciones.size();
     }
 
-    public int CalcularDonacionesDistintas(){
-        // recorrer donaciones y mirar bienes !=
-        return 0;
+    public Integer CalcularDonacionesDistintas(){
+        List<Subcategoria> categorias = new ArrayList<>();
+        for (Donacion d : donaciones) {
+            if (!categorias.contains(d.getSubcategoria())) {
+                categorias.add(d.getSubcategoria());
+            }
+        }
+        return categorias.size();
     }
 
-    public int CalcularOrganizacionesAyudadas(){
-        // recorrer donaciones y mirar entidades !=
-        return 0;
+    public Integer CalcularOrganizacionesAyudadas(){
+        List<Organizacion> organizaciones = new ArrayList<>();
+        for (Donacion d : donaciones) {
+            if (!organizaciones.contains(d.getOrganizacion())) { //agregar a quien se dono en donacion
+                organizaciones.add(d.getOrganizacion());
+            }
+        }
+        return organizaciones.size();
     }
 
     public Integer CalcularRachaActual(){
-        // calcular cuantos meses seguidos ha donado
-        return 0;
+        if (donaciones.isEmpty()) {
+            return 0;
+        }
+
+        int racha = 1;
+        YearMonth mesAnterior = YearMonth.from(donaciones.get(0).getFechaIngreso());
+
+        for (int i = 1; i < donaciones.size(); i++) {
+            YearMonth mesActual = YearMonth.from(donaciones.get(i).getFechaIngreso());
+
+            if (mesActual.equals(mesAnterior)) {
+                continue;
+            }
+
+            if (mesAnterior.plusMonths(1).equals(mesActual)) {
+                racha++;
+            } else {
+                racha = 1;
+            }
+
+            mesAnterior = mesActual;
+        }
+        return racha;
     }
 
-    public int CalcularImpactoAcumulado(){ //cant bienes donados
-        int impacto = 0;
-        for (Donacion d : donaciones) {
-            impacto += d.getCantidadBienes(); 
-        }
+    public Integer CalcularImpactoAcumulado(){ //cant bienes donados
+        Integer impacto = donante.getCantidadTotal();
         return impacto;
     }
 
-    public double calcularTotalDonadoEn(YearMonth periodo) {
-        double total = 0;
+    public Integer calcularTotalDonadoEntre(LocalDate fechaInicio, LocalDate fechaFin) {
+        Integer total = 0;
 
         for (Donacion d : donaciones) {
-            if (YearMonth.from(d.getFecha()).equals(periodo)) {
+            LocalDate fecha = d.getFechaIngreso();
+            if (!fecha.isBefore(fechaInicio) && !fecha.isAfter(fechaFin)) {
                 total += d.getCantidadBienes();
             }
         }
@@ -63,15 +94,29 @@ public class DonanteIncentivos {
         return total;
     }
 
-    public double ObtenerEvolucionDonacionesPorPeriodo(YearMonth mesActual, YearMonth mesAnterior) {
-        double totalActual = calcularTotalDonadoEn(mesActual);
-        double totalAnterior = calcularTotalDonadoEn(mesAnterior);
+    public Double ObtenerComparacionMensual(YearMonth mesActual, YearMonth mesAnterior) {
+        Double totalActual = 0.0;
+        Double totalAnterior = 0.0;
 
-        if (totalAnterior == 0) return totalActual > 0 ? 100.0 : 0.0;
+        for (Donacion d : donaciones) {
+            YearMonth periodo = YearMonth.from(d.getFechaIngreso());
+
+            if (periodo.equals(mesActual)) {
+                totalActual += d.getCantidad();
+            }
+
+            if (periodo.equals(mesAnterior)) {
+                totalAnterior += d.getCantidad();
+            }
+        }
+        if (totalAnterior == 0) {
+            return 0.0;
+        }
         return ((totalActual - totalAnterior) / totalAnterior) * 100;
     }
-    public int ObtenerComparacionMensual() {
-        //comparar con el mes anterior, devolver porcentaje
+
+    public Integer ObtenerEvolucionDonacionesPorPeriodo() {
+        //COMO SE CALCULA?
         return 0;
     }
 
