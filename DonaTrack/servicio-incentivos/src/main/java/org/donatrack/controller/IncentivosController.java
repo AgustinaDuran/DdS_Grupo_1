@@ -35,4 +35,10 @@ public class IncentivosController {
     public ResponseEntity<List<InsigniaDTO>> obtenerVitrina(@PathVariable String nombreUsuario) {
         return ResponseEntity.ok(this.analiticaService.obtenerVitrinaInsignias(nombreUsuario));
     }
+    //http://localhost:8080/api/incentivos/ranking/destacados
+    @GetMapping("/ranking/destacados")
+    public ResponseEntity<PodioMensualDTO> obtenerPodioDestacado() {
+        YearMonth mesActual = YearMonth.now(); 
+        return ResponseEntity.ok(this.analiticaService.obtenerPodioDestacadoDelMes(mesActual));
+}
 }

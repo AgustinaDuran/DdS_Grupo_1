@@ -2,9 +2,9 @@ package org.donatrack.model;
 
 public class MisionDonacionesExitosas extends Mision {
     
-    private int cantidadDonacionesExitosasRequerida;
+    private Integer cantidadDonacionesExitosasRequerida;
 
-    public MisionDonacionesExitosas(String descripcion, Insignia insignia, int cantidadDonacionesExitosasRequerida) {
+    public MisionDonacionesExitosas(String descripcion, Insignia insignia, Integer cantidadDonacionesExitosasRequerida) {
         super(descripcion, insignia);
         this.cantidadDonacionesExitosasRequerida = cantidadDonacionesExitosasRequerida;
     }

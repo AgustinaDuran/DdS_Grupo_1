@@ -15,8 +15,8 @@ public abstract class Mision {
 
     public abstract Integer getObjetivoAsignado();
 
-    public int getDistanciaRestante(DonanteIncentivos donante) {
-        int restante = this.getObjetivoAsignado() - this.getProgresoActual(donante);
+    public Integer getDistanciaRestante(DonanteIncentivos donante) {
+        Integer restante = this.getObjetivoAsignado() - this.getProgresoActual(donante);
         return Math.max(restante, 0); //no tiene en cuenta negativos
     }
 

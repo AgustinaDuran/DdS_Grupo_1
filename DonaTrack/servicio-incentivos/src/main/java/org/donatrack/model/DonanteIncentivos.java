@@ -1,31 +1,45 @@
 package org.donatrack.model;
+
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "donantes_incentivos")
 public class DonanteIncentivos {
     @Id
     private String nombreUsuario;
     private String nombre;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "donante_id")
     private List<Donacion> donaciones = new ArrayList<>();
-    public CategoriaDonante categoriaActual;
+
+    @Transient // no guardar
+    private CategoriaDonante categoriaActual;
+    
+    private String nombreCategoriaActual;
+
+    @ManyToMany(cascade = CascadeType.ALL) //insignias se repiten en varios donantes
     private List<Insignia> insigniasGanadas = new ArrayList<>();
+
+    public DonanteIncentivos() {}
 
     public DonanteIncentivos(String nombreUsuario, String categoria) {
         this.nombreUsuario = nombreUsuario;
         this.categoriaActual = new Colaborador();
+        this.nombreCategoriaActual = this.categoriaActual.getNombre();
     }
 
-    public void registrarActividad(Donacion nuevaDonacion) { //agregar en donante que al agregar donacion, se actualice aca
+    public void registrarActividad(Donacion nuevaDonacion) {
         this.donaciones.add(nuevaDonacion);        
         
         if (this.categoriaActual.completoTodasLasMisiones(this)) {
             CategoriaDonante siguiente = this.categoriaActual.getSiguienteCategoria();
             if (siguiente != null) {
                 this.categoriaActual = siguiente;
+                this.nombreCategoriaActual = siguiente.getNombre();
             }
         }
     }
@@ -59,10 +73,10 @@ public class DonanteIncentivos {
             return 0;
         }
 
-        int racha = 1;
+        Integer racha = 1;
         YearMonth mesAnterior = YearMonth.from(donaciones.get(0).getFechaIngreso());
 
-        for (int i = 1; i < donaciones.size(); i++) {
+        for (Integer i = 1; i < donaciones.size(); i++) {
             YearMonth mesActual = YearMonth.from(donaciones.get(i).getFechaIngreso());
 
             if (mesActual.equals(mesAnterior)) {
@@ -128,6 +142,17 @@ public class DonanteIncentivos {
         if (!this.insigniasGanadas.contains(nuevaInsignia)) {
             this.insigniasGanadas.add(nuevaInsignia);
         }
+    }
+
+    public CategoriaDonante getCategoriaActual() {
+        if (this.categoriaActual == null && this.nombreCategoriaActual != null) {
+            this.categoriaActual = new Colaborador();
+        }
+        return categoriaActual;
+    }
+
+    public String getNombreCategoriaActual() {
+        return nombreCategoriaActual;
     }
 
     public String getNombreUsuario() { 
