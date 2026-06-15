@@ -2,11 +2,15 @@ package org.donatrack.model;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
+@Entity
 public class DonanteIncentivos {
+    @Id
+    private String nombreUsuario;
     private String nombre;
     private List<Donacion> donaciones = new ArrayList<>();
-    private String nombreUsuario;
     public CategoriaDonante categoriaActual;
     private List<Insignia> insigniasGanadas = new ArrayList<>();
 
@@ -126,5 +130,15 @@ public class DonanteIncentivos {
         }
     }
 
+    public String getNombreUsuario() { 
+        return nombreUsuario; 
+    }
 
+    public List<Donacion> getDonaciones() {
+        return donaciones;
+    }
+
+    public List<Insignia> getInsigniasGanadas() {
+        return insigniasGanadas;
+    }
 }

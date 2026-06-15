@@ -20,4 +20,12 @@ public abstract class Mision {
         return Math.max(restante, 0); //no tiene en cuenta negativos
     }
 
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public Insignia getInsigniaOtorgada() {
+        return insignia;
+    }
+
 }
