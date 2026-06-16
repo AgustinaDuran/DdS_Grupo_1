@@ -24,6 +24,16 @@ public class IncentivosController {
         return ResponseEntity.ok(this.analiticaService.obtenerEstadisticasGenerales(nombreUsuario));
     }
 
+    @PostMapping("/registrar-donacion")
+    public ResponseEntity<String> recibirNuevaDonacion(
+        @RequestParam String nombreUsuario, 
+        @RequestBody Donacion nuevaDonacion) {
+        
+        analiticaService.registrarDonacionDeUsuario(nombreUsuario, nuevaDonacion);
+        
+        return ResponseEntity.ok("Donación procesada en Incentivos con éxito");
+    }
+
     //http://localhost:8080/api/incentivos/donantes/{nombreUsuario}/misiones-progreso
     @GetMapping("/donantes/{nombreUsuario}/misiones-progreso")
     public ResponseEntity<List<MisionProgresoDTO>> obtenerMisiones(@PathVariable String nombreUsuario) {
