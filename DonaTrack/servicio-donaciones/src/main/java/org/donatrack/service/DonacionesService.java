@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Service;
 import org.donatrack.controller.dto.DonacionDTO;
 import org.donatrack.repository.DonacionesRepository;
-
+import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 import org.donatrack.dominio.donacion.*;
 import org.donatrack.controller.dto.DonacionDTO;
 import java.util.ArrayList;
@@ -28,6 +28,9 @@ public class DonacionesService {
             donacionDTOs.add(donacionDTO);
         }
         return donacionDTOs;
+    }
+    public void asignarDonacion(EntidadBeneficiaria e, Donacion donacion){
+        donacion.asignar(e);
     }
 
 }

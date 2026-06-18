@@ -1,5 +1,6 @@
 package org.donatrack.dominio.algoritmo;
 
+import org.donatrack.service.DonacionesService;
 import org.donatrack.dominio.donacion.Donacion;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 import java.util.ArrayList;
@@ -9,6 +10,12 @@ import java.util.HashMap;
 
 public class Administrador{
 
+    private DonacionesService donacionesService;
+
+    public Administrador(DonacionesService service){
+        this.donacionesService = service;
+    }
+
     public void confirmarDestinoFinal(ResultadoAsignacion resultado,EntidadBeneficiaria entidad ){
         if(resultado.tieneCoincidencias()){
             resultado.getCoincidencias().stream()
@@ -17,7 +24,7 @@ public class Administrador{
                                         .orElseThrow(() ->
                                         new IllegalArgumentException("La entidad no pertenece al ranking"));
 
-            resultado.getDonacion().asignar(entidad);
+        donacionesService.asignarDonacion(entidad, resultado.getDonacion());
 
         }
         
