@@ -1,9 +1,16 @@
 package org.donatrack.dominio.donacion;
 import java.time.LocalDateTime;
+
+import org.donatrack.dominio.bien.TipoUnidad;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 
 public abstract class EstadoDonacion {
     private LocalDateTime fechaIngresoEstado;
+    protected TipoEstado estado;
+
+    public TipoEstado getEstado() {
+        return estado;
+    }
 
     public LocalDateTime getDate(){
         return fechaIngresoEstado;

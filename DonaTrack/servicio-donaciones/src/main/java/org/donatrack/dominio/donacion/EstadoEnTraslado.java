@@ -3,6 +3,10 @@ import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 
 public class EstadoEnTraslado extends EstadoDonacion {
 
+    public EstadoEnTraslado() {
+        this.estado = TipoEstado.EN_TRASLADO;
+    }
+
     @Override
     public boolean entregaActiva() {
     return true;

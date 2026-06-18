@@ -27,5 +27,9 @@ public class Deposito { // singleton
     public List<Donacion> getDonaciones(){
         return donaciones;
     }
-
+    public List<Donacion> getDonacionesEnDeposito() {
+    return this.donaciones.stream()
+                          .filter(d -> d.getEstadoDonacion() instanceof EstadoEnDeposito)
+                          .toList();
+    }
 }
