@@ -1,11 +1,22 @@
+package org.donatrack.model;
+
+import java.time.LocalDateTime;
+import org.donatrack.model.MedioEnvio;
+
+
 public class Notificacion{
-    private Persona destinatario;
+    private long id;
+    private String destinatario;
     private String mensaje;
-    private Contacto medioEnvio;
+    private MedioEnvio medioEnvio;
     private LocalDate fechaEnvio;
     private Bool estado; 
 
-    public Persona getDestinatario(){
+    public Long getId(){
+        return id;
+    }
+
+    public String getDestinatario(){
         return destinatario;
     }
 
@@ -13,7 +24,7 @@ public class Notificacion{
         return mensaje;
     }
 
-    public Contacto getMedioEnvio(){
+    public MedioEnvio getMedioEnvio(){
         return medioEnvio;
     }
 
@@ -21,13 +32,21 @@ public class Notificacion{
         return estado;
     }
 
-    public Notificacion(Persona destinatario, String mensaje, MedioEnvioStrategy medio) {
+    public Void setMensaje(mensaje){
+        notificacion.mensaje = mensaje;
+    }
+
+    public Notificacion(String destinatario, String mensaje, MedioEnvio medio) {
         this.destinatario = destinatario;
         this.mensaje = mensaje;
         this.medio = medio;
         this.estado = false;
         this.fechaCreacion = LocalDateTime.now();
+    }
 
+    public void enviarNotificacion(){
+        this.estado = true;
+        this.medioEnvio.notificar(this.destinatario, this.mensaje);
     }
 
 }

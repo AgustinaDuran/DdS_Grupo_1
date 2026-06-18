@@ -1,20 +1,41 @@
+package org.donatrack.service;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Service;
+import org.donatrack.controller.dto.*;
+
+import java.util.List;
+
+
+
+@Service
 public class Notificador {
 
-    public static Notificador instancia;
+    private NotificacionesRepository notificacionesRepository;
 
-    private Notificador() {}
+    public void notificar(CrearNotificacionDTO crearNotificacionDTO) {
+        
+        List<Contacto> contactos = crearNotificacionDTO.getContactos();
 
-    public static Notificador getNotificador() {
-        if(instancia == null) {
-            instancia = new Notificador(); 
-        }
-        return instancia;
-    }
 
-    public void notificar(Notificacion notificacion) {
-        Persona destinatario = notificacion.getPersona();
-        String mensaje = notificacion.getMensaje();
+        Contacto contactoSeleccionado = contactos.stream().findFirst().orElseThrow(() -> new RuntimeException("No se encontraron contactos"));
+        //agarra el primer contacto, aca se aplicaria logica de elegir contacto si hubiera
 
-        notificacion.getMedioEnvio().notificar(destinatario, mensaje);
+        MedioEnvio medio= contactoSeleccionado.pasarAMedioEnvio();
+
+        notificacion = new Notificacion(destinatario, mensaje, medio);
+        
+        // Enviamos inmediatamente la notificación, posible reforma a un job
+        notificacion.enviarNotificacion();
+
+        this.notificacionesRepository.save(notificacion);
+        
     } 
+
+    /*
+    enviarNotificacion(){
+        a tal hora/tal motivo. Se ejecuta 
+    }*/ 
 }
+

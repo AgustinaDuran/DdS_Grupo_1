@@ -1,16 +1,41 @@
 public abstract class MedioEnvio {
+    private String destino;
+    public void notificar(String nombreDestinatario, String mensaje);
 
-    public void enviar(Persona destinatario, String mensaje) {}
+}
+public class EnvioWhatsapp extends MedioEnvio {
+    public EnvioWhatsapp(String nroTelefono) {
+        this.destino = nroTelefono;
+    }
+    @Override
+    public void notificar(String nombreDestinatario, String mensaje) {
+        //comunicacion con la api
+    }
 }
 
-public class EnvioWhatsapp {
-    public void enviar(Persona destinatario, String mensaje) {}
+public class EnvioSMS extends MedioEnvio {
+
+    public EnvioSMS(String nroTelefono) {
+        this.destino = nroTelefono;
+    }
+    @Override
+    public void notificar(String nombreDestinatario, String mensaje) {
+        //comunicacion con la api
+
+
+    }
 }
 
-public class EnvioSMS{
-    public void enviar(Persona destinatario, String mensaje) {}
-}
+public class EnvioMail extends MedioEnvio {
+    
 
-public class EnvioMail{
-    public void enviar(Persona destinatario, String mensaje) {}
+    public EnvioMail(String direccionMail) {
+        this.destino = direccionMail;
+    }
+    
+    @Override
+    public void notificar(String nombreDestinatario, String mensaje) {
+        //comunicacion con la api
+    }
+
 }
