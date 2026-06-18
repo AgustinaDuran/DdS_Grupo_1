@@ -22,4 +22,8 @@ public abstract class Necesidad {
         this.activa = false;
     }
 
+    public Boolean isActiva(){
+    return activa;
+}
+
 }

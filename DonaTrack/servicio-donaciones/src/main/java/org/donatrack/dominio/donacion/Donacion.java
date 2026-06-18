@@ -125,6 +125,7 @@ public class Donacion {
 
     public void confirmarEntrega() {
         estadoDonacion.confirmarEntrega(this);
+        entidadAEntregar.agregarDonacionRecibida(this);
     }
 
     public void registrarEntregaFallida(String justificacion) {
