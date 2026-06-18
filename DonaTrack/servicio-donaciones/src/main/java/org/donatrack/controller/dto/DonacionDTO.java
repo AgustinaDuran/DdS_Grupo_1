@@ -9,7 +9,7 @@ import org.donatrack.dominio.categoria.Subcategoria;
 
 public class DonacionDTO { // por ahora muchos datos, vemos si hay convienen otros dtos
     long id;
-    Donante donante;
+    long donante_id;
     String descripcion;
     Subcategoria subcategoria;
     EstadoDonacion estadoDonacion;
@@ -19,7 +19,7 @@ public class DonacionDTO { // por ahora muchos datos, vemos si hay convienen otr
 
     public DonacionDTO(Donacion donacion) {
         this.id = donacion.getId();
-        this.donante = donacion.getDonante();
+        this.donante_id = donacion.getDonante().getId();
         this.descripcion = donacion.getDescripcion();
         this.subcategoria = donacion.getSubcategoria();
         this.estadoDonacion = donacion.getEstadoDonacion();

@@ -1,34 +1,35 @@
-/* package org.donatrack.repository;
+package org.donatrack.repository;
 
 import java.util.List;
+
+import org.donatrack.dominio.donante.Donante;
+import java.util.Optional;
 import java.util.ArrayList;
 
 public class DonantesRepository {
-    
-    private static RepositorioDonante instance = null;
-    private List<Donante> donantes;
+    private final List<Donante> donantes = new ArrayList<>();
 
-public static RepositorioDonante getInstance() {
-        if (instance == null)
-            instance = new RepresentanteDonantes();
-
-        return instance;
+    public List<Donante> findAll() {
+        return new ArrayList<>(donantes);
     }
 
-private DonantesRepository() {
-        this.donantes = new ArrayList<>();
+    public void agregarDonantes(List<Donante> donantes){
+        this.donantes.addAll(donantes);
     }
 
-public void agregarDonante(Donante donante) {
-        this.donantes.add(donante);
+    public Optional<Donante> findById(long id) {
+        return donantes.stream()
+                .filter(d -> d.getId() == id)
+                .findFirst();
     }
 
-public void eliminarDonante(Donante donante) {
-        this.donantes.remove(donante);
+    public Donante save(Donante donante){
+        donantes.add(donante);
+        return donante;
     }
 
-public List<Donante> getDonantes() {
-        return this.donantes;
+    public void delete(long id){
+        donantes.removeIf(d -> d.getId() == id);
     }
     
-} */
+} 

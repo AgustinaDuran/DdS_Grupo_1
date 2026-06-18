@@ -7,12 +7,11 @@ import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.data.annotation.Id;
 
 public class Donacion {
 
@@ -30,14 +29,16 @@ public class Donacion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Donacion(List<ItemBien> itemBienes) { // donacion instanciada por administrador
+    public Donacion(Donante donante, List<ItemBien> itemBienes) { // donacion instanciada por administrador
+        this.donante = donante;
         this.itemBienes = itemBienes;
     }
 
-    public Donacion(ItemBien itemBien) { // donacion instanciada por sistema, segmentada
-        List<ItemBien> listaConElPrimerBien = new ArrayList<>();
-        listaConElPrimerBien.add(itemBien);
-        this.itemBienes = listaConElPrimerBien;
+    public Donacion(Donante donante, ItemBien itemBien, Subcategoria subcategoria) { // donacion instanciada por sistema, segmentada
+        this.donante = donante;
+        this.itemBienes = new ArrayList<>();
+        this.itemBienes.add(itemBien);
+        this.subcategoria = subcategoria;
         estadoDonacion = new EstadoEnDeposito();
         fechaIngreso = LocalDateTime.now();
         this.entidadAEntregar = null;
@@ -97,6 +98,10 @@ public class Donacion {
         return donante;
     }
 
+    public void setDonante(Donante donante) {
+        this.donante = donante;
+    }
+
     public LocalDateTime getFechaIngreso() {
         return fechaIngreso;
     }
@@ -112,7 +117,7 @@ public class Donacion {
     public void asignar(EntidadBeneficiaria e) {
         estadoDonacion.asignar(this);
         setEntidadAEntregar(e);
-        
+
     }
 
     public void planificarRuta() {

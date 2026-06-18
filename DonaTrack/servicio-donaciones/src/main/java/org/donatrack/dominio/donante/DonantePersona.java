@@ -9,6 +9,8 @@ public class DonantePersona extends Donante{
     private String direccion;
     protected List<Contacto> contactos = new ArrayList<>();
     private Contacto contactoPredeterminado;
+    private Persona persona;
+
 
     public DonantePersona(String direccion, Mail mail) {
         this.direccion = direccion;
@@ -42,5 +44,8 @@ public class DonantePersona extends Donante{
 
     public List<Contacto> getContactos(){
         return contactos;
+    }
+    public Persona getPersona() {
+        return this.persona;
     }
 }

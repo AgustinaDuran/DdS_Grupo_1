@@ -1,5 +1,5 @@
 package org.donatrack.controller;
-import org.donatrack.controller.dto.DonacionDTO;
+import org.donatrack.controller.dto.*;
 import org.donatrack.dominio.donacion.Donacion;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.donatrack.service.DonacionesService;
 
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -31,19 +32,28 @@ public class DonacionesController {
 
     //http://localhost:8080/api/donaciones -> GET
     @GetMapping // ResponseEntity<TipoDeDato>
-    public ResponseEntity<List<DonacionDTO>> obtenerDonaciones() {
-        return ResponseEntity.ok(this.donacionesService.obtenerDonaciones());
+    public ResponseEntity<List<DonacionDTO>> obtenerDonaciones(
+        FiltrosDonacionDTO filtrosDonacionesDTO
+    ) {
+        List<Donacion> donaciones = donacionesService.obtenerDonaciones(filtrosDonacionesDTO);
+        List<DonacionDTO> donacionDTOs = new ArrayList<>();
+
+        for (Donacion donacion : donaciones) {
+            DonacionDTO donacionDTO = new DonacionDTO(donacion);
+            donacionDTOs.add(donacionDTO);
+        }
+        return ResponseEntity.ok(donacionDTOs);
     } 
-/* 
+    //http://localhost:8080/api/donaciones -> POST
     @PostMapping
     public ResponseEntity<String> recibirNuevaDonacion(
-        @RequestBody Donacion nuevaDonacion) {
+        @RequestBody CrearDonacionDTO nuevaDonacion) {
         
-        analiticaService.registrarDonacionDeUsuario(nombreUsuario, nuevaDonacion);
+        donacionesService.registrarDonacion(nuevaDonacion);
         
-        return ResponseEntity.ok("Donación procesada en Incentivos con éxito");
+        return ResponseEntity.ok("Donación aniadida correctamente");
     }
-
+/*
     //http://localhost:8080/api/incentivos/donantes/{nombreUsuario}/misiones-progreso
     @GetMapping("/donantes/{nombreUsuario}/misiones-progreso")
     public ResponseEntity<List<MisionProgresoDTO>> obtenerMisiones(@PathVariable String nombreUsuario) {

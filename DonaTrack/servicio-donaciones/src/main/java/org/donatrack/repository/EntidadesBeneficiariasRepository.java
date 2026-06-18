@@ -1,38 +1,38 @@
 package org.donatrack.repository;
-import org.donatrack.dominio.donacion.Donacion;
 
-import java.util.ArrayList;
 import java.util.List;
 
-
+import java.util.Optional;
 
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 
-public class EntidadesBeneficiariasRepository { // singleton
+import java.util.ArrayList;
 
-    private static EntidadesBeneficiariasRepository instance = null;
-    private List<EntidadBeneficiaria> entidades;
+public class EntidadesBeneficiariasRepository {
+    private final List<EntidadBeneficiaria> entidades = new ArrayList<>();
 
-    private EntidadesBeneficiariasRepository() { // constructor privado
-        this.entidades = new ArrayList<>();
+    public List<EntidadBeneficiaria> findAll() {
+        return new ArrayList<>(entidades);
     }
 
-    public static EntidadesBeneficiariasRepository getInstance() {
-        if (instance == null) {
-            instance = new EntidadesBeneficiariasRepository();
-        }
-        return instance;
+    public void agregarEntidades(List<EntidadBeneficiaria> entidades){
+        this.entidades.addAll(entidades);
     }
 
-    public void agregarEntidad(EntidadBeneficiaria entidad) {
-        this.entidades.add(entidad);
+    public EntidadBeneficiaria findById(long id) {
+        return entidades.stream()
+                .filter(d -> d.getId() == id)
+                .findFirst()
+                .orElse(null);
     }
 
-    public void eliminarEntidad(EntidadBeneficiaria entidad) {
-        this.entidades.remove(entidad);
+    public EntidadBeneficiaria save(EntidadBeneficiaria entidad){
+        entidades.add(entidad);
+        return entidad;
     }
 
-    public List<EntidadBeneficiaria> getEntidades() {
-        return this.entidades;
+    public void delete(long id){
+        entidades.removeIf(d -> d.getId() == id);
     }
-}
+    
+} 

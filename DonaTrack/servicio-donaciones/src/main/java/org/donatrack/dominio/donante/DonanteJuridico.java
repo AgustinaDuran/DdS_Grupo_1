@@ -1,5 +1,6 @@
 package org.donatrack.dominio.donante;
 import org.donatrack.dominio.organizacion.TipoOrganizacion;
+import org.donatrack.dominio.organizacion.Organizacion;
 
 /* import java.util.ArrayList;
 import java.util.List; */
@@ -7,6 +8,7 @@ import java.util.List; */
 public class DonanteJuridico extends Donante {
     private TipoOrganizacion tipoOrganizacion;
     private String rubro;
+    private Organizacion organizacion;
 
     public DonanteJuridico(TipoOrganizacion tipoOrganizacion, String rubro) {
         this.tipoOrganizacion = tipoOrganizacion;
@@ -19,5 +21,9 @@ public class DonanteJuridico extends Donante {
 
     public String getRubro() {
         return this.rubro;
+    }
+
+    public Organizacion getOrganizacion() {
+        return this.organizacion;
     }
 }

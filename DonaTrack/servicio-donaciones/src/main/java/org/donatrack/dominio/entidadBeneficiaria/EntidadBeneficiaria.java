@@ -2,8 +2,14 @@ package org.donatrack.dominio.entidadBeneficiaria;
 
 import org.donatrack.dominio.donacion.*;
 import org.donatrack.dominio.necesidades.Necesidad;
+import org.springframework.data.annotation.Id;
+
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+
 import java.util.List;
 import java.util.ArrayList;
+
 
 public class EntidadBeneficiaria {
     
@@ -11,6 +17,10 @@ public class EntidadBeneficiaria {
     private String direccion;
     private List<Necesidad> necesidades;
     private List<Donacion> donacionesRecibidas;
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
 
     public EntidadBeneficiaria(TipoEntidadBeneficiaria tipoEntidad, String direccion) {
@@ -66,6 +76,10 @@ public class EntidadBeneficiaria {
     
     public void agregarDonacionRecibida(Donacion donacion) { 
     donacionesRecibidas.add(donacion);
+    }
+
+    public long getId() {
+        return id;
     }
 
 
