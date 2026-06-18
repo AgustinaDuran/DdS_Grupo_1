@@ -28,6 +28,14 @@ public class DonacionesRepository { // singleton
         return donaciones;
     }
 
+    public Donacion findById(long id){
+        return donaciones.stream()
+                .filter(d -> d.getId() == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+
     public List<Donacion> buscarConFiltros(TipoEstado tipoEstado, LocalDateTime fechaDesde, LocalDateTime fechaHasta, Subcategoria subcategoria){
         return donaciones;
 

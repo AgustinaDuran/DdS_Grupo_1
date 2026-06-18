@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.HashMap;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 import org.donatrack.dominio.donacion.Donacion;
+
 public class ResultadoAsignacion{
     private Donacion donacion;
     private List<EntidadBeneficiaria> rankingPorCoincidencias = new ArrayList<>();

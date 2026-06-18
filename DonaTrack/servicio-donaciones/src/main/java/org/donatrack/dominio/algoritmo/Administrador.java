@@ -16,7 +16,7 @@ public class Administrador{
         this.donacionesService = service;
     }
 
-    public void confirmarDestinoFinal(ResultadoAsignacion resultado,EntidadBeneficiaria entidad ){
+    public void confirmarDestinoFinal(ResultadoAsignacion resultado, EntidadBeneficiaria entidad ){
         if(resultado.tieneCoincidencias()){
             resultado.getCoincidencias().stream()
                                         .filter(e -> e.equals(entidad))

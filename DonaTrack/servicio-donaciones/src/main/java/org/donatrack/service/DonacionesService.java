@@ -34,16 +34,22 @@ public class DonacionesService {
         return donaciones;
     }
 
+    public Donacion obtenerDonacionPorId(long id) {
+        return donacionesRepository.findById(id);
+    }
+
     public void registrarDonacion(CrearDonacionDTO nuevaDonacion) {
         Donante donante = this.donantesService.obtenerDonantePorId(nuevaDonacion.getDonanteId()).orElseThrow();
 
-        Donacion donacionCompleta = new Donacion(donante, nuevaDonacion.getItems()); // despues manejarse con IdDonante probablemente
+        Donacion donacionCompleta = new Donacion(donante, nuevaDonacion.getItems()); // despues manejarse con IdDonante
+                                                                                     // probablemente
 
         List<Donacion> donacionesSegmentadas = this.segmentarDonacion(donacionCompleta);
 
         donacionesRepository.saveAll(donacionesSegmentadas);
 
-        donacionesSegmentadas.forEach(d -> donante.agregarDonacionHistorica(d)); // de nuevo, puede que labure con IDS despues
+        donacionesSegmentadas.forEach(d -> donante.agregarDonacionHistorica(d)); // de nuevo, puede que labure con IDS
+                                                                                 // despues
 
         this.donantesService.guardarDonante(donante);
 
@@ -76,8 +82,55 @@ public class DonacionesService {
                 .orElse(null);
     }
 
-    public void asignarDonacion(EntidadBeneficiaria entidadBeneficiaria, Donacion donacion) {
+    public void eliminarDonacionPorId(long id) {
+        donacionesRepository.delete(id);
+    }
 
+    public void actualizarDonacion(long id, ActualizarDonacionDTO datosActualizacion) {
+        Donacion donacion = donacionesRepository.findById(id);
+
+        if (donacion == null) {
+            throw new IllegalArgumentException("No se encontró la donación con el ID proporcionado");
+        }
+        if (datosActualizacion.getTipoEstado() != null) {
+            donacion = this.cambiarEstadoDonacion(donacion, datosActualizacion);
+        }
+        if (datosActualizacion.getFotoEntrega() != null) {
+            donacion.setFotoEntrega(datosActualizacion.getFotoEntrega());
+        }
+
+        donacionesRepository.save(donacion);
+
+    }
+
+    private Donacion cambiarEstadoDonacion(Donacion donacion, ActualizarDonacionDTO datosActualizacion) {
+        switch (datosActualizacion.getTipoEstado()) {
+            case TipoEstado.LISTA_PARA_ENTREGAR:
+                donacion.planificarRuta();
+                break;
+            case TipoEstado.EN_TRASLADO:
+                donacion.iniciarTraslado();
+                break;
+            case TipoEstado.ENTREGADA:
+                // notificacion a entidad beneficiaria? [EVENTO]
+                
+                donacion.confirmarEntrega();
+                break;
+            case TipoEstado.ENTREGA_FALLIDA:
+                donacion.registrarEntregaFallida(datosActualizacion.getJustificacionEntregaFallida());
+                break;
+            case TipoEstado.VENCIDA:
+                donacion.marcarComoVencida();
+                break;
+            default:
+                throw new IllegalArgumentException("Tipo de estado no válido");
+        }
+        return donacion;
+    }
+
+    public void asignarDonacion(EntidadBeneficiaria entidadBeneficiaria, Donacion donacion) {
+        donacion.asignar(entidadBeneficiaria);
+        //fetch notificacion a notificacion-service [EVENTO]
     }
 
 }

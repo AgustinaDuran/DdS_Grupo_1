@@ -4,15 +4,9 @@ import org.donatrack.dominio.donacion.Donacion;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import org.donatrack.service.DonacionesService;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -53,23 +47,30 @@ public class DonacionesController {
         
         return ResponseEntity.ok("Donación aniadida correctamente");
     }
-/*
-    //http://localhost:8080/api/incentivos/donantes/{nombreUsuario}/misiones-progreso
-    @GetMapping("/donantes/{nombreUsuario}/misiones-progreso")
-    public ResponseEntity<List<MisionProgresoDTO>> obtenerMisiones(@PathVariable String nombreUsuario) {
-        return ResponseEntity.ok(this.analiticaService.obtenerProgresoMisiones(nombreUsuario));
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DonacionDTO> obtenerDonacionPorId(@PathVariable Long id) {
+        Donacion donacion = donacionesService.obtenerDonacionPorId(id);
+        if (donacion != null) {
+            DonacionDTO donacionDTO = new DonacionDTO(donacion);
+            return ResponseEntity.ok(donacionDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    //http://localhost:8080/api/incentivos/donantes/{nombreUsuario}/vitrina
-    @GetMapping("/donantes/{nombreUsuario}/vitrina")
-    public ResponseEntity<List<InsigniaDTO>> obtenerVitrina(@PathVariable String nombreUsuario) {
-        return ResponseEntity.ok(this.analiticaService.obtenerVitrinaInsignias(nombreUsuario));
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> actualizarDonacion(@PathVariable Long id, @RequestBody ActualizarDonacionDTO datosActualizacion) {
+        donacionesService.actualizarDonacion(id, datosActualizacion);
+        return ResponseEntity.ok("Donación actualizada correctamente");
     }
-    //http://localhost:8080/api/incentivos/ranking/destacados
-    @GetMapping("/ranking/destacados")
-    public ResponseEntity<PodioMensualDTO> obtenerPodioDestacado() {
-        YearMonth mesActual = YearMonth.now(); 
-        return ResponseEntity.ok(this.analiticaService.obtenerPodioDestacadoDelMes(mesActual));
-} */
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> eliminarDonacion(@PathVariable Long id) {
+        donacionesService.eliminarDonacionPorId(id);
+        return ResponseEntity.ok("Donación eliminada correctamente");
+    }
+
 }
 
