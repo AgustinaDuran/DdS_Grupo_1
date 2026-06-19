@@ -1,5 +1,5 @@
 package org.donatrack.controller.dto;
-import java.util.List;
+import java.util.Map;
 
 public class PerfilAnaliticoDTO {
     public String nombreUsuario;

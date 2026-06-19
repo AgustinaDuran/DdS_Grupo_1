@@ -10,7 +10,7 @@ public class MisionProgresoDTO {
     public MisionProgresoDTO(String desc, Integer prog, Integer obj, Integer dist, String ins) {
         this.descripcion = desc;
         this.progresoActual = prog;
-        this.objetivo = obj;
+        this.objective = obj;
         this.distanciaRestante = dist;
         this.nombreInsigniaPremio = ins;
     }

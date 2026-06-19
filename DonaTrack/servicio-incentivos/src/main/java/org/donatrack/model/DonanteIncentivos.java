@@ -18,7 +18,7 @@ public class DonanteIncentivos {
 
     @Transient // no guardar
     private CategoriaDonante categoriaActual;
-
+    
     private String nombreCategoriaActual;
 
     @ManyToMany(cascade = CascadeType.ALL) //insignias se repiten en varios donantes
@@ -33,8 +33,8 @@ public class DonanteIncentivos {
     }
 
     public void registrarActividad(Donacion nuevaDonacion) {
-        this.donaciones.add(nuevaDonacion);
-
+        this.donaciones.add(nuevaDonacion);        
+        
         if (this.categoriaActual.completoTodasLasMisiones(this)) {
             CategoriaDonante siguiente = this.categoriaActual.getSiguienteCategoria();
             if (siguiente != null) {
@@ -61,7 +61,7 @@ public class DonanteIncentivos {
     public Integer CalcularOrganizacionesAyudadas(){
         List<Organizacion> organizaciones = new ArrayList<>();
         for (Donacion d : donaciones) {
-            if (!organizaciones.contains(d.getOrganizacion())) {
+            if (!organizaciones.contains(d.getOrganizacion())) { //agregar a quien se dono en donacion
                 organizaciones.add(d.getOrganizacion());
             }
         }
@@ -95,10 +95,7 @@ public class DonanteIncentivos {
     }
 
     public Integer CalcularImpactoAcumulado(){ //cant bienes donados
-        Integer impacto = 0;
-        for (Donacion d : donaciones) {
-            impacto += d.getCantidad();
-        }
+        Integer impacto = donante.getCantidadTotal();
         return impacto;
     }
 
@@ -108,7 +105,7 @@ public class DonanteIncentivos {
         for (Donacion d : donaciones) {
             LocalDate fecha = d.getFechaIngreso();
             if (!fecha.isBefore(fechaInicio) && !fecha.isAfter(fechaFin)) {
-                total += d.getCantidad();
+                total += d.getCantidadBienes();
             }
         }
 
@@ -141,38 +138,6 @@ public class DonanteIncentivos {
         return 0;
     }
 
-    /**
-     * Cantidad de misiones de la categoría actual que el donante tiene cumplidas.
-     * Nota: el modelo no registra la fecha de cumplimiento de cada misión, por lo
-     * que el parámetro de mes se acepta pero el cálculo es sobre el estado actual.
-     */
-    public Integer calcularMisionesCumplidasEn(YearMonth mes) {
-        Integer cumplidas = 0;
-        for (Mision mision : getCategoriaActual().getMisionesDelNivel()) {
-            if (mision.estaCumplidaPor(this)) {
-                cumplidas++;
-            }
-        }
-        return cumplidas;
-    }
-
-    // Alias en minúscula usados por los servicios (convención de nombres distinta).
-    public Integer calcularImpactoAcumulado() {
-        return CalcularImpactoAcumulado();
-    }
-
-    public Integer calcularOrganizacionesAyudadas() {
-        return CalcularOrganizacionesAyudadas();
-    }
-
-    public Double obtenerComparacionMensual(YearMonth mesActual, YearMonth mesAnterior) {
-        return ObtenerComparacionMensual(mesActual, mesAnterior);
-    }
-
-    public Integer obtenerEvolucionDonacionesPorPeriodo() {
-        return ObtenerEvolucionDonacionesPorPeriodo();
-    }
-
     public void ganarInsignia(Insignia nuevaInsignia) {
         if (!this.insigniasGanadas.contains(nuevaInsignia)) {
             this.insigniasGanadas.add(nuevaInsignia);
@@ -190,8 +155,8 @@ public class DonanteIncentivos {
         return nombreCategoriaActual;
     }
 
-    public String getNombreUsuario() {
-        return nombreUsuario;
+    public String getNombreUsuario() { 
+        return nombreUsuario; 
     }
 
     public List<Donacion> getDonaciones() {
