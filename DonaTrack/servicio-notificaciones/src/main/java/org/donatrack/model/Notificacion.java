@@ -10,7 +10,7 @@ public class Notificacion{
     private String mensaje;
     private MedioEnvio medioEnvio;
     private LocalDate fechaEnvio;
-    private Bool estado; 
+    private boolean estado; //mejor enumEstadoNotificacion
 
     public Long getId(){
         return id;
@@ -28,18 +28,18 @@ public class Notificacion{
         return medioEnvio;
     }
 
-    public Bool getEstado(){
+    public boolean getEstado(){
         return estado;
     }
 
-    public Void setMensaje(mensaje){
-        notificacion.mensaje = mensaje;
-    }
+    public void setMensaje(String mensaje){ 
+        this.mensaje = mensaje;
+        }
 
     public Notificacion(String destinatario, String mensaje, MedioEnvio medio) {
         this.destinatario = destinatario;
         this.mensaje = mensaje;
-        this.medio = medio;
+        this.medioEnvio = medio;
         this.estado = false;
         this.fechaCreacion = LocalDateTime.now();
     }

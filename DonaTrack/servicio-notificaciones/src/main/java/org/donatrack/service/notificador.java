@@ -22,7 +22,7 @@ public class Notificador {
         Contacto contactoSeleccionado = contactos.stream().findFirst().orElseThrow(() -> new RuntimeException("No se encontraron contactos"));
         //agarra el primer contacto, aca se aplicaria logica de elegir contacto si hubiera
 
-        MedioEnvio medio= contactoSeleccionado.pasarAMedioEnvio();
+        MedioEnvio medio = contactoSeleccionado.pasarAMedioEnvio();
 
         notificacion = new Notificacion(destinatario, mensaje, medio);
         

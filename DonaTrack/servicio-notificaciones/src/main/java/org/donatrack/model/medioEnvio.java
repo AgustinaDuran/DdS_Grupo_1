@@ -1,6 +1,6 @@
 public abstract class MedioEnvio {
-    private String destino;
-    public void notificar(String nombreDestinatario, String mensaje);
+    protected String destino;
+    public abstract void notificar(String nombreDestinatario, String mensaje);
 
 }
 public class EnvioWhatsapp extends MedioEnvio {
