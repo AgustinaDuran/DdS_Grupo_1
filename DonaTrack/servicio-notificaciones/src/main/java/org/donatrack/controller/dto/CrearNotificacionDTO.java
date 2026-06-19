@@ -1,7 +1,7 @@
 package org.donatrack.controller.dto;
 
 import java.util.List;
-import org.donatrack.model.Contacto;
+import org.donatrack.model.contacto.Contacto;
 
 
 public class CrearNotificacionDTO{

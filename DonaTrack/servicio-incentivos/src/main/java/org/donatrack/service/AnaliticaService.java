@@ -28,7 +28,7 @@ public class AnaliticaService {
 
         return new PerfilAnaliticoDTO(
                 donante.getNombreUsuario(),
-                donante.categoriaActual.getNombre(),
+                donante.getCategoriaActual().getNombre(),
                 donante.getDonaciones(),
                 donante.obtenerEvolucionDonacionesPorPeriodo(), //falta ver el tema del grafico y como se calcula
                 donante.obtenerComparacionMensual(YearMonth.now(), YearMonth.now().minusMonths(1)), 
@@ -43,7 +43,7 @@ public class AnaliticaService {
 
         List<MisionProgresoDTO> progresoList = new ArrayList<>();
         
-        for (Mision mision : donante.categoriaActual.getMisionesDelNivel()) {
+        for (Mision mision : donante.getCategoriaActual().getMisionesDelNivel()) {
             progresoList.add(new MisionProgresoDTO(
                     mision.getDescripcion(),
                     mision.getProgresoActual(donante),
@@ -71,7 +71,18 @@ public class AnaliticaService {
         }
     
         long personasAdelante = donanteRepository.countDonantesConMasDonaciones(nombreUsuario);
-        return (Integer) personasAdelante + 1;
+        return (int) (personasAdelante + 1);
+    }
+
+    /**
+     * Registra una donación recibida desde el Servicio de Donaciones e impacta
+     * el progreso de incentivos del donante.
+     */
+    public void registrarDonacionDeUsuario(String nombreUsuario, Donacion donacion) {
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario)
+                .orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
+        donante.registrarActividad(donacion);
+        donanteRepository.save(donante);
     }
 
     public PodioMensualDTO obtenerPodioDestacadoDelMes(YearMonth mesAConsultar) {
