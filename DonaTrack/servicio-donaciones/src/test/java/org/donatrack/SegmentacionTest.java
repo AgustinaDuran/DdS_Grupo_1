@@ -21,9 +21,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Verifica la segmentación: una carga masiva de bienes se divide en
- * donaciones independientes, una por subcategoría, agrupando los ítems
- * de la misma subcategoría en una sola donación.
+    Verifica la segmentación: una carga masiva de bienes se divide en
+    donaciones independientes, una por subcategoría, agrupando los ítems
+    de la misma subcategoría en una sola donación.
  */
 class SegmentacionTest {
 

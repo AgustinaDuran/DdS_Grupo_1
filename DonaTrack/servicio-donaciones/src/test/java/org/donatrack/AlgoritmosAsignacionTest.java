@@ -18,10 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * Verifica los algoritmos de asignación (matchmaking) y la consolidación
- * de coincidencias del coordinador.
- */
+
 class AlgoritmosAsignacionTest {
 
     private EntidadBeneficiaria entidad(String dir) {
