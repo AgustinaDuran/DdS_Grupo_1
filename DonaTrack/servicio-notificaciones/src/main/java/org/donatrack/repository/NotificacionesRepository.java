@@ -15,7 +15,7 @@ public class NotificacionesRepository { // singleton
         if(instancia == null){
             instancia = new NotificacionesRepository();
         }
-        return instancia
+        return instancia;
     }
 
 

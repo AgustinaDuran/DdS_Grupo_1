@@ -9,7 +9,21 @@ import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 import java.util.ArrayList;
 
 public class EntidadesBeneficiariasRepository {
-    private final List<EntidadBeneficiaria> entidades = new ArrayList<>();
+    private final List<EntidadBeneficiaria> entidades;
+
+    private static EntidadesBeneficiariasRepository instancia;
+
+
+    public static EntidadesBeneficiariasRepository getInstance(){
+        if(instancia == null){
+            instancia = new EntidadesBeneficiariasRepository();
+        }
+        return instancia;
+    }
+
+    public EntidadesBeneficiariasRepository(){
+        this.entidades = new ArrayList<>();
+    }
 
     public List<EntidadBeneficiaria> findAll() {
         return new ArrayList<>(entidades);

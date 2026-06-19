@@ -18,7 +18,7 @@ public class CoordinadorAsignacion {
     }
 
     public List<ResultadoAsignacion> generarRecomendaciones() {
-        List<EntidadBeneficiaria> entidades = EntidadesBeneficiariasRepository.getInstance().getEntidades();
+        List<EntidadBeneficiaria> entidades = EntidadesBeneficiariasRepository.getInstance().findAll();
         List<Donacion> deposito = Deposito.getInstance().getDonacionesEnDeposito();
 
         List<ResultadoAsignacion> resultados = new ArrayList<>();

@@ -27,7 +27,7 @@ public class CrearNotificacionDTO{
     }
 
     public void setDestinatarioId(long destinatarioId) {
-        this.destinatario = destinatario;
+        this.destinatarioId = destinatarioId;
     }
 
     public void setMensaje(String mensaje) {
