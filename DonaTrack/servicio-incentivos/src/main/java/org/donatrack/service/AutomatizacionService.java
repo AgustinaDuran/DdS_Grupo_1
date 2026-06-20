@@ -12,10 +12,10 @@ public class AutomatizacionService {
     
     private final String N8N_WEBHOOK_INSIGNIA_URL = "http://localhost:5678/webhook-test/insignia-ganada";
 
-    public void notificarInsigniaGanada(String nombreUsuario, String descripcionMision, String urlImagenInsignia) { 
+    public void NotificarInsigniaGanada(String nombre, String descripcionMision, String urlImagenInsignia) { 
         Map<String, Object> datos = new HashMap<>(); //pal n8n
-        datos.put("usuario", nombreUsuario);
-        datos.put("texto", "¡Felicitaciones a @" + nombreUsuario + " por cumplir la misión: " + descripcionMision + "!");
+        datos.put("usuario", nombre);
+        datos.put("texto", "¡Felicitaciones a @" + nombre + " por cumplir la misión: " + descripcionMision + "!");
         datos.put("imagenUrl", urlImagenInsignia);
 
         try {

@@ -5,10 +5,10 @@ import java.util.List;
 public class Colaborador extends CategoriaDonante {
     public Colaborador() {
     
-        Insignia rachaBronce = FabricaInsignias.crear(TipoInsignia.RACHA, NivelInsignia.BRONCE);
-        Insignia completitudBronce = FabricaInsignias.crear(TipoInsignia.COMPLETITUD, NivelInsignia.BRONCE);
-        Insignia habilBronce = FabricaInsignias.crear(TipoInsignia.HABIL_DONADOR, NivelInsignia.BRONCE);
-        Insignia exitosasBronce = FabricaInsignias.crear(TipoInsignia.DONACIONES_EXITOSAS, NivelInsignia.BRONCE);
+        Insignia rachaBronce = FabricaInsignias.Crear(TipoInsignia.RACHA, NivelInsignia.BRONCE);
+        Insignia completitudBronce = FabricaInsignias.Crear(TipoInsignia.COMPLETITUD, NivelInsignia.BRONCE);
+        Insignia habilBronce = FabricaInsignias.Crear(TipoInsignia.HABIL_DONADOR, NivelInsignia.BRONCE);
+        Insignia exitosasBronce = FabricaInsignias.Crear(TipoInsignia.DONACIONES_EXITOSAS, NivelInsignia.BRONCE);
 
         this.misiones = List.of(
             new MisionRacha("Completa donaciones durante X meses consecutivos", rachaBronce, 3),
@@ -19,10 +19,10 @@ public class Colaborador extends CategoriaDonante {
     }
 
     @Override
-    public String getNombre() { return "Colaborador"; }
+    public String GetNombre() { return "Colaborador"; }
 
     @Override
-    public CategoriaDonante getSiguienteCategoria() {
+    public CategoriaDonante GetSiguienteCategoria() {
         return new Sostenedor();
     }
     

@@ -2,7 +2,7 @@ package org.donatrack.model;
 
 public class FabricaInsignias {
 
-    public static Insignia crear(TipoInsignia tipo, NivelInsignia nivel) {
+    public static Insignia Crear(TipoInsignia tipo, NivelInsignia nivel) {
 
         String baseNombre = switch (tipo) {
             case RACHA -> "Racha";

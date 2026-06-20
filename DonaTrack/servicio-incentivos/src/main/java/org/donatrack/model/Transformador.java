@@ -5,10 +5,10 @@ import java.util.List;
 public class Transformador extends CategoriaDonante {
     public Transformador() {
       
-        Insignia rachaOro = FabricaInsignias.crear(TipoInsignia.RACHA, NivelInsignia.ORO);
-        Insignia completitudOro = FabricaInsignias.crear(TipoInsignia.COMPLETITUD, NivelInsignia.ORO);
-        Insignia habilOro = FabricaInsignias.crear(TipoInsignia.HABIL_DONADOR, NivelInsignia.ORO);
-        Insignia exitosasOro = FabricaInsignias.crear(TipoInsignia.DONACIONES_EXITOSAS, NivelInsignia.ORO);
+        Insignia rachaOro = FabricaInsignias.Crear(TipoInsignia.RACHA, NivelInsignia.ORO);
+        Insignia completitudOro = FabricaInsignias.Crear(TipoInsignia.COMPLETITUD, NivelInsignia.ORO);
+        Insignia habilOro = FabricaInsignias.Crear(TipoInsignia.HABIL_DONADOR, NivelInsignia.ORO);
+        Insignia exitosasOro = FabricaInsignias.Crear(TipoInsignia.DONACIONES_EXITOSAS, NivelInsignia.ORO);
 
         this.misiones = List.of(
             new MisionRacha("Completa donaciones durante X meses consecutivos", rachaOro, 12),
@@ -19,10 +19,10 @@ public class Transformador extends CategoriaDonante {
     }
 
     @Override
-    public String getNombre() { return "Transformador"; }
+    public String GetNombre() { return "Transformador"; }
 
     @Override
-    public CategoriaDonante getSiguienteCategoria() {
+    public CategoriaDonante GetSiguienteCategoria() {
         return null;
     }
     

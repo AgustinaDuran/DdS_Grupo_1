@@ -5,23 +5,22 @@ public class MisionCompletitud extends Mision {
    private Integer cantidadDonacionesDistintasRequeridas;
 
     public MisionCompletitud(String descripcion, Insignia insignia, Integer cantidadDonacionesDistintasRequeridas) {
-        this.descripcion = descripcion;
-        this.insignia = insignia;
+        super(descripcion, insignia);
         this.cantidadDonacionesDistintasRequeridas = cantidadDonacionesDistintasRequeridas;
     }
 
     @Override
-    public Boolean estaCumplidaPor(DonanteIncentivos donante) {
+    public Boolean EstaCumplidaPor(DonanteIncentivos donante) {
         return donante.CalcularDonacionesDistintas() >= cantidadDonacionesDistintasRequeridas;
     }
 
     @Override
-    public Integer getProgresoActual(DonanteIncentivos donante) {
+    public Integer GetProgresoActual(DonanteIncentivos donante) {
         return donante.CalcularDonacionesDistintas();
     }
 
     @Override
-        public Integer getObjetivoAsignado() {
+        public Integer GetObjetivoAsignado() {
         return this.cantidadDonacionesDistintasRequeridas;
     }
 }

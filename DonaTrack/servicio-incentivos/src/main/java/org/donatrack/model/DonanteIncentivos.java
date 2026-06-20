@@ -1,5 +1,7 @@
 package org.donatrack.model;
 
+import org.donatrack.controller.dto.*;
+
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
@@ -10,11 +12,10 @@ import jakarta.persistence.*;
 public class DonanteIncentivos {
     @Id
     private String nombreUsuario;
-    private String nombre;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "donante_id")
-    private List<Donacion> donaciones = new ArrayList<>();
+    private List<DonacionDTO> donaciones = new ArrayList<>();
 
     @Transient // no guardar
     private CategoriaDonante categoriaActual;
@@ -26,22 +27,35 @@ public class DonanteIncentivos {
 
     public DonanteIncentivos() {}
 
-    public DonanteIncentivos(String nombreUsuario, String categoria) {
+    public DonanteIncentivos(String nombreUsuario) {
         this.nombreUsuario = nombreUsuario;
         this.categoriaActual = new Colaborador();
-        this.nombreCategoriaActual = this.categoriaActual.getNombre();
+        this.nombreCategoriaActual = this.categoriaActual.GetNombre();
     }
 
-    public void registrarActividad(Donacion nuevaDonacion) {
+    public List<Mision> RegistrarActividad(DonacionDTO nuevaDonacion) {
         this.donaciones.add(nuevaDonacion);        
         
-        if (this.categoriaActual.completoTodasLasMisiones(this)) {
-            CategoriaDonante siguiente = this.categoriaActual.getSiguienteCategoria();
-            if (siguiente != null) {
-                this.categoriaActual = siguiente;
-                this.nombreCategoriaActual = siguiente.getNombre();
+        CategoriaDonante categoria = this.GetCategoriaActual();
+
+        List<Mision> misionesRecienCumplidas = new ArrayList<>();
+
+        for (Mision mision : categoria.GetMisionesDelNivel()) {
+            if (mision.EstaCumplidaPor(this) && !YaTieneInsignia(mision.GetInsigniaOtorgada())) {
+                this.GanarInsignia(mision.GetInsigniaOtorgada());
+                misionesRecienCumplidas.add(mision);
             }
         }
+
+        if (categoria.CompletoTodasLasMisiones(this)) {
+            CategoriaDonante siguiente = categoria.GetSiguienteCategoria();
+            if (siguiente != null) {
+                this.categoriaActual = siguiente;
+                this.nombreCategoriaActual = siguiente.GetNombre();
+            }
+        }
+ 
+        return misionesRecienCumplidas;
     }
 
     public Integer CalcularTotalDonaciones(){
@@ -49,22 +63,25 @@ public class DonanteIncentivos {
     }
 
     public Integer CalcularDonacionesDistintas(){
-        List<Subcategoria> categorias = new ArrayList<>();
-        for (Donacion d : donaciones) {
-            if (!categorias.contains(d.getSubcategoria())) {
-                categorias.add(d.getSubcategoria());
+        List<String> categorias = new ArrayList<>();
+
+        for (DonacionDTO d : donaciones) {
+            if (!categorias.contains(d.GetSubcategoria())) {
+                categorias.add(d.GetSubcategoria());
             }
         }
         return categorias.size();
     }
 
     public Integer CalcularOrganizacionesAyudadas(){
-        List<Organizacion> organizaciones = new ArrayList<>();
-        for (Donacion d : donaciones) {
-            if (!organizaciones.contains(d.getOrganizacion())) { //agregar a quien se dono en donacion
-                organizaciones.add(d.getOrganizacion());
+        List<String> organizaciones = new ArrayList<>();
+
+        for (DonacionDTO d : donaciones) {
+            if (!organizaciones.contains(d.GetOrganizacion())) {
+                organizaciones.add(d.GetOrganizacion());
             }
         }
+
         return organizaciones.size();
     }
 
@@ -73,11 +90,14 @@ public class DonanteIncentivos {
             return 0;
         }
 
+        List<DonacionDTO> ordenadas = new ArrayList<>(donaciones);
+        ordenadas.sort(Comparator.comparing(DonacionDTO::GetFechaIngreso));
+
         Integer racha = 1;
-        YearMonth mesAnterior = YearMonth.from(donaciones.get(0).getFechaIngreso());
+        YearMonth mesAnterior = YearMonth.from(ordenadas.get(0).GetFechaIngreso());
 
         for (Integer i = 1; i < donaciones.size(); i++) {
-            YearMonth mesActual = YearMonth.from(donaciones.get(i).getFechaIngreso());
+            YearMonth mesActual = YearMonth.from(ordenadas.get(i).GetFechaIngreso());
 
             if (mesActual.equals(mesAnterior)) {
                 continue;
@@ -94,18 +114,27 @@ public class DonanteIncentivos {
         return racha;
     }
 
+    public Integer GetCantidadBienesDonados(){
+        Integer total = 0;
+        for (DonacionDTO d : donaciones) {
+            total += d.GetCantidadBienes();
+        }
+        return total;
+    }
+
     public Integer CalcularImpactoAcumulado(){ //cant bienes donados
-        Integer impacto = donante.getCantidadTotal();
+        Integer impacto = this.GetCantidadBienesDonados();
         return impacto;
     }
 
-    public Integer calcularTotalDonadoEntre(LocalDate fechaInicio, LocalDate fechaFin) {
+    public Integer CalcularTotalDonadoEntre(LocalDate fechaInicio, LocalDate fechaFin) {
         Integer total = 0;
 
-        for (Donacion d : donaciones) {
-            LocalDate fecha = d.getFechaIngreso();
+        for (DonacionDTO d : donaciones) {
+            LocalDate fecha = d.GetFechaIngreso();
+
             if (!fecha.isBefore(fechaInicio) && !fecha.isAfter(fechaFin)) {
-                total += d.getCantidadBienes();
+                total += d.GetCantidadBienes();
             }
         }
 
@@ -116,15 +145,15 @@ public class DonanteIncentivos {
         Double totalActual = 0.0;
         Double totalAnterior = 0.0;
 
-        for (Donacion d : donaciones) {
-            YearMonth periodo = YearMonth.from(d.getFechaIngreso());
+        for (DonacionDTO d : donaciones) {
+            YearMonth periodo = YearMonth.from(d.GetFechaIngreso());
 
             if (periodo.equals(mesActual)) {
-                totalActual += d.getCantidad();
+                totalActual += d.GetCantidadBienes();
             }
 
             if (periodo.equals(mesAnterior)) {
-                totalAnterior += d.getCantidad();
+                totalAnterior += d.GetCantidadBienes();
             }
         }
         if (totalAnterior == 0) {
@@ -133,37 +162,120 @@ public class DonanteIncentivos {
         return ((totalActual - totalAnterior) / totalAnterior) * 100;
     }
 
-    public Integer ObtenerEvolucionDonacionesPorPeriodo() {
-        //COMO SE CALCULA?
-        return 0;
+    public List<Integer> ObtenerEvolucionDonacionesPorPeriodo(YearMonth mesInicio, YearMonth mesFinal) {
+        List<Integer> cantidadBienesPorMes = new ArrayList<>();
+
+        YearMonth mesActual = mesInicio;
+
+        while (!mesActual.isAfter(mesFinal)) {
+            int totalMes = 0;
+
+            for (DonacionDTO d : donaciones) {
+                if (YearMonth.from(d.GetFechaIngreso()).equals(mesActual)) {
+                    totalMes += d.GetCantidadBienes();
+                }
+            }
+
+            cantidadBienesPorMes.add(totalMes);
+            mesActual = mesActual.plusMonths(1);
+        }
+
+        return cantidadBienesPorMes;
     }
 
-    public void ganarInsignia(Insignia nuevaInsignia) {
+    public void GanarInsignia(Insignia nuevaInsignia) {
         if (!this.insigniasGanadas.contains(nuevaInsignia)) {
             this.insigniasGanadas.add(nuevaInsignia);
         }
     }
 
-    public CategoriaDonante getCategoriaActual() {
-        if (this.categoriaActual == null && this.nombreCategoriaActual != null) {
-            this.categoriaActual = new Colaborador();
+    private Boolean YaTieneInsignia(Insignia insignia) {
+        return this.insigniasGanadas.contains(insignia);
+    }
+
+    public CategoriaDonante GetCategoriaActual() {
+        if(categoriaActual == null){
+            switch(nombreCategoriaActual){
+                case "Colaborador":
+                    categoriaActual = new Colaborador();
+                    break;
+                case "Sostenedor":
+                    categoriaActual = new Sostenedor();
+                    break;
+                case "Transformador":
+                    categoriaActual = new Transformador();
+                    break;
+            }
         }
         return categoriaActual;
     }
 
-    public String getNombreCategoriaActual() {
-        return nombreCategoriaActual;
+    public Integer CalcularMisionesCumplidasEn(YearMonth mes){
+        LocalDate finDeMes = mes.atEndOfMonth();
+        LocalDate finDeMesAnterior = mes.minusMonths(1).atEndOfMonth();
+ 
+        return ContarMisionesNuevasEntre(finDeMesAnterior, finDeMes);
     }
 
-    public String getNombreUsuario() { 
-        return nombreUsuario; 
+    private Integer ContarMisionesNuevasEntre(LocalDate fechaInicio, LocalDate fechaFin) {
+        DonanteIncentivos snapshotInicio = CrearSnapshotHasta(fechaInicio);
+        DonanteIncentivos snapshotFin = CrearSnapshotHasta(fechaFin);
+ 
+        int nuevas = 0;
+        CategoriaDonante categoria = new Colaborador();
+ 
+        while (categoria != null) {
+            for (Mision mision : categoria.GetMisionesDelNivel()) {
+                boolean estabaCumplidaAntes = mision.EstaCumplidaPor(snapshotInicio);
+                boolean estaCumplidaAhora = mision.EstaCumplidaPor(snapshotFin);
+                if (!estabaCumplidaAntes && estaCumplidaAhora) {
+                    nuevas++;
+                }
+            }
+ 
+            if (categoria.CompletoTodasLasMisiones(snapshotFin)) {
+                categoria = categoria.GetSiguienteCategoria();
+            } else {
+                categoria = null;
+            }
+        }
+ 
+        return nuevas;
     }
 
-    public List<Donacion> getDonaciones() {
-        return donaciones;
+    private DonanteIncentivos CrearSnapshotHasta(LocalDate fechaLimite) {
+        List<DonacionDTO> filtradas = new ArrayList<>();
+        for (DonacionDTO d : this.donaciones) {
+            if (!d.GetFechaIngreso().isAfter(fechaLimite)) {
+                filtradas.add(d);
+            }
+        }
+ 
+        DonanteIncentivos snapshot = new DonanteIncentivos(this.nombreUsuario);
+        snapshot.donaciones = filtradas;
+        return snapshot;
     }
 
-    public List<Insignia> getInsigniasGanadas() {
-        return insigniasGanadas;
+    public YearMonth GetMesPrimeraDonacion(){
+        if (donaciones.isEmpty()) {
+            return YearMonth.now();
+        }
+ 
+        LocalDate fechaMasAntigua = donaciones.get(0).GetFechaIngreso();
+        for (DonacionDTO d : donaciones) {
+            if (d.GetFechaIngreso().isBefore(fechaMasAntigua)) {
+                fechaMasAntigua = d.GetFechaIngreso();
+            }
+        }
+        return YearMonth.from(fechaMasAntigua);
     }
+
+
+    public String GetNombreCategoriaActual() { return nombreCategoriaActual; }
+
+    public String GetNombreUsuario() { return nombreUsuario; }
+
+    public List<DonacionDTO> GetDonaciones() { return donaciones; }
+
+    public List<Insignia> GetInsigniasGanadas() { return insigniasGanadas; }
 }
