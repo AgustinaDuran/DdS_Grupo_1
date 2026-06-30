@@ -16,10 +16,7 @@ public class Chofer {
 
     public Chofer() {}
 
-    public Chofer(String nombre, String apellido, String documento, Camion camion) {
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.documento = documento;
+    public Chofer(Camion camion) {
         this.camion = camion;
     }
 
