@@ -1,5 +1,7 @@
 package org.donatrack.dominio.donacion;
 
+import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
+
 public class EstadoAsignacionRealizada extends EstadoDonacion {
 
     public EstadoAsignacionRealizada() {
@@ -7,7 +9,7 @@ public class EstadoAsignacionRealizada extends EstadoDonacion {
     }
 
    @Override
-    public void planificarRuta(Donacion d) {
+    public void siguiente(Donacion d, EntidadBeneficiaria entidad) {
         EstadoDonacion estadoNuevo = new EstadoListaParaEntregar();
         estadoNuevo.setDate();
         d.setEstadoDonacion(estadoNuevo);

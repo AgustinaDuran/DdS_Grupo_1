@@ -19,7 +19,7 @@ public abstract class EstadoDonacion {
     public void setDate(){
         fechaIngresoEstado= LocalDateTime.now();
     }
-    public void siguiente(Donacion d){
+    public void siguiente(Donacion d, EntidadBeneficiaria entidad){
         throw new RuntimeException("Este estado no posee un estado siguiente");
     }
 

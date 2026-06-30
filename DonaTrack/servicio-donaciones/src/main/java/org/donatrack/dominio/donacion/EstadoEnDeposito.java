@@ -11,14 +11,14 @@ public class EstadoEnDeposito extends EstadoDonacion {
     }
 
     @Override
-    public void asignar(Donacion d) {
+    public void siguiente(Donacion d, EntidadBeneficiaria entidad) {
         EstadoDonacion nuevoEstado = new EstadoAsignacionRealizada();
         nuevoEstado.setDate();
         d.setEstadoDonacion(nuevoEstado);
     }
 
     @Override
-    public void marcarComoVencida(Donacion d) {
+    public void falloEnEstado(Donacion d, String j) {
         EstadoDonacion nuevoEstado = new EstadoVencido();
         nuevoEstado.setDate();
         d.setEstadoDonacion(nuevoEstado);

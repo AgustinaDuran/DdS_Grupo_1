@@ -114,8 +114,8 @@ public class Donacion {
         fotoEntrega = foto;
     }
 
-    public void siguiente(){
-        estadoDonacion.siguiente(this);
+    public void siguiente(EntidadBeneficiaria entidad){
+        estadoDonacion.siguiente(this, entidad);
     }
 
     public void falloEnEstado(String justificacion){

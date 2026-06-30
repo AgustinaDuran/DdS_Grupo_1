@@ -8,12 +8,7 @@ public class EstadoEnTraslado extends EstadoDonacion {
     }
 
     @Override
-    public boolean entregaActiva() {
-    return true;
-    }
-
-    @Override
-    public void confirmarEntrega(Donacion d) {
+    public void siguiente(Donacion d, EntidadBeneficiaria entidad) {
         EstadoDonacion nuevoEstado = new EstadoEntregada(d.getEntidadAEntregar());
         nuevoEstado.setDate();
         d.setEstadoDonacion(nuevoEstado);
@@ -21,7 +16,7 @@ public class EstadoEnTraslado extends EstadoDonacion {
 
 
     @Override
-    public void registrarEntregaFallida(Donacion d, String justificacion) {
+    public void falloEnEstado(Donacion d, String justificacion) {
         d.setEstadoDonacion(new EstadoEntregaFallida(d.getEntidadAEntregar(), justificacion));
     }
 }

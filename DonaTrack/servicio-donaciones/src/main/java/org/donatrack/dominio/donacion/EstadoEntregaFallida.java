@@ -20,7 +20,7 @@ public class EstadoEntregaFallida extends EstadoDonacion {
     }
 
     @Override
-    public void siguiente(Donacion d) {
+    public void siguiente(Donacion d, EntidadBeneficiaria entidad) {
         EstadoDonacion nuevoEstado = new EstadoEnDeposito();
         nuevoEstado.setDate();
         d.setEstadoDonacion(nuevoEstado);
