@@ -9,23 +9,19 @@ public abstract class Mision {
         this.insignia = insignia;
     }
 
-    public abstract Boolean estaCumplidaPor(DonanteIncentivos donante);
+    public abstract Boolean EstaCumplidaPor(DonanteIncentivos donante);
 
-    public abstract Integer getProgresoActual(DonanteIncentivos donante);
+    public abstract Integer GetProgresoActual(DonanteIncentivos donante);
 
-    public abstract Integer getObjetivoAsignado();
+    public abstract Integer GetObjetivoAsignado();
 
-    public Integer getDistanciaRestante(DonanteIncentivos donante) {
-        Integer restante = this.getObjetivoAsignado() - this.getProgresoActual(donante);
+    public Integer GetDistanciaRestante(DonanteIncentivos donante) {
+        Integer restante = this.GetObjetivoAsignado() - this.GetProgresoActual(donante);
         return Math.max(restante, 0); //no tiene en cuenta negativos
     }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
+    public String GetDescripcion() { return descripcion; }
 
-    public Insignia getInsigniaOtorgada() {
-        return insignia;
-    }
+    public Insignia GetInsigniaOtorgada() { return insignia; }
 
 }

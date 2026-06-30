@@ -22,7 +22,7 @@ public class PuestoRanking {
         this.misionesCumplidasEnElMes = misionesCumplidasEnElMes;
     }
 
-    public Integer getPosicion() { return posicion; }
-    public String getNombreUsuario() { return nombreUsuario; }
-    public Integer getMisionesCumplidasEnElMes() { return misionesCumplidasEnElMes; }
+    public Integer GetPosicion() { return posicion; }
+    public String GetNombreUsuario() { return nombreUsuario; }
+    public Integer GetMisionesCumplidasEnElMes() { return misionesCumplidasEnElMes; }
 }

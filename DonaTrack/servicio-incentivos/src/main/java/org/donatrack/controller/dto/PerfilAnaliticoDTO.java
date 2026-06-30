@@ -1,17 +1,18 @@
 package org.donatrack.controller.dto;
-import java.util.Map;
+
+import java.util.List;
 
 public class PerfilAnaliticoDTO {
     public String nombreUsuario;
     public String categoriaActual;
-    public List<Donacion> donaciones;
-    public Integer evolucionDonacionesPorPeriodo; //-> ver como resulta la funcion, x ahora ??
+    public List<DonacionDTO> donaciones;
+    public List<Integer> evolucionDonacionesPorPeriodo; //-> ver como resulta la funcion, x ahora ??
     public Double comparacionMensual;
     public Integer totalOrganizacionesAyudadas;
     public Integer impactoAcumulado;
     public Integer posicionRanking;
 
-    public PerfilAnaliticoDTO(String nombreUsuario, String cat, List<Donacion> don, Integer evol, Double comp, Integer totalOrg, Integer imp, Integer pos) {
+    public PerfilAnaliticoDTO(String nombreUsuario, String cat, List<DonacionDTO> don, List<Integer> evol, Double comp, Integer totalOrg, Integer imp, Integer pos) {
         this.nombreUsuario = nombreUsuario;
         this.categoriaActual = cat;
         this.donaciones = don;

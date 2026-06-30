@@ -6,82 +6,95 @@ import org.donatrack.repository.DonanteRepository;
 import org.donatrack.repository.RankingRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.*;
+import java.util.*;
 
 @Service
 public class AnaliticaService {
 
     private final DonanteRepository donanteRepository;
     private final RankingRepository rankingRepository;
+    private final AutomatizacionService automatizacionService;
 
-    public AnaliticaService(DonanteRepository donanteRepository, RankingRepository rankingRepository) {
+    public AnaliticaService(DonanteRepository donanteRepository, RankingRepository rankingRepository, AutomatizacionService automatizacionService) {
         this.donanteRepository = donanteRepository;
         this.rankingRepository = rankingRepository;
+        this.automatizacionService = automatizacionService;
     }
 
-    public PerfilAnaliticoDTO obtenerEstadisticasGenerales(String nombreUsuario) {
+    public void RegistrarDonacionDeUsuario(String nombreUsuario, DonacionDTO donacionDto) {
         DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
 
-        Integer posicionRanking = calcularPosicionRanking(nombreUsuario);
+        List<Mision> misionesRecienCumplidas = donante.RegistrarActividad(donacionDto);
+
+        donanteRepository.save(donante);
+
+        for (Mision mision : misionesRecienCumplidas) {
+            automatizacionService.NotificarInsigniaGanada(donante.GetNombreUsuario(), mision.GetDescripcion(), mision.GetInsigniaOtorgada().GetImagen());
+        }
+    }
+
+    public PerfilAnaliticoDTO ObtenerEstadisticasGenerales(String nombreUsuario) {
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
+
+        Integer posicionRanking = CalcularPosicionRanking(nombreUsuario);
 
         return new PerfilAnaliticoDTO(
-                donante.getNombreUsuario(),
-                donante.categoriaActual.getNombre(),
-                donante.getDonaciones(),
-                donante.obtenerEvolucionDonacionesPorPeriodo(), //falta ver el tema del grafico y como se calcula
-                donante.obtenerComparacionMensual(YearMonth.now(), YearMonth.now().minusMonths(1)), 
-                donante.calcularOrganizacionesAyudadas(),
-                donante.calcularImpactoAcumulado(),
+                donante.GetNombreUsuario(),
+                donante.GetNombreCategoriaActual(),
+                donante.GetDonaciones(),
+                donante.ObtenerEvolucionDonacionesPorPeriodo(donante.GetMesPrimeraDonacion(), YearMonth.now()),
+                donante.ObtenerComparacionMensual(YearMonth.now(), YearMonth.now().minusMonths(1)), 
+                donante.CalcularOrganizacionesAyudadas(),
+                donante.CalcularImpactoAcumulado(),
                 posicionRanking
         );
     }
 
-    public List<MisionProgresoDTO> obtenerProgresoMisiones(String nombreUsuario) {
+    public List<MisionProgresoDTO> ObtenerProgresoMisiones(String nombreUsuario) {
         DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
 
         List<MisionProgresoDTO> progresoList = new ArrayList<>();
         
-        for (Mision mision : donante.categoriaActual.getMisionesDelNivel()) {
+        for (Mision mision : donante.GetCategoriaActual().GetMisionesDelNivel()) {
             progresoList.add(new MisionProgresoDTO(
-                    mision.getDescripcion(),
-                    mision.getProgresoActual(donante),
-                    mision.getObjetivoAsignado(),
-                    mision.getDistanciaRestante(donante),
-                    mision.getInsigniaOtorgada().getNombre()
+                    mision.GetDescripcion(),
+                    mision.GetProgresoActual(donante),
+                    mision.GetObjetivoAsignado(),
+                    mision.GetDistanciaRestante(donante),
+                    mision.GetInsigniaOtorgada().GetNombre()
             ));
         }
         return progresoList;
     }
 
-    public List<InsigniaDTO> obtenerInsignias(String nombreUsuario) {
+    public List<InsigniaDTO> ObtenerInsignias(String nombreUsuario) {
         DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
 
         List<InsigniaDTO> dtos = new ArrayList<>();
-        for (Insignia insignia : donante.getInsigniasGanadas()) {
-            dtos.add(new InsigniaDTO(insignia.getNombre(),insignia.getImagen()));
+        for (Insignia insignia : donante.GetInsigniasGanadas()) {
+            dtos.add(new InsigniaDTO(insignia.GetNombre(),insignia.GetImagen()));
         }
         return dtos;
     }
 
-    private Integer calcularPosicionRanking(String nombreUsuario) {
+    private Integer CalcularPosicionRanking(String nombreUsuario) {
         if (!donanteRepository.existsById(nombreUsuario)) {
             return 0;
         }
     
         long personasAdelante = donanteRepository.countDonantesConMasDonaciones(nombreUsuario);
-        return (Integer) personasAdelante + 1;
+        return (int) personasAdelante + 1;
     }
 
-    public PodioMensualDTO obtenerPodioDestacadoDelMes(YearMonth mesAConsultar) {
+    public PodioMensualDTO ObtenerPodioDestacadoDelMes(YearMonth mesAConsultar) {
         RankingMensual ranking = rankingRepository.findById(mesAConsultar.toString()).orElseThrow(() -> new RuntimeException("Aún no se ha procesado el ranking para: " + mesAConsultar));
 
         List<PodioMensualDTO.PuestoGanador> destacadosDTO = new ArrayList<>();
-        for (PuestoRanking puesto : ranking.getPodio()) {
-            destacadosDTO.add(new PodioMensualDTO.PuestoGanador(puesto.getPosicion(), puesto.getNombreUsuario(), puesto.getMisionesCumplidasEnElMes()));
+        for (PuestoRanking puesto : ranking.GetPodio()) {
+            destacadosDTO.add(new PodioMensualDTO.PuestoGanador(puesto.GetPosicion(), puesto.GetNombreUsuario(), puesto.GetMisionesCumplidasEnElMes()));
         }
 
-    return new PodioMensualDTO(ranking.getIdPeriodo(), destacadosDTO);
+        return new PodioMensualDTO(ranking.GetIdPeriodo(), destacadosDTO);
     }
 }

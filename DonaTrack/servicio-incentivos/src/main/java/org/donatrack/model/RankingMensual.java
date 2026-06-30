@@ -22,10 +22,11 @@ public class RankingMensual {
         this.idPeriodo = periodo.toString();
     }
 
-    public void agregarAlPodio(PuestoRanking puesto) {
+    public void AgregarAlPodio(PuestoRanking puesto) {
         this.podio.add(puesto);
     }
 
-    public String getIdPeriodo() { return idPeriodo; }
-    public List<PuestoRanking> getPodio() { return podio; }
+    public String GetIdPeriodo() {return idPeriodo; }
+
+    public List<PuestoRanking> GetPodio() { return podio; }
 }

@@ -10,17 +10,17 @@ public class MisionDonacionesExitosas extends Mision {
     }
 
     @Override
-    public Boolean estaCumplidaPor(DonanteIncentivos donante) {
-        return donante.calcularOrganizacionesAyudadas() >= this.cantidadDonacionesExitosasRequerida;
+    public Boolean EstaCumplidaPor(DonanteIncentivos donante) {
+        return donante.CalcularOrganizacionesAyudadas() >= this.cantidadDonacionesExitosasRequerida;
     }
     
     @Override
-    public Integer getProgresoActual(DonanteIncentivos donante) {
-        return donante.calcularOrganizacionesAyudadas();
+    public Integer GetProgresoActual(DonanteIncentivos donante) {
+        return donante.CalcularOrganizacionesAyudadas();
     }
 
     @Override
-        public Integer getObjetivoAsignado() {
+        public Integer GetObjetivoAsignado() {
         return this.cantidadDonacionesExitosasRequerida;
     }
 

@@ -10,17 +10,17 @@ public class MisionRacha extends Mision {
     }
 
     @Override
-    public Boolean estaCumplidaPor(DonanteIncentivos donante) {
+    public Boolean EstaCumplidaPor(DonanteIncentivos donante) {
         return donante.CalcularRachaActual() >= mesesConsecutivosRequeridos;
     }
     
     @Override
-    public Integer getProgresoActual(DonanteIncentivos donante) {
+    public Integer GetProgresoActual(DonanteIncentivos donante) {
         return donante.CalcularRachaActual();
     }
 
     @Override
-        public Integer getObjetivoAsignado() {
+        public Integer GetObjetivoAsignado() {
         return this.mesesConsecutivosRequeridos;
     }   
 }
