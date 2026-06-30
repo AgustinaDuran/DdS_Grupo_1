@@ -114,6 +114,15 @@ public class Donacion {
         fotoEntrega = foto;
     }
 
+    public void siguiente(){
+        estadoDonacion.siguiente(this);
+    }
+
+    public void falloEnEstado(String justificacion){
+        estadoDonacion.falloEnEstado(this, justificacion);
+    }
+
+    /*
     public void asignar(EntidadBeneficiaria e) {
         estadoDonacion.asignar(this);
         setEntidadAEntregar(e);
@@ -144,7 +153,7 @@ public class Donacion {
     public void volverADeposito() {
         estadoDonacion.volverADeposito(this);
     }
-
+*/
     public void agregarListaEstadoDonacion(EstadoDonacion estadoObtenido) {
         this.historialEstadoDonacion.add(estadoObtenido);
     }

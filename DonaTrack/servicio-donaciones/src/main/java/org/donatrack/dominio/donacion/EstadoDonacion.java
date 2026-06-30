@@ -19,14 +19,20 @@ public abstract class EstadoDonacion {
     public void setDate(){
         fechaIngresoEstado= LocalDateTime.now();
     }
-    
+    public void siguiente(Donacion d){
+        throw new RuntimeException("Este estado no posee un estado siguiente");
+    }
+
+
+
+    public void falloEnEstado(Donacion d, String justificacion){
+        throw new RuntimeException("No posee un fallo de estado");
+    }
+    /* 
     public void asignar(Donacion d) {
         throw new RuntimeException("No se puede asignar la donación en el estado actual.");
     }
 
-    public boolean entregaActiva() {
-    return false;
-    }
     
     public void planificarRuta(Donacion d) {
         throw new RuntimeException("No se puede planificar ruta en el estado actual.");
@@ -51,7 +57,7 @@ public abstract class EstadoDonacion {
     public void volverADeposito(Donacion d) {
         throw new RuntimeException("No se puede volver al depósito en el estado actual.");
     }
-    
+    */
     
 
 }
