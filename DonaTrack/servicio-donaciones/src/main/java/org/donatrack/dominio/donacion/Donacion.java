@@ -152,4 +152,31 @@ public class Donacion {
     public List<EstadoDonacion> getHistorialEstados() {
         return historialEstadoDonacion;
     }
+
+    public List<Donacion> segmentarDonacion() {
+        Donante donante = this.donante;
+        List<Donacion> donacionesSegmentadas = new ArrayList<>();
+        List<ItemBien> bienesDonacion = this.itemBienes;
+
+        for (ItemBien itemBien : bienesDonacion) {
+            Subcategoria subcategoriaBien = itemBien.getBien().getSubcategoria();
+            Donacion donacionDeSubcategoria = this.donacionDeSubcategoria(donacionesSegmentadas, subcategoriaBien);
+
+            if (donacionesSegmentadas.isEmpty() || donacionDeSubcategoria == null) {
+                Donacion donacionNueva = new Donacion(donante, itemBien, subcategoriaBien);
+                donacionesSegmentadas.add(donacionNueva);
+            } else {
+                donacionDeSubcategoria.agregarItemBien(itemBien);
+            }
+        }
+
+        return donacionesSegmentadas;
+    }
+
+    private Donacion donacionDeSubcategoria(List<Donacion> donaciones, Subcategoria subcategoria) {
+        return donaciones.stream()
+                .filter(d -> d.getItemBienes().stream().anyMatch(b -> b.getBien().getSubcategoria() == subcategoria))
+                .findFirst()
+                .orElse(null);
+    }
 }

@@ -44,8 +44,7 @@ public class DonacionesService {
         Donacion donacionCompleta = new Donacion(donante, nuevaDonacion.getItems()); // despues manejarse con IdDonante
                                                                                      // probablemente
 
-        List<Donacion> donacionesSegmentadas = this.segmentarDonacion(donacionCompleta);
-
+        List<Donacion> donacionesSegmentadas = donacionCompleta.segmentarDonacion();
         donacionesRepository.saveAll(donacionesSegmentadas);
 
         donacionesSegmentadas.forEach(d -> donante.agregarDonacionHistorica(d)); // de nuevo, puede que labure con IDS
@@ -55,32 +54,8 @@ public class DonacionesService {
 
     }
 
-    private List<Donacion> segmentarDonacion(Donacion donacionCompleta) {
-        Donante donante = donacionCompleta.getDonante();
-        List<Donacion> donacionesSegmentadas = new ArrayList<>();
-        List<ItemBien> bienesDonacion = donacionCompleta.getItemBienes();
+    
 
-        for (ItemBien itemBien : bienesDonacion) {
-            Subcategoria subcategoriaBien = itemBien.getBien().getSubcategoria();
-            Donacion donacionDeSubcategoria = this.donacionDeSubcategoria(donacionesSegmentadas, subcategoriaBien);
-
-            if (donacionesSegmentadas.isEmpty() || donacionDeSubcategoria == null) {
-                Donacion donacionNueva = new Donacion(donante, itemBien, subcategoriaBien);
-                donacionesSegmentadas.add(donacionNueva);
-            } else {
-                donacionDeSubcategoria.agregarItemBien(itemBien);
-            }
-        }
-
-        return donacionesSegmentadas;
-    }
-
-    private Donacion donacionDeSubcategoria(List<Donacion> donaciones, Subcategoria subcategoria) {
-        return donaciones.stream()
-                .filter(d -> d.getItemBienes().stream().anyMatch(b -> b.getBien().getSubcategoria() == subcategoria))
-                .findFirst()
-                .orElse(null);
-    }
 
     public void eliminarDonacionPorId(long id) {
         donacionesRepository.delete(id);
