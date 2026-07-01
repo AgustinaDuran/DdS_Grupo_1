@@ -4,25 +4,35 @@ import org.donatrack.dominio.categoria.Subcategoria;
 import org.donatrack.dominio.bien.ItemBien;
 import org.donatrack.dominio.donante.Donante;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
-
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Entity
+@Table(name = "donacionesSegmentadas")
 public class Donacion {
 
-    private Donante donante;
+    
+
     private String descripcion;
     private EstadoDonacion estadoDonacion;
-    private Subcategoria subcategoria;
+    
     private List<ItemBien> itemBienes;
     private LocalDateTime fechaIngreso;
     private String fotoEntrega;
     private List<EstadoDonacion> historialEstadoDonacion = new ArrayList<>();
+
+
+    @ManyToOne
+    //@JoinColumn //no se como se usa esto todavia
+    private Donante donante;
+
+    @ManyToOne
+    private Subcategoria subcategoria;
+
+    
     private EntidadBeneficiaria entidadAEntregar;
 
     @Id
@@ -41,7 +51,6 @@ public class Donacion {
         this.subcategoria = subcategoria;
         estadoDonacion = new EstadoEnDeposito();
         fechaIngreso = LocalDateTime.now();
-        this.entidadAEntregar = null;
     }
 
 
@@ -114,13 +123,25 @@ public class Donacion {
         fotoEntrega = foto;
     }
 
+    public void siguiente(){
+        estadoDonacion.siguiente(this);
+    }
     public void siguiente(EntidadBeneficiaria entidad){
         estadoDonacion.siguiente(this, entidad);
+    }
+
+    public void falloEnEstado(){
+        estadoDonacion.falloEnEstado(this);
     }
 
     public void falloEnEstado(String justificacion){
         estadoDonacion.falloEnEstado(this, justificacion);
     }
+
+    public Boolean esEstadoValido(TipoEstado nuevoEstado){
+        return this.estadoDonacion.esEstadoValido(nuevoEstado);
+    }
+
 
     /*
     public void asignar(EntidadBeneficiaria e) {
@@ -163,7 +184,7 @@ public class Donacion {
     }
 
     public List<Donacion> segmentarDonacion() {
-        Donante donante = this.donante;
+        Donante Donante = this.donante;
         List<Donacion> donacionesSegmentadas = new ArrayList<>();
         List<ItemBien> bienesDonacion = this.itemBienes;
 

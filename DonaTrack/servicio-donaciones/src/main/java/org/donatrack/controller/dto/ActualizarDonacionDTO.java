@@ -7,6 +7,7 @@ public class ActualizarDonacionDTO {
     String fotoEntrega; 
     TipoEstado tipoEstado;
     String JustificacionEntregaFallida;
+    long entidadId;
 
 
     public ActualizarDonacionDTO() {
@@ -32,10 +33,6 @@ public class ActualizarDonacionDTO {
         return tipoEstado;
     }
 
-    public void setTipoEstado(TipoEstado tipoEstado) {
-        this.tipoEstado = tipoEstado;
-    }
-
     public String getJustificacionEntregaFallida() {
         return JustificacionEntregaFallida;
     }
@@ -43,5 +40,15 @@ public class ActualizarDonacionDTO {
     public void setJustificacionEntregaFallida(String JustificacionEntregaFallida) {
         JustificacionEntregaFallida = JustificacionEntregaFallida;
     }
+
+    public long getEntidadId(){
+        return this.entidadId;
+    }
+
+    public void setEntidadId(long entidadId){
+        this.entidadId = entidadId;
+    }
+
+
 
 }

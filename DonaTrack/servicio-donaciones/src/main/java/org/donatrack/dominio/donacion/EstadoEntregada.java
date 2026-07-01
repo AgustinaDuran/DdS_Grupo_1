@@ -8,10 +8,9 @@ public class EstadoEntregada extends EstadoDonacion {
     public EstadoEntregada() {
         this.estado = TipoEstado.ENTREGADA;
     }
-    
-    public EstadoEntregada(EntidadBeneficiaria e) {
-            this.entidadBeneficiaria = e;
-        }
 
+    public EstadoEntregada(EntidadBeneficiaria entidad) {
+        this.entidadBeneficiaria = entidad;
+    }
 
 }

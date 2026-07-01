@@ -12,7 +12,7 @@ public class DonantePersona extends Donante{
     private Persona persona;
 
 
-    public DonantePersona(String direccion, Mail mail) {
+    public DonantePersona(String direccion, Contacto mail) {
         this.direccion = direccion;
         this.contactos.add(mail);
         this.contactoPredeterminado = mail;

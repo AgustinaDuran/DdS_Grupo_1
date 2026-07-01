@@ -1,5 +1,8 @@
 package org.donatrack.dominio.donacion;
+
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EstadoEntregaFallida extends EstadoDonacion {
 
@@ -8,11 +11,12 @@ public class EstadoEntregaFallida extends EstadoDonacion {
 
     public EstadoEntregaFallida() {
         this.estado = TipoEstado.ENTREGA_FALLIDA;
+        this.estadosValidos = List.of(TipoEstado.EN_DEPOSITO);
     }
 
-    public EstadoEntregaFallida(EntidadBeneficiaria e, String justificacion) {
+    public EstadoEntregaFallida(EntidadBeneficiaria entidad, String justificacion) {
         this.justificacion = justificacion;
-        this.entidadBeneficiaria=e;
+        this.entidadBeneficiaria = entidad;
     }
 
     public String getJustificacion() {
@@ -20,7 +24,7 @@ public class EstadoEntregaFallida extends EstadoDonacion {
     }
 
     @Override
-    public void siguiente(Donacion d, EntidadBeneficiaria entidad) {
+    public void siguiente(Donacion d) {
         EstadoDonacion nuevoEstado = new EstadoEnDeposito();
         nuevoEstado.setDate();
         d.setEstadoDonacion(nuevoEstado);

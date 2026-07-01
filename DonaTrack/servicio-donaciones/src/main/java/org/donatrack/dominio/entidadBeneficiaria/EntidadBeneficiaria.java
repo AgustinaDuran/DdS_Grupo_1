@@ -58,13 +58,13 @@ public class EntidadBeneficiaria {
         }
     }
 
-    public void seguirEntregasActivas(List<Donacion> donaciones) {
+    /* public void seguirEntregasActivas(List<Donacion> donaciones) {
         for (Donacion donacion : donaciones) {
             if (donacion.getEstadoDonacion().entregaActiva()) {
                 System.out.println("Entrega activa: "+ donacion.getDescripcion());
             }
         }
-    }
+    } */
 
     public void recibirNotificacion(String mensaje){
         System.out.println("Notificación: " + mensaje);

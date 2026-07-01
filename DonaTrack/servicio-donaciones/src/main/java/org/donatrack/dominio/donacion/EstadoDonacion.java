@@ -1,12 +1,20 @@
 package org.donatrack.dominio.donacion;
 import java.time.LocalDateTime;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.donatrack.dominio.bien.TipoUnidad;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 
 public abstract class EstadoDonacion {
     private LocalDateTime fechaIngresoEstado;
     protected TipoEstado estado;
+    protected List<TipoEstado> estadosValidos;
+
+    public EstadoDonacion(){
+        this.estadosValidos = new ArrayList<>();
+    }
+
 
     public TipoEstado getEstado() {
         return estado;
@@ -19,15 +27,30 @@ public abstract class EstadoDonacion {
     public void setDate(){
         fechaIngresoEstado= LocalDateTime.now();
     }
-    public void siguiente(Donacion d, EntidadBeneficiaria entidad){
+
+    public void siguiente(Donacion d){
         throw new RuntimeException("Este estado no posee un estado siguiente");
     }
 
+    public void siguiente(Donacion d, EntidadBeneficiaria entidad){
+        throw new RuntimeException("Este estado no posee un estado siguiente");
+    }
+    
 
+    public void falloEnEstado(Donacion d){
+        throw new RuntimeException("No posee un fallo de estado");
+    }
 
     public void falloEnEstado(Donacion d, String justificacion){
         throw new RuntimeException("No posee un fallo de estado");
     }
+
+    public Boolean esEstadoValido(TipoEstado nuevoEstado){
+        return this.estadosValidos.contains(nuevoEstado);
+    }
+
+
+
     /* 
     public void asignar(Donacion d) {
         throw new RuntimeException("No se puede asignar la donación en el estado actual.");
