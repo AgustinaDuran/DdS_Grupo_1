@@ -1,6 +1,11 @@
 package org.donatrack.model;
 
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import org.donatrack.model.MedioEnvio;
 
 
@@ -12,6 +17,8 @@ public class Notificacion {
     private MedioEnvio medioEnvio;
     private LocalDateTime fechaEnvio;
     private EnumEstadoNotificacion estado;
+
+    public static Long contadorId = 1L;
 
     public Long getId() {
         return id;
@@ -25,6 +32,7 @@ public class Notificacion {
         return mensaje;
     }
 
+    @JsonIgnore
     public MedioEnvio getMedioEnvio() {
         return medioEnvio;
     }
@@ -38,6 +46,7 @@ public class Notificacion {
     }
 
     public Notificacion(String destinatario, String mensaje, MedioEnvio medioEnvio) {
+        this.id = contadorId++;
         this.destinatario = destinatario;
         this.mensaje = mensaje;
         this.medioEnvio = medioEnvio;

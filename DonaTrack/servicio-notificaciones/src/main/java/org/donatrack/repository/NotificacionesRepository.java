@@ -1,16 +1,18 @@
 package org.donatrack.repository;
 
 import org.donatrack.model.Notificacion;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class NotificacionesRepository { // singleton
 
     private List<Notificacion> notificaciones;
     private static NotificacionesRepository instancia;
 
-    private NotificacionesRepository() {
+    public NotificacionesRepository() {
         notificaciones = new ArrayList<>();
     }
 

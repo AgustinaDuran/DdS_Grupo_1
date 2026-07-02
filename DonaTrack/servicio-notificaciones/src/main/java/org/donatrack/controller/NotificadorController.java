@@ -36,7 +36,6 @@ public class NotificadorController{
 
 
 /*
-
 private void enviarAlServicioDeNotificaciones(String nombre, List<Contacto> contactos, String mensaje) {
         CrearNotificacionDTO dto = new CrearNotificacionDTO();
         dto.setNombreDestinatario(nombre);
@@ -58,5 +57,5 @@ public void registrarMisionCumplida(Donante donante, Mision mision) {
             "¡Felicitaciones! Cumpliste la misión: " + mision.getNombre() //
         );
     }
-
+}
 * */
