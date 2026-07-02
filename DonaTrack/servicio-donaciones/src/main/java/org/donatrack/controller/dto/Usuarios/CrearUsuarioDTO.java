@@ -1,23 +1,13 @@
-package org.donatrack.controller.dto.Donantes;
+package org.donatrack.controller.dto.Usuarios;
 
-import org.donatrack.dominio.donante.TipoPersonaJuridica;
-import org.donatrack.dominio.usuario.RolUsuario;
+import org.donatrack.controller.dto.Donantes.CrearDonanteDTO;
 import org.donatrack.dominio.contacto.Contacto;
+import org.donatrack.dominio.usuario.RolUsuario;
 
-public class CrearDonanteDTO {
+public class CrearUsuarioDTO {
+    
 
-    private TipoDonante tipo;
-
-    // Campos Donante Juridico:
-    private TipoPersonaJuridica tipoPersonaJuridica;
-    private String rubro;
-
-    private Long usuarioId;
-
-    // Campos CrearUsuarioDTO
-    private RolUsuario tipoUsuario;
-
-    // Campos Persona:
+     // Campos Persona:
     private String nombre;
     private String apellido;
     private Integer edad;
@@ -31,39 +21,31 @@ public class CrearDonanteDTO {
     private String razonSocial;
     private String cuit;
 
-    public CrearDonanteDTO() {
+    
+    private RolUsuario rolUsuario;
+
+    public CrearUsuarioDTO(CrearDonanteDTO crearDonanteDTO) {
+        
+        this.rolUsuario = crearDonanteDTO.getRolUsuario();
+
+        if (rolUsuario == RolUsuario.PERSONA) {
+            this.nombre = crearDonanteDTO.getNombre();
+            this.apellido = crearDonanteDTO.getApellido();
+            this.edad = crearDonanteDTO.getEdad();
+            this.dni = crearDonanteDTO.getDni();
+            this.genero = crearDonanteDTO.getGenero();
+            this.direccion = crearDonanteDTO.getDireccion();
+            this.contactoPredeterminado = crearDonanteDTO.getContactoPredeterminado();
+        } else {
+            this.razonSocial = crearDonanteDTO.getRazonSocial();
+            this.cuit = crearDonanteDTO.getCuit();
+        }
+    
     }
 
-    public TipoDonante getTipo() {
-        return tipo;
+    public CrearUsuarioDTO() {
     }
-    public void setTipo(TipoDonante tipo) {
-        this.tipo = tipo;
-    }
-    public TipoPersonaJuridica getTipoPersonaJuridica() {
-        return tipoPersonaJuridica;
-    }
-    public void setTipoPersonaJuridica(TipoPersonaJuridica tipoPersonaJuridica) {
-        this.tipoPersonaJuridica = tipoPersonaJuridica;
-    }
-    public String getRubro() {
-        return rubro;
-    }
-    public void setRubro(String rubro) {
-        this.rubro = rubro;
-    }
-    public Long getUsuarioId() {
-        return usuarioId;
-    }
-    public void setUsuarioId(Long usuarioId) {
-        this.usuarioId = usuarioId;
-    }
-    public RolUsuario getRolUsuario() {
-        return tipoUsuario;
-    }
-    public void setRolUsuario(RolUsuario rolUsuario) {
-        this.tipoUsuario = rolUsuario;
-    }
+
     public String getNombre() {
         return nombre;
     }
@@ -118,7 +100,11 @@ public class CrearDonanteDTO {
     public void setCuit(String cuit) {
         this.cuit = cuit;
     }
-    
-
+    public RolUsuario getRolUsuario() {
+        return rolUsuario;
+    }
+    public void setRolUsuario(RolUsuario rolUsuario) {
+        this.rolUsuario = rolUsuario;
+    }
 
 }

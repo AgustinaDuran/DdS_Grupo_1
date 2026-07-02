@@ -42,7 +42,7 @@ public class CategoriasController {
 
     @GetMapping("/subcategorias/{id}")
     public ResponseEntity<SubcategoriaDTO> obtenerSubcategoriaPorId(@PathVariable Long id) {
-        Subcategoria subcategoria = categoriasService.obtenerSubcategoriaPor(id);
+        Subcategoria subcategoria = categoriasService.obtenerSubcategoriaPorId(id);
         if (subcategoria == null) {
             return ResponseEntity.notFound().build();
         }

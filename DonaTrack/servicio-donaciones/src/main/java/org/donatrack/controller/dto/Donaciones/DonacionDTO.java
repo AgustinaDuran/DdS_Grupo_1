@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 import org.donatrack.dominio.categoria.Subcategoria;
 
 public class DonacionDTO { // por ahora muchos datos, vemos si hay convienen otros dtos
-    long id;
-    long donante_id;
+    Long id;
+    Long donante_id;
     String descripcion;
     Subcategoria subcategoria;
     EstadoDonacion estadoDonacion;

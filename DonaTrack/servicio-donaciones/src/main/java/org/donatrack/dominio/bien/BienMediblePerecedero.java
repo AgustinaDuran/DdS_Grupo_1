@@ -1,20 +1,20 @@
 package org.donatrack.dominio.bien;
 
-import java.time.LocalDateTime;
+import org.donatrack.dominio.categoria.Subcategoria;
+import java.time.LocalDate;
 
 public class BienMediblePerecedero extends BienMedible {
-    
-    private LocalDateTime fechaVencimiento;
 
-    public BienMediblePerecedero(String nombre,String descripcion,String foto,TipoUnidad unidad,Float cantidadBien, LocalDateTime vencimiento){
-        super(nombre, descripcion, foto,  unidad, cantidadBien);
-        this.fechaVencimiento=vencimiento;
+    private LocalDate fechaVencimiento;
+
+    public BienMediblePerecedero(String nombre, String descripcion, Subcategoria subcategoria, TipoUnidad unidad, Float cantidadBien,
+            LocalDate vencimiento) {
+        super(nombre, descripcion, subcategoria, unidad, cantidadBien);
+        this.fechaVencimiento = vencimiento;
     }
 
-    public LocalDateTime getFechaVencimiento(){
+    public LocalDate getFechaVencimiento() {
         return fechaVencimiento;
     }
-
-    
 
 }

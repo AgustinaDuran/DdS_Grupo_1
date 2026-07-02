@@ -26,7 +26,7 @@ public class NotificacionesRepository { // singleton
         return notificaciones;
     }
 
-    public Notificacion findById(long id){
+    public Notificacion findById(Long id){
         return notificaciones.stream()
                 .filter(n -> n.getId() == id)
                 .findFirst()
@@ -37,7 +37,7 @@ public class NotificacionesRepository { // singleton
         notificaciones.add(notificacion);
     }
 
-    public void delete(long id){
+    public void delete(Long id){
         notificaciones = notificaciones.stream()
                 .filter(n -> !n.getId().equals(id))
                 .toList();

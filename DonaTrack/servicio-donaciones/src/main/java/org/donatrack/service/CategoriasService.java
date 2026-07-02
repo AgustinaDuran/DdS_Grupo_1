@@ -26,7 +26,7 @@ public class CategoriasService {
         return categoriasRepository.buscarSubcategorias(filtros.getCategoriaId(), filtros.getNombre());
     }
 
-    public Subcategoria obtenerSubcategoriaPor(Long id) {
+    public Subcategoria obtenerSubcategoriaPorId(Long id) {
         return categoriasRepository.findSubcategoriaById(id);
     }
 

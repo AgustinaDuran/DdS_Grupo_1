@@ -28,7 +28,7 @@ public class DonacionesRepository { // singleton
         return donaciones;
     }
 
-    public Donacion findById(long id){
+    public Donacion findById(Long id){
         return donaciones.stream()
                 .filter(d -> d.getId() == id)
                 .findFirst()
@@ -50,7 +50,7 @@ public class DonacionesRepository { // singleton
         this.donaciones.addAll(donaciones);
     }
 
-    public void delete(long id){
+    public void delete(Long id){
         donaciones = donaciones.stream().filter(d -> d.getId() != id).toList();
     }
     
@@ -59,7 +59,7 @@ public class DonacionesRepository { // singleton
 
 /* 
 //para cuando usemos base de datos
-public interface DonacionesRepository extends JpaRepository<Donaciones, long> {
+public interface DonacionesRepository extends JpaRepository<Donaciones, Long> {
 
     //Ejemplo de query: busqueda de donacion filtrada
     @Query("""

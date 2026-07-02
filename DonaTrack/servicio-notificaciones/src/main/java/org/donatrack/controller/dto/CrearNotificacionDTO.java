@@ -5,7 +5,7 @@ import org.donatrack.model.Contacto;
 
 
 public class CrearNotificacionDTO{
-    private long destinatarioId;
+    private Long destinatarioId;
     private String nombreDestinatario;
     private List<Contacto> contactos;
     private String mensaje;
@@ -13,7 +13,7 @@ public class CrearNotificacionDTO{
     public CrearNotificacionDTO() {
     }
 
-    public long getDestinatarioId(){
+    public Long getDestinatarioId(){
         return destinatarioId;
     }
     public String getMensaje() {
@@ -26,7 +26,7 @@ public class CrearNotificacionDTO{
         return nombreDestinatario;
     }
 
-    public void setDestinatarioId(long destinatarioId) {
+    public void setDestinatarioId(Long destinatarioId) {
         this.destinatarioId = destinatarioId;
     }
 

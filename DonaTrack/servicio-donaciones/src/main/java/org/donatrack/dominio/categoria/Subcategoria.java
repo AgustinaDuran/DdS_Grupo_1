@@ -15,7 +15,7 @@ public class Subcategoria{
         this.categoria= categoria;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

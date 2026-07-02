@@ -22,7 +22,7 @@ public class NecesidadesRepository { // singleton
         return necesidades;
     }
 
-    public Necesidad findById(long id) {
+    public Necesidad findById(Long id) {
         return necesidades.stream()
                 .filter(n -> n.getId() != null && n.getId() == id)
                 .findFirst()
@@ -41,7 +41,7 @@ public class NecesidadesRepository { // singleton
         this.necesidades.addAll(necesidades);
     }
 
-    public void delete(long id) {
+    public void delete(Long id) {
         necesidades = necesidades.stream()
                 .filter(n -> n.getId() == null || n.getId() != id)
                 .toList();
@@ -77,7 +77,7 @@ public class NecesidadesRepository {
         return necesidades;
     }
 
-    public Necesidad findById(long id) {
+    public Necesidad findById(Long id) {
         return necesidades.stream()
                 .filter(n -> n.getId() != null && n.getId() == id)
                 .findFirst()
@@ -96,7 +96,7 @@ public class NecesidadesRepository {
         this.necesidades.addAll(necesidades);
     }
 
-    public void delete(long id) {
+    public void delete(Long id) {
         necesidades = necesidades.stream()
                 .filter(n -> n.getId() == null || n.getId() != id)
                 .toList();

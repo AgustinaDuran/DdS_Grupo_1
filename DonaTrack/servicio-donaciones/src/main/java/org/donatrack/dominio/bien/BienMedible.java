@@ -1,23 +1,23 @@
 package org.donatrack.dominio.bien;
+import org.donatrack.dominio.categoria.Subcategoria;
 
 public class BienMedible extends Bien {
-    
+
     protected TipoUnidad unidad;
     protected Float cantidadBien;
 
-    public BienMedible(String nombre,String descripcion,String foto,TipoUnidad unidad, Float cantidadBien){
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-        this.foto = foto;
+    public BienMedible(String nombre, String descripcion, Subcategoria subcategoria, TipoUnidad unidad,
+            Float cantidadBien) {
+        super(nombre, descripcion, subcategoria);
         this.unidad = unidad;
         this.cantidadBien = cantidadBien;
     }
 
-    public TipoUnidad getUnidad(){
+    public TipoUnidad getUnidad() {
         return unidad;
     }
 
-    public Float getCantidadBien(){
+    public Float getCantidadBien() {
         return cantidadBien;
     }
 

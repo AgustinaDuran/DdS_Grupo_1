@@ -13,6 +13,13 @@ public abstract class Bien {
     protected String foto;
     protected Subcategoria subcategoria;
 
+    public Bien(String nombre, String descripcion, Subcategoria subcategoria) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.subcategoria = subcategoria;
+    }
+
+
     public String getNombre(){
         return this.nombre;
     }

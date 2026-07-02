@@ -11,5 +11,5 @@ public interface DonanteRepository extends CrudRepository<DonanteIncentivos, Str
 
     //cant usuario cn mas donaciones
     @Query("SELECT COUNT(d) FROM DonanteIncentivos d WHERE SIZE(d.donaciones) > " + "(SELECT SIZE(du.donaciones) FROM DonanteIncentivos du WHERE du.nombreUsuario = :nombreUsuario)")
-    long countDonantesConMasDonaciones(@Param("nombreUsuario") String nombreUsuario);
+    Long countDonantesConMasDonaciones(@Param("nombreUsuario") String nombreUsuario);
 }

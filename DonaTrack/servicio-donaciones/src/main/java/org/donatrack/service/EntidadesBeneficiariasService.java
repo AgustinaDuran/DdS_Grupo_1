@@ -26,7 +26,8 @@ public class EntidadesBeneficiariasService {
     public EntidadBeneficiaria registrarEntidad(CrearEntidadBeneficiariaDTO nuevaEntidad) {
         EntidadBeneficiaria entidad = new EntidadBeneficiaria(
                 nuevaEntidad.getTipoEntidad(),
-                nuevaEntidad.getDireccion());
+                nuevaEntidad.getDireccion(),
+                nuevaEntidad.getOrganizacion());
         return entidadesBeneficiariasRepository.save(entidad);
     }
 

@@ -1,4 +1,4 @@
-package org.donatrack.dominio.organizacion;
+/* package org.donatrack.dominio.usuario.organizacion;
 
 public class RepresentanteOrganizacion {
     private String nombre;
@@ -26,3 +26,4 @@ public class RepresentanteOrganizacion {
     }
     
 }
+ */

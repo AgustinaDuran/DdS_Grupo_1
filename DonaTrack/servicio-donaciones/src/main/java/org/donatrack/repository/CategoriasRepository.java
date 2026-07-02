@@ -21,7 +21,7 @@ public class CategoriasRepository { // singleton
         return categorias;
     }
 
-    public Categoria findCategoriaById(long id) {
+    public Categoria findCategoriaById(Long id) {
         return categorias.stream()
                 .filter(c -> c.getId() == id)
                 .findFirst()
@@ -32,7 +32,7 @@ public class CategoriasRepository { // singleton
         categorias.add(categoria);
     }
 
-    public void deleteCategoria(long id) {
+    public void deleteCategoria(Long id) {
         categorias = categorias.stream()
                 .filter(c -> c.getId() != id)
                 .toList();
@@ -43,7 +43,7 @@ public class CategoriasRepository { // singleton
         return subcategorias;
     }
 
-    public Subcategoria findSubcategoriaById(long id) {
+    public Subcategoria findSubcategoriaById(Long id) {
         return subcategorias.stream()
                 .filter(s -> s.getId() == id)
                 .findFirst()
@@ -58,7 +58,7 @@ public class CategoriasRepository { // singleton
         subcategorias.add(subcategoria);
     }
 
-    public void deleteSubcategoria(long id) {
+    public void deleteSubcategoria(Long id) {
         subcategorias = subcategorias.stream()
                 .filter(s -> s.getId() != id)
                 .toList();
@@ -89,21 +89,21 @@ public class CategoriasRepository {
     }
 
     public List<Categoria> findAllCategorias() { return categorias; }
-    public Categoria findCategoriaById(long id) {
+    public Categoria findCategoriaById(Long id) {
         return categorias.stream().filter(c -> c.getId() == id).findFirst().orElse(null);
     }
     public void saveCategoria(Categoria categoria) { categorias.add(categoria); }
-    public void deleteCategoria(long id) {
+    public void deleteCategoria(Long id) {
         categorias = categorias.stream().filter(c -> c.getId() != id).toList();
     }
 
     public List<Subcategoria> findAllSubcategorias() { return subcategorias; }
-    public Subcategoria findSubcategoriaById(long id) {
+    public Subcategoria findSubcategoriaById(Long id) {
         return subcategorias.stream().filter(s -> s.getId() == id).findFirst().orElse(null);
     }
     public List<Subcategoria> buscarSubcategorias(Long categoriaId, String nombre) { return subcategorias; }
     public void saveSubcategoria(Subcategoria subcategoria) { subcategorias.add(subcategoria); }
-    public void deleteSubcategoria(long id) {
+    public void deleteSubcategoria(Long id) {
         subcategorias = subcategorias.stream().filter(s -> s.getId() != id).toList();
     }
 }

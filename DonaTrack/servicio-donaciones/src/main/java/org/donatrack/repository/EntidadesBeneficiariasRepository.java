@@ -33,7 +33,7 @@ public class EntidadesBeneficiariasRepository {
         this.entidades.addAll(entidades);
     }
 
-    public EntidadBeneficiaria findById(long id) {
+    public EntidadBeneficiaria findById(Long id) {
         return entidades.stream()
                 .filter(d -> d.getId() == id)
                 .findFirst()
@@ -45,7 +45,7 @@ public class EntidadesBeneficiariasRepository {
         return entidad;
     }
 
-    public void delete(long id){
+    public void delete(Long id){
         entidades.removeIf(d -> d.getId() == id);
     }
 
@@ -68,10 +68,10 @@ public class EntidadesBeneficiariasRepository {
 
     public List<EntidadBeneficiaria> findAll() { return new ArrayList<>(entidades); }
     public void agregarEntidades(List<EntidadBeneficiaria> entidades){ this.entidades.addAll(entidades); }
-    public EntidadBeneficiaria findById(long id) {
+    public EntidadBeneficiaria findById(Long id) {
         return entidades.stream().filter(d -> d.getId() == id).findFirst().orElse(null);
     }
     public EntidadBeneficiaria save(EntidadBeneficiaria entidad){ entidades.add(entidad); return entidad; }
-    public void delete(long id){ entidades.removeIf(d -> d.getId() == id); }
+    public void delete(Long id){ entidades.removeIf(d -> d.getId() == id); }
 }
 */

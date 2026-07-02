@@ -3,9 +3,10 @@ package org.donatrack.controller.dto.Donantes;
 import org.donatrack.dominio.donante.Donante;
 import org.donatrack.dominio.donante.DonanteJuridico;
 import org.donatrack.dominio.donante.DonantePersona;
-import org.donatrack.dominio.donante.Persona;
-import org.donatrack.dominio.organizacion.Organizacion;
-import org.donatrack.dominio.organizacion.TipoOrganizacion;
+import org.donatrack.dominio.usuario.organizacion.Organizacion;
+import org.donatrack.dominio.usuario.DatosUsuario;
+import org.donatrack.dominio.donante.TipoPersonaJuridica;
+import org.donatrack.dominio.usuario.persona.Persona;
 
 public class DonanteDTO {
 
@@ -20,8 +21,8 @@ public class DonanteDTO {
     private String genero;
     private String direccion;
 
-    // Persona jurídica
-    private TipoOrganizacion tipoOrganizacion;
+    // Persona jurídica--
+    private TipoPersonaJuridica tipoOrganizacion;
     private String rubro;
     private String razonSocial;
     private String cuit;
@@ -31,24 +32,27 @@ public class DonanteDTO {
 
         if (donante instanceof DonantePersona donantePersona) {
             this.tipo = TipoDonante.HUMANA;
-            this.direccion = donantePersona.getDireccion();
-            Persona persona = donantePersona.getPersona();
+            
+            Persona persona = (Persona) donantePersona.getDatosUsuario();
             if (persona != null) {
                 this.nombre = persona.getNombre();
                 this.apellido = persona.getApellido();
                 this.edad = persona.getEdad();
                 this.dni = persona.getDni();
                 this.genero = persona.getGenero();
+                this.direccion = persona.getDireccion();
             }
         } else if (donante instanceof DonanteJuridico donanteJuridico) {
             this.tipo = TipoDonante.JURIDICA;
-            this.tipoOrganizacion = donanteJuridico.getTipoOrganizacion();
+            this.tipoOrganizacion = donanteJuridico.getTipoPersonaJuridica();
             this.rubro = donanteJuridico.getRubro();
-            Organizacion organizacion = donanteJuridico.getOrganizacion();
+            Organizacion organizacion = (Organizacion) donanteJuridico.getDatosUsuario();
             if (organizacion != null) {
                 this.razonSocial = organizacion.getRazonSocial();
                 this.cuit = organizacion.getCuit();
             }
+        } else{
+            throw new IllegalArgumentException("Tipo de donante desconocido: " + donante.getClass().getName());
         }
     }
 
@@ -84,7 +88,7 @@ public class DonanteDTO {
         return direccion;
     }
 
-    public TipoOrganizacion getTipoOrganizacion() {
+    public TipoPersonaJuridica getTipoPersonaJuridica() {
         return tipoOrganizacion;
     }
 

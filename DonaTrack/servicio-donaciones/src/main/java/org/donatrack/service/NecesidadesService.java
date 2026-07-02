@@ -49,7 +49,7 @@ public class NecesidadesService {
         }
         Subcategoria subcategoria = null;
         if (nuevaNecesidad.getSubcategoriaId() != null) {
-            subcategoria = categoriasService.obtenerSubcategoriaPor(nuevaNecesidad.getSubcategoriaId());
+            subcategoria = categoriasService.obtenerSubcategoriaPorId(nuevaNecesidad.getSubcategoriaId());
         }
 
         Necesidad necesidad;
@@ -88,6 +88,8 @@ public class NecesidadesService {
         if (necesidad instanceof NecesidadExtraordinaria extraordinaria && datosActualizacion.getMotivo() != null) {
             extraordinaria.setMotivo(datosActualizacion.getMotivo());
         }
+
+        necesidadesRepository.save(necesidad);
     }
 
     public void eliminarNecesidadPorId(Long id) {

@@ -7,7 +7,7 @@ public class ActualizarDonacionDTO {
     String fotoEntrega; 
     TipoEstado tipoEstado;
     String JustificacionEntregaFallida;
-    long entidadId;
+    Long entidadId;
 
 
     public ActualizarDonacionDTO() {
@@ -41,11 +41,11 @@ public class ActualizarDonacionDTO {
         this.JustificacionEntregaFallida = JustificacionEntregaFallida;
     }
 
-    public long getEntidadId(){
+    public Long getEntidadId(){
         return this.entidadId;
     }
 
-    public void setEntidadId(long entidadId){
+    public void setEntidadId(Long entidadId){
         this.entidadId = entidadId;
     }
 

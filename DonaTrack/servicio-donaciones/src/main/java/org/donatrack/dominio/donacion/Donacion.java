@@ -54,7 +54,7 @@ public class Donacion {
     }
 
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

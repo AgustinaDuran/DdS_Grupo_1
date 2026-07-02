@@ -19,7 +19,7 @@ public class Categoria {
         this.subcategorias = new ArrayList<>();
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

@@ -25,13 +25,15 @@ public class DonacionesService {
     private DonacionesRepository donacionesRepository;
     private DonantesService donantesService;
     private EntidadesBeneficiariasService entidadesBeneficiariasService;
+    private BienesService bienesService;
     private final RestClient restClient;
 
     public DonacionesService(DonacionesRepository donacionesRepository, DonantesService donantesService,
-                             EntidadesBeneficiariasService entidadesBeneficiariasService) {
+                             EntidadesBeneficiariasService entidadesBeneficiariasService, BienesService bienesService) {
         this.donacionesRepository = donacionesRepository;
         this.donantesService = donantesService;
         this.entidadesBeneficiariasService = entidadesBeneficiariasService;
+        this.bienesService = bienesService;
         this.restClient = RestClient.create("http://localhost:8081");
     } // o seteado post instanciacion en archivo dependencias
 
@@ -45,30 +47,34 @@ public class DonacionesService {
         return donaciones;
     }
 
-    public Donacion obtenerDonacionPorId(long id) {
+    public Donacion obtenerDonacionPorId(Long id) {
         return donacionesRepository.findById(id);
     }
 
     public void registrarDonacion(CrearDonacionDTO nuevaDonacion) {
         Donante donante = this.donantesService.obtenerDonantePorId(nuevaDonacion.getDonanteId()).orElseThrow();
+        List<ItemBien> itemBienes = this.bienesService.convertirItemsDTOaItemsBien(nuevaDonacion.getItems());
 
-        Donacion donacionCompleta = new Donacion(donante, nuevaDonacion.getItems());
+
+        DonacionCompleta donacionCompleta = new DonacionCompleta(donante, itemBienes, nuevaDonacion.getDescripcion());
 
         List<Donacion> donacionesSegmentadas = donacionCompleta.segmentarDonacion();
         donacionesRepository.saveAll(donacionesSegmentadas);
 
-        donacionesSegmentadas.forEach(d -> donante.agregarDonacionHistorica(d)); // de nuevo, puede que labure con IDS
+        donacionesSegmentadas.forEach(d -> donante.agregarDonacionHistorica(d)); // de nuevo, puede que labure con ID's
                                                                                  // despues
 
         this.donantesService.guardarDonante(donante);
 
+        //avisar a incentivos de que un donanto donó
+
     }
 
-    public void eliminarDonacionPorId(long id) {
+    public void eliminarDonacionPorId(Long id) {
         donacionesRepository.delete(id);
     }
 
-    public void actualizarDonacion(long id, ActualizarDonacionDTO datosActualizacion) {
+    public void actualizarDonacion(Long id, ActualizarDonacionDTO datosActualizacion) {
         Donacion donacion = donacionesRepository.findById(id);
 
         if (donacion == null) {

@@ -2,23 +2,35 @@ package org.donatrack.dominio.donante;
 import org.donatrack.dominio.donacion.Donacion;
 import org.donatrack.dominio.donacion.EstadoDonacion;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+
 import org.donatrack.dominio.categoria.Subcategoria;
+import org.donatrack.dominio.usuario.DatosUsuario;
 
-
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Donante {
     protected List<Donacion>  donacionesHistoricas = new ArrayList<>();
+    protected DatosUsuario datosUsuario;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
-    public long getId() {
+    public Long getId() {
         return id;
     }
+
+    
+    public Donante(DatosUsuario datosUsuario) {
+        this.datosUsuario = datosUsuario;
+        this.donacionesHistoricas = new ArrayList<>();
+    }
+
+
+    public List<Donacion> getDonacionesHistoricas() {
+        return donacionesHistoricas;
+    }
+
 
     public List<Donacion> filtrarPorEstado(EstadoDonacion estado){
         List<Donacion> donaciones = donacionesHistoricas.stream()
@@ -59,6 +71,12 @@ public abstract class Donante {
         this.donacionesHistoricas.add(donacion);
     }
 
+    public DatosUsuario getDatosUsuario(){
+        return datosUsuario;
+    }
     
+    public void setDatosUsuario(DatosUsuario d){
+        this.datosUsuario = d;
+    }
     
 }

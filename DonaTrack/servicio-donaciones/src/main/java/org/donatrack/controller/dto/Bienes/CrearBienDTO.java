@@ -1,6 +1,6 @@
 package org.donatrack.controller.dto.Bienes;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.donatrack.dominio.bien.TipoUnidad;
 
@@ -16,7 +16,7 @@ public class CrearBienDTO {
     private TipoUnidad unidad;
     private Float cantidadBien;
  
-    private LocalDateTime fechaVencimiento;
+    private String fechaVencimiento;
 
  
     public String getTipo() { 
@@ -82,11 +82,11 @@ public class CrearBienDTO {
         this.cantidadBien = cantidadBien; 
     }
  
-    public LocalDateTime getFechaVencimiento() { 
+    public String getFechaVencimiento() { 
         return fechaVencimiento; 
     }
 
-    public void setFechaVencimiento(LocalDateTime fechaVencimiento) { 
+    public void setFechaVencimiento(String fechaVencimiento) { 
         this.fechaVencimiento = fechaVencimiento; 
     }
 }

@@ -2,10 +2,10 @@ package org.donatrack.dominio.entidadBeneficiaria;
 
 import org.donatrack.dominio.donacion.*;
 import org.donatrack.dominio.necesidades.Necesidad;
-import org.springframework.data.annotation.Id;
+import org.donatrack.dominio.usuario.organizacion.Organizacion;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import org.springframework.data.annotation.Id;
+import jakarta.persistence.*;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -17,17 +17,19 @@ public class EntidadBeneficiaria {
     private String direccion;
     private List<Necesidad> necesidades;
     private List<Donacion> donacionesRecibidas;
-    
+    private Organizacion organizacion;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
 
-    public EntidadBeneficiaria(TipoEntidadBeneficiaria tipoEntidad, String direccion) {
+    public EntidadBeneficiaria(TipoEntidadBeneficiaria tipoEntidad, String direccion, Organizacion organizacion) {
         this.tipoEntidad = tipoEntidad;
         this.direccion = direccion;
         this.necesidades = new ArrayList<>();
         this.donacionesRecibidas = new ArrayList<>();
+        this.organizacion = organizacion;
     }
     
     public TipoEntidadBeneficiaria getTipoEntidad() { 
@@ -47,7 +49,7 @@ public class EntidadBeneficiaria {
         necesidades.add(necesidad);
     }
 
-    public void confirmarRecepcionDonacion(Necesidad necesidad){ //confirma cuando una necesidad es saldada
+    /* public void confirmarRecepcionDonacion(Necesidad necesidad){ //confirma cuando una necesidad es saldada
         necesidad.marcarComoSaldada();
     }
 
@@ -58,18 +60,18 @@ public class EntidadBeneficiaria {
         }
     }
 
-    /* public void seguirEntregasActivas(List<Donacion> donaciones) {
+    public void seguirEntregasActivas(List<Donacion> donaciones) {
         for (Donacion donacion : donaciones) {
             if (donacion.getEstadoDonacion().entregaActiva()) {
                 System.out.println("Entrega activa: "+ donacion.getDescripcion());
             }
         }
-    } */
+    }
 
     public void recibirNotificacion(String mensaje){
         System.out.println("Notificación: " + mensaje);
     }
-
+ */
     public List<Donacion> getDonacionesRecibidas() {    
     return donacionesRecibidas;
     }
@@ -78,7 +80,7 @@ public class EntidadBeneficiaria {
     donacionesRecibidas.add(donacion);
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 

@@ -83,7 +83,7 @@ public class AnaliticaService {
             return 0;
         }
     
-        long personasAdelante = donanteRepository.countDonantesConMasDonaciones(nombreUsuario);
+        Long personasAdelante = donanteRepository.countDonantesConMasDonaciones(nombreUsuario);
         return (int) personasAdelante + 1;
     }
 

@@ -8,15 +8,7 @@ import org.donatrack.controller.dto.EntidadBeneficiaria.EntidadBeneficiariaDTO;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 import org.donatrack.service.EntidadesBeneficiariasService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/entidades-beneficiarias")
@@ -37,6 +29,17 @@ public class EntidadesBeneficiariasController {
             entidadesDTOs.add(new EntidadBeneficiariaDTO(entidad));
         }
         return ResponseEntity.ok(entidadesDTOs);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EntidadBeneficiariaDTO> obtenerEntidadPorId(@PathVariable Long id) {
+        EntidadBeneficiaria entidad = entidadesBeneficiariasService.obtenerEntidadPorId(id);
+        if (entidad != null) {
+            EntidadBeneficiariaDTO entidadDTO = new EntidadBeneficiariaDTO(entidad);
+            return ResponseEntity.ok(entidadDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping

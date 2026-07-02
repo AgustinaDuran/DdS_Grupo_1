@@ -1,29 +1,31 @@
 package org.donatrack.dominio.donante;
-import org.donatrack.dominio.organizacion.TipoOrganizacion;
-import org.donatrack.dominio.organizacion.Organizacion;
+import org.donatrack.dominio.usuario.organizacion.Organizacion;
 
+import org.donatrack.dominio.usuario.DatosUsuario;
 /* import java.util.ArrayList;
 import java.util.List; */
 
 public class DonanteJuridico extends Donante {
-    private TipoOrganizacion tipoOrganizacion;
+    private TipoPersonaJuridica tipoPersonaJuridica;
     private String rubro;
-    private Organizacion organizacion;
 
-    public DonanteJuridico(TipoOrganizacion tipoOrganizacion, String rubro) {
-        this.tipoOrganizacion = tipoOrganizacion;
+
+    public DonanteJuridico(DatosUsuario datosUsuario, TipoPersonaJuridica tipoPersonaJuridica, String rubro) {
+        super(datosUsuario);
+        this.tipoPersonaJuridica = tipoPersonaJuridica;
         this.rubro = rubro;
     }
 
-    public TipoOrganizacion getTipoOrganizacion() {
-        return this.tipoOrganizacion;
+    public TipoPersonaJuridica getTipoPersonaJuridica() {
+        return this.tipoPersonaJuridica;
+    }
+
+    public void setTipoPersonaJuridica(TipoPersonaJuridica tipoPersonaJuridica) {
+        this.tipoPersonaJuridica = tipoPersonaJuridica;
     }
 
     public String getRubro() {
         return this.rubro;
     }
 
-    public Organizacion getOrganizacion() {
-        return this.organizacion;
-    }
 }

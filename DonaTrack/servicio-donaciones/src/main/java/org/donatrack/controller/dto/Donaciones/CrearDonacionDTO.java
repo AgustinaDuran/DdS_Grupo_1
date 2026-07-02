@@ -6,20 +6,21 @@ import org.donatrack.dominio.bien.*;
 import org.donatrack.dominio.donante.*;
 import java.time.LocalDateTime;
 import org.donatrack.dominio.categoria.Subcategoria;
+import org.donatrack.controller.dto.Bienes.ItemBienDTO;
 
 public class CrearDonacionDTO { // por ahora muchos datos, vemos si hay convienen otros dtos
-    long donanteId;
-    String descripcion; // por ahora no se usa
-    List<ItemBien> items;
+    Long donanteId;
+    String descripcion;
+    List<ItemBienDTO> items;
 
 
     public CrearDonacionDTO(){ 
     }
     
-    public long getDonanteId() {
+    public Long getDonanteId() {
         return donanteId;
     }
-    public void setDonanteId(long donanteId) {
+    public void setDonanteId(Long donanteId) {
         this.donanteId = donanteId;
     }
     public String getDescripcion() {
@@ -28,10 +29,10 @@ public class CrearDonacionDTO { // por ahora muchos datos, vemos si hay conviene
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
-    public List<ItemBien> getItems() {
+    public List<ItemBienDTO> getItems() {
         return items;
     }
-    public void setItems(List<ItemBien> items) {
+    public void setItems(List<ItemBienDTO> items) {
         this.items = items;
     }
 

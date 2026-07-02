@@ -8,14 +8,7 @@ import org.donatrack.controller.dto.Donantes.DonanteDTO;
 import org.donatrack.dominio.donante.Donante;
 import org.donatrack.service.DonantesService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -44,6 +37,16 @@ public class DonantesController {
         donantesService.registrarDonante(nuevoDonante);
         return ResponseEntity.ok("Donante añadido correctamente");
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<DonanteDTO> obtenerDonantePorId(@PathVariable Long id) {
+        Donante donante = donantesService.obtenerDonantePorId(id).orElse(null);
+        if (donante == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(new DonanteDTO(donante));
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> borrarDonante(@PathVariable Long id) {
