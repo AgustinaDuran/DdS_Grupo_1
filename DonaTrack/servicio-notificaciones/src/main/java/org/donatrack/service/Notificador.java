@@ -12,7 +12,11 @@ import java.util.List;
 @Service
 public class Notificador {
 
-    private NotificacionesRepository notificacionesRepository;
+    private final NotificacionesRepository notificacionesRepository;
+
+    public Notificador(NotificacionesRepository notificacionesRepository) {
+        this.notificacionesRepository = notificacionesRepository;
+    }
 
     public void notificar(CrearNotificacionDTO crearNotificacionDTO) {
 

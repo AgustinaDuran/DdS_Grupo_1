@@ -22,7 +22,7 @@ public class CrearNotificacionDTO{
     public List<Contacto> getContactos(){
         return contactos;
     }
-    public String getnombreDestinatario(){
+    public String getNombreDestinatario(){
         return nombreDestinatario;
     }
 
