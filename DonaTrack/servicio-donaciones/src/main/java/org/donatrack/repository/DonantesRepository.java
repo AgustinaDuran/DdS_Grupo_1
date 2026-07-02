@@ -5,7 +5,9 @@ import java.util.List;
 import org.donatrack.dominio.donante.Donante;
 import java.util.Optional;
 import java.util.ArrayList;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class DonantesRepository {
     private final List<Donante> donantes = new ArrayList<>();
 

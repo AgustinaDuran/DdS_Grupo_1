@@ -5,7 +5,9 @@ import org.donatrack.dominio.usuario.DatosUsuario;
 import org.donatrack.dominio.usuario.organizacion.Organizacion;
 import org.donatrack.repository.UsuariosRepository;
 import org.donatrack.dominio.usuario.persona.Persona;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UsuariosService {
     UsuariosRepository usuariosRepository;
 

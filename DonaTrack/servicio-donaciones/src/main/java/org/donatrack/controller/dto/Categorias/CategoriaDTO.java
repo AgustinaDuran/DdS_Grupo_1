@@ -12,6 +12,10 @@ public class CategoriaDTO {
         this.nombre = categoria.getNombre();
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public String getNombre() {
         return nombre;
     }

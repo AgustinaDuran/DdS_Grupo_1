@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.donatrack.dominio.bien.Bien;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class BienesRepository {
     public List<Bien> bienes;
 

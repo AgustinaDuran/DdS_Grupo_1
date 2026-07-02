@@ -1,7 +1,7 @@
 package org.donatrack.repository;
 import org.donatrack.dominio.donacion.*;
 import org.donatrack.dominio.categoria.*;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 
 import java.time.LocalDateTime;
@@ -10,12 +10,13 @@ import java.util.List;
 
 
 
-public class DonacionesRepository { // singleton
+@Repository
+public class DonacionesRepository {
 
     private List<Donacion> donaciones; // a reemplazar por un
 
 
-    private DonacionesRepository() { //constructor privado
+    public DonacionesRepository() {
         donaciones = new ArrayList<>();
     }
 

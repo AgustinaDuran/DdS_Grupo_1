@@ -5,12 +5,14 @@ import java.util.List;
 
 import org.donatrack.dominio.necesidades.Necesidad;
 import org.donatrack.dominio.necesidades.TipoNecesidad;
+import org.springframework.stereotype.Repository;
 
-public class NecesidadesRepository { // singleton
+@Repository
+public class NecesidadesRepository {
 
     private List<Necesidad> necesidades;
 
-    private NecesidadesRepository() { // constructor privado
+    public NecesidadesRepository() {
         necesidades = new ArrayList<>();
     }
 

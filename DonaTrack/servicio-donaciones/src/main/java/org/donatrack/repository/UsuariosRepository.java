@@ -6,7 +6,9 @@ import java.util.Optional;
 
 import org.donatrack.dominio.donante.Donante;
 import org.donatrack.dominio.usuario.DatosUsuario;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class UsuariosRepository {
     private final List<DatosUsuario> usuarios = new ArrayList<>();
 

@@ -15,6 +15,8 @@ public class EstadoEntregaFallida extends EstadoDonacion {
     }
 
     public EstadoEntregaFallida(EntidadBeneficiaria entidad, String justificacion) {
+        this.estado = TipoEstado.ENTREGA_FALLIDA;
+        this.estadosValidos = List.of(TipoEstado.EN_DEPOSITO);
         this.justificacion = justificacion;
         this.entidadBeneficiaria = entidad;
     }

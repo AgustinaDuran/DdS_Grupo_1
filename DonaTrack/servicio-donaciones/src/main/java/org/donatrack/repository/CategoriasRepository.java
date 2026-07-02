@@ -5,13 +5,15 @@ import java.util.List;
 
 import org.donatrack.dominio.categoria.Categoria;
 import org.donatrack.dominio.categoria.Subcategoria;
+import org.springframework.stereotype.Repository;
 
-public class CategoriasRepository { // singleton
+@Repository
+public class CategoriasRepository {
 
     private List<Categoria> categorias;
     private List<Subcategoria> subcategorias;
 
-    private CategoriasRepository() { // constructor privado
+    public CategoriasRepository() {
         categorias = new ArrayList<>();
         subcategorias = new ArrayList<>();
     }

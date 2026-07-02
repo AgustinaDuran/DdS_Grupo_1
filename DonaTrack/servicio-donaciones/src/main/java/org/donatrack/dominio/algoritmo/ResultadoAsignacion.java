@@ -5,11 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
-import org.donatrack.service.DonacionesService;
 import org.donatrack.dominio.donacion.Donacion;
 
 public class ResultadoAsignacion{
-    private DonacionesService donacionesService;
     private Donacion donacion;
     private List<EntidadBeneficiaria> rankingPorCoincidencias = new ArrayList<>();
     private List<List<EntidadBeneficiaria>> rankingsPorAlgoritmo = new ArrayList<>();
@@ -53,23 +51,19 @@ public class ResultadoAsignacion{
                                         .findFirst()
                                         .orElseThrow(() ->
                                         new IllegalArgumentException("La entidad no pertenece al ranking"));
-
-        donacionesService.asignarDonacion(entidad, this.getDonacion());
-
         }
-        
+
         else{
 
             this.getRankingsPorAlgoritmo()
                      .stream()
-                     .flatMap(List::stream)                     
+                     .flatMap(List::stream)
                      .filter(e -> e.equals(entidad))
                      .findFirst()
                      .orElseThrow(() -> new IllegalArgumentException("La entidad no pertenece al ranking"));
-
-            this.getDonacion().asignar(entidad);
         }
 
+        this.getDonacion().siguiente(entidad);
     }
 
     /*public void marcarComoVencida(Donacion d){

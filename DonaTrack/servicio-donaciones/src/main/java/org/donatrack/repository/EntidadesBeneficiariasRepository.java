@@ -7,7 +7,9 @@ import java.util.Optional;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 
 import java.util.ArrayList;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class EntidadesBeneficiariasRepository {
     private final List<EntidadBeneficiaria> entidades;
 
