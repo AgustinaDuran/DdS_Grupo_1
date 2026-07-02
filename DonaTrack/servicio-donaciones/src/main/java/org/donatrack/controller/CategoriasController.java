@@ -2,12 +2,9 @@ package org.donatrack.controller;
 
 import org.donatrack.controller.dto.Categorias.*;
 import org.donatrack.dominio.categoria.*;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.donatrack.service.DonacionesService;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.donatrack.service.CategoriasService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,16 +22,16 @@ public class CategoriasController {
 
     // SUBCATEGORIAS
     @GetMapping ("/subcategorias") // ResponseEntity<TipoDeDato>
-    public ResponseEntity<List<SubcategoriaDTO>> getCategorias(
-            FiltrosSubcategoriaDTO filtrosSubategoriaDTO) {
-        List<Subcategoria> Subcategorias = categoriasService.obtenerSubcategorias(filtrosSubategoriaDTO);
-        List<SubcategoriaDTO> SubcategoriasDTOs = new ArrayList<>();
+    public ResponseEntity<List<SubcategoriaDTO>> getSubcategorias(
+            FiltrosSubcategoriaDTO filtrosSubcategoriaDTO) {
+        List<Subcategoria> subcategorias = categoriasService.obtenerSubcategorias(filtrosSubcategoriaDTO);
+        List<SubcategoriaDTO> subcategoriasDTOs = new ArrayList<>();
 
         for (Subcategoria subcategoria : subcategorias) {
             SubcategoriaDTO subcategoriaDTO = new SubcategoriaDTO(subcategoria);
             subcategoriasDTOs.add(subcategoriaDTO);
         }
-        return ResponseEntity.ok(SubcategoriasDTOs);
+        return ResponseEntity.ok(subcategoriasDTOs);
     }
 
     @PostMapping ("/subcategorias")
@@ -44,12 +41,12 @@ public class CategoriasController {
     }
 
     @GetMapping("/subcategorias/{id}")
-    public ResponseEntity<List<SubcategoriaDTO>> obtenerSubcategoriasPorCategoria(@PathVariable Long id) {
-        List<Subcategoria> subcategoria = categoriasService.obtenerSubcategoriaPor(id);
-        
-        SubcategoriaDTO subcategoriaDTO = new SubcategoriaDTO(subcategoria);
-
-        return ResponseEntity.ok(subcategoriaDTO);
+    public ResponseEntity<SubcategoriaDTO> obtenerSubcategoriaPorId(@PathVariable Long id) {
+        Subcategoria subcategoria = categoriasService.obtenerSubcategoriaPor(id);
+        if (subcategoria == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(new SubcategoriaDTO(subcategoria));
     }
 
     @DeleteMapping("/subcategorias/{id}")
@@ -78,13 +75,12 @@ public class CategoriasController {
     }
 
     @GetMapping("/categorias/{id}")
-    public ResponseEntity<List<CategoriaDTO>> obtenerCategoriaPorId(@PathVariable Long id) {
-
-        List<Subcategoria> categoria = categoriasService.obtenerCategoriaId(id);
-
-        CategoriaDTO categoriaDTO = new CategoriaDTO(categoria);
-
-        return ResponseEntity.ok(categoriaDTO);
+    public ResponseEntity<CategoriaDTO> obtenerCategoriaPorId(@PathVariable Long id) {
+        Categoria categoria = categoriasService.obtenerCategoriaId(id);
+        if (categoria == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(new CategoriaDTO(categoria));
     }
 
     @PostMapping("/categorias")

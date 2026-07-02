@@ -1,18 +1,17 @@
 package org.donatrack.service;
 
+import org.donatrack.controller.dto.EntidadBeneficiaria.CrearEntidadBeneficiariaDTO;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 import org.donatrack.repository.EntidadesBeneficiariasRepository;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 public class EntidadesBeneficiariasService {
 
-    private EntidadesBeneficiariasRepository entidadesBeneficiariasRepository;
+    private final EntidadesBeneficiariasRepository entidadesBeneficiariasRepository;
 
-    public EntidadesBeneficiariasService(EntidadesBeneficiariasRepository donantesRepository) {
+    public EntidadesBeneficiariasService(EntidadesBeneficiariasRepository entidadesBeneficiariasRepository) {
         this.entidadesBeneficiariasRepository = entidadesBeneficiariasRepository;
     }
 
@@ -20,12 +19,19 @@ public class EntidadesBeneficiariasService {
         return entidadesBeneficiariasRepository.findAll();
     }
 
-    public EntidadBeneficiaria nuevaEntidad(EntidadBeneficiaria entidad) {
+    public EntidadBeneficiaria obtenerEntidadPorId(Long id) {
+        return entidadesBeneficiariasRepository.findById(id);
+    }
+
+    public EntidadBeneficiaria registrarEntidad(CrearEntidadBeneficiariaDTO nuevaEntidad) {
+        EntidadBeneficiaria entidad = new EntidadBeneficiaria(
+                nuevaEntidad.getTipoEntidad(),
+                nuevaEntidad.getDireccion());
         return entidadesBeneficiariasRepository.save(entidad);
     }
 
     public void eliminarEntidad(Long id) {
         entidadesBeneficiariasRepository.delete(id);
     }
-    
+
 }

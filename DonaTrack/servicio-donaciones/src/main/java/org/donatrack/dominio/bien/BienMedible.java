@@ -12,5 +12,13 @@ public class BienMedible extends Bien {
         this.unidad = unidad;
         this.cantidadBien = cantidadBien;
     }
-    
+
+    public TipoUnidad getUnidad(){
+        return unidad;
+    }
+
+    public Float getCantidadBien(){
+        return cantidadBien;
+    }
+
 }

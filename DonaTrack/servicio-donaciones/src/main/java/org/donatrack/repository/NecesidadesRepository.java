@@ -1,29 +1,105 @@
-/* package org.donatrack.dominio;
+package org.donatrack.repository;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NecesidadesRepository {
+import org.donatrack.dominio.necesidades.Necesidad;
+import org.donatrack.dominio.necesidades.TipoNecesidad;
 
-    private static RepositorioNecesidades instance = null;
+public class NecesidadesRepository { // singleton
+
     private List<Necesidad> necesidades;
 
-    public NecesidadesRepository() {
-        this.necesidades = new ArrayList<>();
+    private NecesidadesRepository() { // constructor privado
+        necesidades = new ArrayList<>();
     }
 
-    public static RepositorioNecesidades getInstance() {
-        if (instance == null) {
-            instance = new RepositorioNecesidades();
-        }
-        return instance;
+    public void agregarNecesidades(List<Necesidad> necesidades) {
+        this.necesidades.addAll(necesidades);
     }
 
-    public void agregarNecesidad(Necesidad necesidad) {
+    public List<Necesidad> findAll() {
+        return necesidades;
+    }
+
+    public Necesidad findById(long id) {
+        return necesidades.stream()
+                .filter(n -> n.getId() != null && n.getId() == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<Necesidad> buscarConFiltros(Long entidadId, Long subcategoriaId, TipoNecesidad tipo, Boolean activa) {
+        return necesidades;
+    }
+
+    public void save(Necesidad necesidad) {
         necesidades.add(necesidad);
     }
 
-    public void eliminarNecesidad(Necesidad necesidad) {
-        necesidades.remove(necesidad);
+    public void saveAll(List<Necesidad> necesidades) {
+        this.necesidades.addAll(necesidades);
     }
-} */
+
+    public void delete(long id) {
+        necesidades = necesidades.stream()
+                .filter(n -> n.getId() == null || n.getId() != id)
+                .toList();
+    }
+
+}
+
+/*
+// Variante como bean de Spring en memoria (para que funcione la inyección por constructor)
+package org.donatrack.repository;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.donatrack.dominio.necesidades.Necesidad;
+import org.donatrack.dominio.necesidades.TipoNecesidad;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class NecesidadesRepository {
+
+    private List<Necesidad> necesidades;
+
+    public NecesidadesRepository() {
+        necesidades = new ArrayList<>();
+    }
+
+    public void agregarNecesidades(List<Necesidad> necesidades) {
+        this.necesidades.addAll(necesidades);
+    }
+
+    public List<Necesidad> findAll() {
+        return necesidades;
+    }
+
+    public Necesidad findById(long id) {
+        return necesidades.stream()
+                .filter(n -> n.getId() != null && n.getId() == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<Necesidad> buscarConFiltros(Long entidadId, Long subcategoriaId, TipoNecesidad tipo, Boolean activa) {
+        return necesidades;
+    }
+
+    public void save(Necesidad necesidad) {
+        necesidades.add(necesidad);
+    }
+
+    public void saveAll(List<Necesidad> necesidades) {
+        this.necesidades.addAll(necesidades);
+    }
+
+    public void delete(long id) {
+        necesidades = necesidades.stream()
+                .filter(n -> n.getId() == null || n.getId() != id)
+                .toList();
+    }
+}
+*/

@@ -19,7 +19,7 @@ public class DonacionDTO { // por ahora muchos datos, vemos si hay convienen otr
 
     public DonacionDTO(Donacion donacion) {
         this.id = donacion.getId();
-        this.donante_id = donacion.getDonante().getId();
+        this.donante_id = donacion.getDonante().getId(); //devolver todo el donante o solo el id
         this.descripcion = donacion.getDescripcion();
         this.subcategoria = donacion.getSubcategoria();
         this.estadoDonacion = donacion.getEstadoDonacion();

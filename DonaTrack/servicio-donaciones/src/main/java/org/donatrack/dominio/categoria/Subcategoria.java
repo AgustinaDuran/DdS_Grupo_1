@@ -23,8 +23,16 @@ public class Subcategoria{
         return this.categoria;
     }
 
+    public void setCategoria(Categoria categoria){
+        this.categoria = categoria;
+    }
+
     public String getNombre(){
         return this.nombre;
+    }
+
+    public void setNombre(String nombre){
+        this.nombre = nombre;
     }
 
 }

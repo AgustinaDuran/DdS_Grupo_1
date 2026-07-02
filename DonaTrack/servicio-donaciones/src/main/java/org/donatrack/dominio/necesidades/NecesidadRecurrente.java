@@ -19,4 +19,8 @@ public class NecesidadRecurrente extends Necesidad{
     public Periodo getPeriodoTiempo(){
         return periodoTiempo;
     }
+
+    public void setPeriodoTiempo(Periodo periodoTiempo){
+        this.periodoTiempo = periodoTiempo;
+    }
 }

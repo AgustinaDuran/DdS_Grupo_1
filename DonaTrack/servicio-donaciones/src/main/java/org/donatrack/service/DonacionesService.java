@@ -24,11 +24,14 @@ import java.util.List;
 public class DonacionesService {
     private DonacionesRepository donacionesRepository;
     private DonantesService donantesService;
+    private EntidadesBeneficiariasService entidadesBeneficiariasService;
     private final RestClient restClient;
 
-    public DonacionesService(DonacionesRepository donacionesRepository, DonantesService donantesService) {
+    public DonacionesService(DonacionesRepository donacionesRepository, DonantesService donantesService,
+                             EntidadesBeneficiariasService entidadesBeneficiariasService) {
         this.donacionesRepository = donacionesRepository;
         this.donantesService = donantesService;
+        this.entidadesBeneficiariasService = entidadesBeneficiariasService;
         this.restClient = RestClient.create("http://localhost:8081");
     } // o seteado post instanciacion en archivo dependencias
 
@@ -49,11 +52,7 @@ public class DonacionesService {
     public void registrarDonacion(CrearDonacionDTO nuevaDonacion) {
         Donante donante = this.donantesService.obtenerDonantePorId(nuevaDonacion.getDonanteId()).orElseThrow();
 
-        Donacion donacionCompleta = new Donacion(nuevaDonacion.getDonanteId(), nuevaDonacion.getItems()); // despues
-                                                                                                          // manejarse
-                                                                                                          // con
-                                                                                                          // IdDonante
-        // probablemente
+        Donacion donacionCompleta = new Donacion(donante, nuevaDonacion.getItems());
 
         List<Donacion> donacionesSegmentadas = donacionCompleta.segmentarDonacion();
         donacionesRepository.saveAll(donacionesSegmentadas);
@@ -93,34 +92,34 @@ public class DonacionesService {
         }
 
         switch (nuevoEstado) { //aca se mandan las notificaciones
-            case TipoEstado.EN_DEPOSITO:
+            case EN_DEPOSITO:
                 donacion.siguiente();
                 break;
-            case TipoEstado.ASIGNACION_REALIZADA:
-                EntidadBeneficiaria entidad = datosActualizacion.getEntidadId()
+            case ASIGNACION_REALIZADA:
+                EntidadBeneficiaria entidad = entidadesBeneficiariasService.obtenerEntidadPorId(datosActualizacion.getEntidadId());
                 donacion.siguiente(entidad);
                 //notificacion a entidad que se le asignó
                 //notificacion a donante que se asigno una donacion suya
                 //actualizar necesidades de entidad? para no asignarle a algo ya satisfecho?
                 break;
-            case TipoEstado.LISTA_PARA_ENTREGAR:
+            case LISTA_PARA_ENTREGAR:
                 donacion.siguiente();
-                
+
                 break;
-            case TipoEstado.EN_TRASLADO:
+            case EN_TRASLADO:
                 donacion.siguiente();
                 //notificacion a entidad que su donacion esta en camino
                 //notificacion a donante que su donacion esta en camino
                 break;
-            case TipoEstado.ENTREGADA:
+            case ENTREGADA:
                 donacion.siguiente();
                 //notificacion a entidad que acepto
                 //notificacion a donante que envio
                 break;
-            case TipoEstado.ENTREGA_FALLIDA:
+            case ENTREGA_FALLIDA:
                 donacion.falloEnEstado(datosActualizacion.getJustificacionEntregaFallida());
                 break;
-            case TipoEstado.VENCIDA:
+            case VENCIDA:
                 donacion.falloEnEstado();
                 break;
             default:

@@ -38,7 +38,7 @@ public class ActualizarDonacionDTO {
     }
 
     public void setJustificacionEntregaFallida(String JustificacionEntregaFallida) {
-        JustificacionEntregaFallida = JustificacionEntregaFallida;
+        this.JustificacionEntregaFallida = JustificacionEntregaFallida;
     }
 
     public long getEntidadId(){
