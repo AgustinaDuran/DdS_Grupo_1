@@ -4,49 +4,53 @@ import java.time.LocalDateTime;
 import org.donatrack.model.MedioEnvio;
 
 
-public class Notificacion{
-    private long id;
+public class Notificacion {
+
+    private Long id;
     private String destinatario;
     private String mensaje;
     private MedioEnvio medioEnvio;
-    private LocalDate fechaEnvio;
-    private boolean estado; //mejor enumEstadoNotificacion
+    private LocalDateTime fechaEnvio;
+    private EnumEstadoNotificacion estado;
 
-    public Long getId(){
+    public Long getId() {
         return id;
     }
 
-    public String getDestinatario(){
+    public String getDestinatario() {
         return destinatario;
     }
 
-    public String getMensaje(){
+    public String getMensaje() {
         return mensaje;
     }
 
-    public MedioEnvio getMedioEnvio(){
+    public MedioEnvio getMedioEnvio() {
         return medioEnvio;
     }
 
-    public boolean getEstado(){
+    public EnumEstadoNotificacion getEstado() {
         return estado;
     }
 
-    public void setMensaje(String mensaje){ 
+    public void setMensaje(String mensaje) {
         this.mensaje = mensaje;
-        }
+    }
 
-    public Notificacion(String destinatario, String mensaje, MedioEnvio medio) {
+    public Notificacion(String destinatario, String mensaje, MedioEnvio medioEnvio) {
         this.destinatario = destinatario;
         this.mensaje = mensaje;
-        this.medioEnvio = medio;
-        this.estado = false;
-        this.fechaCreacion = LocalDateTime.now();
+        this.medioEnvio = medioEnvio;
+        this.estado = EnumEstadoNotificacion.PENDIENTE;
+        this.fechaEnvio = LocalDateTime.now();
     }
 
-    public void enviarNotificacion(){
-        this.estado = true;
-        this.medioEnvio.notificar(this.destinatario, this.mensaje);
+    public void marcarComoEnviada() {
+        this.estado = EnumEstadoNotificacion.ENVIADA;
+        this.fechaEnvio = LocalDateTime.now();
     }
 
+    public void marcarComoFallida() {
+        this.estado = EnumEstadoNotificacion.FALLIDA;
+    }
 }

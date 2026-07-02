@@ -10,7 +10,7 @@ public class CrearNotificacionDTO{
     private List<Contacto> contactos;
     private String mensaje;
 
-    public CrearNotificacionDTO() { 
+    public CrearNotificacionDTO() {
     }
 
     public long getDestinatarioId(){
