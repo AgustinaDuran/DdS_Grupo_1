@@ -33,11 +33,10 @@ public class DonanteIncentivos {
         this.nombreCategoriaActual = this.categoriaActual.GetNombre();
     }
 
-    public List<Mision> RegistrarActividad(DonacionDTO nuevaDonacion) {
-        this.donaciones.add(nuevaDonacion);        
-        
-        CategoriaDonante categoria = this.GetCategoriaActual();
+    public ResultadoActividad RegistrarActividad(DonacionDTO nuevaDonacion) {
+        this.donaciones.add(nuevaDonacion);
 
+        CategoriaDonante categoria = this.GetCategoriaActual();
         List<Mision> misionesRecienCumplidas = new ArrayList<>();
 
         for (Mision mision : categoria.GetMisionesDelNivel()) {
@@ -47,15 +46,17 @@ public class DonanteIncentivos {
             }
         }
 
+        String nuevaCategoria = null;
         if (categoria.CompletoTodasLasMisiones(this)) {
             CategoriaDonante siguiente = categoria.GetSiguienteCategoria();
             if (siguiente != null) {
                 this.categoriaActual = siguiente;
                 this.nombreCategoriaActual = siguiente.GetNombre();
+                nuevaCategoria = siguiente.GetNombre();
             }
         }
- 
-        return misionesRecienCumplidas;
+
+        return new ResultadoActividad(misionesRecienCumplidas, nuevaCategoria);
     }
 
     public Integer CalcularTotalDonaciones(){

@@ -26,4 +26,16 @@ public class AutomatizacionService {
             System.err.println("No se pudo conectar con n8n para publicar el hito: " + e.getMessage());
         }
     }
+
+    public void NotificarSubidaDeCategoria(String nombre, String nuevaCategoria) {
+    Map<String, Object> datos = new HashMap<>();
+    datos.put("usuario", nombre);
+    datos.put("texto", "¡Felicitaciones a @" + nombre + " por ascender a la categoría " + nuevaCategoria + "!");
+
+    try {
+        restTemplate.postForObject(n8nWebhookUrl, datos, String.class);
+    } catch (Exception e) {
+        System.err.println("No se pudo conectar con n8n para publicar el ascenso: " + e.getMessage());
+    }
+}
 }
