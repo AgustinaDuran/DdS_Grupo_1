@@ -1,9 +1,12 @@
 package org.donatrack.controller;
 
 import org.donatrack.controller.dto.CrearNotificacionDTO;
+import org.donatrack.model.Notificacion;
 import org.donatrack.service.Notificador;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/notificaciones")
@@ -23,6 +26,11 @@ public class NotificadorController{
         notificador.notificar(notificacionDTO);
 
         return ResponseEntity.ok("Notificacion enviada correctamente");
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Notificacion>> obtenerHistorial() {
+        return ResponseEntity.ok(notificador.obtenerNotificaciones());
     }
 }
 

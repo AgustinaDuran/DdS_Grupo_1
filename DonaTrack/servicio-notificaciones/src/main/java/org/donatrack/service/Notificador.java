@@ -50,6 +50,10 @@ public class Notificador {
             default -> throw new RuntimeException("Medio de envío no soportado: " + tipo);
         };
     }
+
+    public List<Notificacion> obtenerNotificaciones() {
+        return this.notificacionesRepository.findAll();
+    }
 }
 
 
