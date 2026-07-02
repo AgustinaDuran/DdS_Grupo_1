@@ -25,12 +25,17 @@ public class AnaliticaService {
     public void RegistrarDonacionDeUsuario(String nombreUsuario, DonacionDTO donacionDto) {
         DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
 
-        List<Mision> misionesRecienCumplidas = donante.RegistrarActividad(donacionDto);
+        ResultadoActividad resultado = donante.RegistrarActividad(donacionDto);
 
         donanteRepository.save(donante);
 
-        for (Mision mision : misionesRecienCumplidas) {
-            automatizacionService.NotificarInsigniaGanada(donante.GetNombreUsuario(), mision.GetDescripcion(), mision.GetInsigniaOtorgada().GetImagen());
+        for (Mision mision : resultado.GetMisionesCumplidas()) {
+            automatizacionService.NotificarInsigniaGanada(
+                donante.GetNombreUsuario(), mision.GetDescripcion(), mision.GetInsigniaOtorgada().GetImagen());
+        }
+
+        if (resultado.GetNuevaCategoria() != null) {
+            automatizacionService.NotificarSubidaDeCategoria(donante.GetNombreUsuario(), resultado.GetNuevaCategoria());
         }
     }
 
