@@ -1,19 +1,16 @@
 package org.donatrack.controller;
-import org.donatrack.service.NecesidadesService;
-import org.donatrack.service.DonacionesService;
+import org.donatrack.controller.dto.*;
+import org.donatrack.controller.dto.Necesidad.*;
+import org.donatrack.dominio.necesidades.Necesidad;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
+import org.donatrack.service.NecesidadesService;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -28,38 +25,53 @@ public class NecesidadesController {
         this.necesidadesService = necesidadesService;
     }
 
-/*     //http://localhost:8080/api/donaciones
-    @GetMapping("/")
-    public ResponseEntity<PerfilAnaliticoDTO> obtenerPerfil(@PathVariable String nombreUsuario) {
-        return ResponseEntity.ok(this.donacionesService.obtenerDonaciones());
-    }
 
-    @PostMapping("/registrar-donacion")
-    public ResponseEntity<String> recibirNuevaDonacion(
-        @RequestParam String nombreUsuario, 
-        @RequestBody Donacion nuevaDonacion) {
+    @GetMapping // ResponseEntity<TipoDeDato>
+    public ResponseEntity<List<NecesidadDTO>> obtenerNecesidades(
+        FiltrosNecesidadDTO filtrosNecesidadDTO
+    ) {
+        List<Necesidad> necesidades = necesidadesService.obtenerNecesidades(filtrosNecesidadDTO);
+        List<NecesidadDTO> necesidadDTOs = new ArrayList<>();
+
+        for (Necesidad necesidad : necesidades) {
+            NecesidadDTO necesidadDTO = new NecesidadDTO(necesidad);
+            necesidadDTOs.add(necesidadDTO);
+        }
+        return ResponseEntity.ok(necesidadDTOs);
+    } 
+    //http://localhost:8080/api/necesidades -> POST
+    @PostMapping
+    public ResponseEntity<String> recibirNuevaNecesidad(
+        @RequestBody CrearNecesidadDTO nuevaNecesidad) {
         
-        analiticaService.registrarDonacionDeUsuario(nombreUsuario, nuevaDonacion);
+        necesidadesService.registrarNecesidad(nuevaNecesidad);
         
-        return ResponseEntity.ok("Donación procesada en Incentivos con éxito");
+        return ResponseEntity.ok("Necesidad aniadida correctamente");
     }
 
-    //http://localhost:8080/api/incentivos/donantes/{nombreUsuario}/misiones-progreso
-    @GetMapping("/donantes/{nombreUsuario}/misiones-progreso")
-    public ResponseEntity<List<MisionProgresoDTO>> obtenerMisiones(@PathVariable String nombreUsuario) {
-        return ResponseEntity.ok(this.analiticaService.obtenerProgresoMisiones(nombreUsuario));
+    @GetMapping("/{id}")
+    public ResponseEntity<NecesidadDTO> obtenerNecesidadPorId(@PathVariable Long id) {
+        Necesidad necesidad = necesidadesService.obtenerNecesidadPorId(id);
+        if (necesidad != null) {
+            NecesidadDTO necesidadDTO = new NecesidadDTO(necesidad);
+            return ResponseEntity.ok(necesidadDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    //http://localhost:8080/api/incentivos/donantes/{nombreUsuario}/vitrina
-    @GetMapping("/donantes/{nombreUsuario}/vitrina")
-    public ResponseEntity<List<InsigniaDTO>> obtenerVitrina(@PathVariable String nombreUsuario) {
-        return ResponseEntity.ok(this.analiticaService.obtenerVitrinaInsignias(nombreUsuario));
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> actualizarNecesidad(@PathVariable Long id, @RequestBody ActualizarNecesidadDTO datosActualizacion) {
+        necesidadesService.actualizarNecesidad(id, datosActualizacion);
+        return ResponseEntity.ok("Necesidad actualizada correctamente");
     }
-    //http://localhost:8080/api/incentivos/ranking/destacados
-    @GetMapping("/ranking/destacados")
-    public ResponseEntity<PodioMensualDTO> obtenerPodioDestacado() {
-        YearMonth mesActual = YearMonth.now(); 
-        return ResponseEntity.ok(this.analiticaService.obtenerPodioDestacadoDelMes(mesActual));
-} */
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> eliminarNecesidad(@PathVariable Long id) {
+        necesidadesService.eliminarNecesidadPorId(id);
+        return ResponseEntity.ok("Necesidad eliminada correctamente");
+    }
+
 }
 

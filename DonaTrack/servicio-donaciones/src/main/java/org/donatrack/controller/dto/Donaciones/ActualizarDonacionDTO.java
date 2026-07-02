@@ -1,4 +1,4 @@
-package org.donatrack.controller.dto;
+package org.donatrack.controller.dto.Donaciones;
 
 import org.donatrack.dominio.donacion.*;
 

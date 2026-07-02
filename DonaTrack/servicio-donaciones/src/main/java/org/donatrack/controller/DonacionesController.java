@@ -1,5 +1,9 @@
 package org.donatrack.controller;
 import org.donatrack.controller.dto.*;
+import org.donatrack.controller.dto.Donaciones.ActualizarDonacionDTO;
+import org.donatrack.controller.dto.Donaciones.CrearDonacionDTO;
+import org.donatrack.controller.dto.Donaciones.DonacionDTO;
+import org.donatrack.controller.dto.Donaciones.FiltrosDonacionDTO;
 import org.donatrack.dominio.donacion.Donacion;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

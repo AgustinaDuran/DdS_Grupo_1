@@ -1,8 +1,13 @@
 package org.donatrack.dominio.bien;
 import org.donatrack.dominio.categoria.Subcategoria;
+import jakarta.persistence.*;
+
 
 public abstract class Bien {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected Long id;
     protected String nombre;
     protected String descripcion;
     protected String foto;
@@ -27,5 +32,22 @@ public abstract class Bien {
     public void setFoto(String foto) {
         this.foto = foto;
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+    
 
 }

@@ -1,17 +1,26 @@
 package org.donatrack.dominio.categoria;
 import org.donatrack.dominio.bien.Bien;
+import jakarta.persistence.*;
 
 public class Subcategoria{
     private String nombre;
-    private Bien tipoBien;
+    private Categoria categoria;
 
-    public Subcategoria(String nombre,Bien tipoBien){
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    public Subcategoria(String nombre,Categoria categoria){
         this.nombre= nombre;
-        this.tipoBien= tipoBien;
+        this.categoria= categoria;
     }
 
-    public Bien getBien(){
-        return this.tipoBien;
+    public long getId() {
+        return id;
+    }
+
+    public Categoria getCategoria(){
+        return this.categoria;
     }
 
     public String getNombre(){

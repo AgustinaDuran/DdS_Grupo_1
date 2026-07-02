@@ -1,4 +1,4 @@
-package org.donatrack.controller.dto;
+package org.donatrack.controller.dto.Donaciones;
 import java.time.LocalDateTime;
 
 import org.donatrack.dominio.categoria.*;

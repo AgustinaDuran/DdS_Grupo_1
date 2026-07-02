@@ -1,4 +1,4 @@
-package org.donatrack.controller.dto;
+package org.donatrack.controller.dto.Notificaciones;
 
 import java.util.List;
 import org.donatrack.dominio.contacto.Contacto;
