@@ -7,5 +7,9 @@ import java.util.List;
 
 @Repository
 public interface CamionRepository extends JpaRepository<Camion, String> {
-    List<Camion> findByRutaActivaIsNull(); //camiones disp
+    List<Camion> findByRutaActivaIsNullAndActivoTrue(); //camiones disp
+
+    List<Camion> findByRutaActivaIsNotNull(); //camiones en ruta
+
+    List<Camion> findByActivoTrue(); //camiones activos
 }

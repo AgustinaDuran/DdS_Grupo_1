@@ -1,5 +1,6 @@
 package org.donatrack.service;
-
+ 
+import org.donatrack.controller.dto.CamionDTO;
 import org.donatrack.controller.dto.SolicitudOptimizadorDTO;
 import org.donatrack.model.*;
 import org.donatrack.repository.CamionRepository;
@@ -8,10 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-
+ 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
+ 
 @Service
 public class LogisticaService {
 
@@ -33,7 +35,7 @@ public class LogisticaService {
         this.webClient = webClientBuilder.build();
     }
 
-    @Scheduled(cron = "0 0 3 * * ?") // todos los dias a las 3am x poner
+    @Scheduled(cron = "0 0 0 * * ?")
     public void planificarRutasProgramado() {
         planificarRutasDelDia();
     }
@@ -75,11 +77,11 @@ public class LogisticaService {
     public void procesarCallbackPlanificador(List<RutaReparto> rutas) {
         for (RutaReparto ruta : rutas) {
             Camion camion = camionRepository.findById(ruta.getPatenteCamion()).orElseThrow(() -> new RuntimeException("Camión no encontrado: " + ruta.getPatenteCamion()));
-
+ 
             if (camion.getRutaActiva() != null) {
                 throw new IllegalStateException("El camión " + camion.getPatente() + " ya tiene una ruta activa.");
             }
-
+ 
             camion.setRutaActiva(ruta);
             camionRepository.save(camion);
         }
@@ -87,12 +89,12 @@ public class LogisticaService {
 
     public void iniciarRuta(String patente) {
         Camion camion = camionRepository.findById(patente).orElseThrow(() -> new RuntimeException("Camión no encontrado: " + patente));
-
+ 
         RutaReparto ruta = camion.getRutaActiva();
         if (ruta == null) {
             throw new RuntimeException("El camión " + patente + " no tiene una ruta activa asignada.");
         }
-
+ 
         for (Entrega entrega : ruta.getEntregas()) {
             entrega.CambiarEstado(EstadoEntrega.EN_TRASLADO, null, null);
             entregaRepository.save(entrega);
@@ -101,10 +103,10 @@ public class LogisticaService {
 
     public void actualizarEstadoEntrega(Long id, EstadoEntrega nuevoEstado, String fotoUrl, String motivo) {
         Entrega entrega = entregaRepository.findById(id).orElseThrow(() -> new RuntimeException("Entrega no encontrada: " + id));
-
+ 
         entrega.CambiarEstado(nuevoEstado, fotoUrl, motivo);
         entregaRepository.save(entrega);
-
+ 
         if (entrega.EsEstadoTerminal()) {
             LiberarCamionSiRutaTerminada(entrega);
         }
@@ -114,7 +116,7 @@ public class LogisticaService {
         Optional<Camion> camionOpt = camionRepository.findAll().stream()
                 .filter(c -> c.getRutaActiva() != null && c.getRutaActiva().getEntregas().contains(entrega))
                 .findFirst();
-
+ 
         camionOpt.ifPresent(camion -> {
             if (camion.getRutaActiva().EstaFinalizada()) {
                 camion.setRutaActiva(null);
@@ -123,13 +125,69 @@ public class LogisticaService {
         });
     }
 
+    //admin camiones
+    public List<Camion> listarCamiones() {
+        return camionRepository.findByActivoTrue();
+    }
+ 
+    public Camion crearCamion(CamionDTO dto) {
+        if (camionRepository.existsById(dto.getPatente())) {
+            throw new IllegalStateException("Ya existe un camión con patente: " + dto.getPatente());
+        }
+        Camion camion = new Camion(dto.getPatente(), dto.getCapacidadVolumen(), dto.getAltura(), dto.getCapacidadCarga());
+        return camionRepository.save(camion);
+    }
+ 
+    public Camion modificarCamion(String patente, CamionDTO dto) {
+        Camion camion = camionRepository.findById(patente).orElseThrow(() -> new RuntimeException("Camión no encontrado: " + patente));
+ 
+        camion.setCapacidadVolumen(dto.getCapacidadVolumen());
+        camion.setAltura(dto.getAltura());
+        camion.setCapacidadCarga(dto.getCapacidadCarga());
+        return camionRepository.save(camion);
+    }
+ 
+    public void darDeBajaCamion(String patente) {
+        Camion camion = camionRepository.findById(patente).orElseThrow(() -> new RuntimeException("Camión no encontrado: " + patente));
+ 
+        if (camion.getRutaActiva() != null) {
+            throw new IllegalStateException("No se puede dar de baja el camión " + patente + " porque tiene una ruta activa.");
+        }
+ 
+        camion.setActivo(false);
+        camionRepository.save(camion);
+    }
+
+    //seguimiento tiempo real
+    public void actualizarUbicacionCamion(String patente, Double latitud, Double longitud) {
+        Camion camion = camionRepository.findById(patente).orElseThrow(() -> new RuntimeException("Camión no encontrado: " + patente));
+ 
+        camion.setLatitud(latitud);
+        camion.setLongitud(longitud);
+        camion.setUltimaActualizacionUbicacion(LocalDateTime.now());
+        camionRepository.save(camion);
+    }
+
     //para los otros servicios
     public Entrega ConsultarEntrega(Long id) {
         return entregaRepository.findById(id).orElseThrow(() -> new RuntimeException("Entrega no encontrada: " + id));
     }
-
+ 
     public RutaReparto ConsultarRutaActiva(String patente) {
         Camion camion = camionRepository.findById(patente).orElseThrow(() -> new RuntimeException("Camión no encontrado: " + patente));
         return camion.getRutaActiva();
+    }
+
+    public List<Entrega> listarEntregas(EstadoEntrega estado) {
+        if (estado == null) {
+            return entregaRepository.findAll();
+        }
+        return entregaRepository.findByEstado(estado);
+    }
+
+    public List<RutaReparto> listarRutasActivas() {
+        return camionRepository.findByRutaActivaIsNotNull().stream()
+                .map(Camion::getRutaActiva)
+                .toList();
     }
 }
