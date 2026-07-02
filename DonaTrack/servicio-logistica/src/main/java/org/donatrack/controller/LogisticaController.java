@@ -17,6 +17,12 @@ public class LogisticaController {
     @Autowired
     private LogisticaService logisticaService;
 
+    @PostMapping("/entregas")
+    public ResponseEntity<String> recibirNuevasEntregas(@RequestBody DepositoDTO depositoDTO) {
+        logisticaService.registrarNuevasEntregas(depositoDTO.getEntregas());
+        return ResponseEntity.ok("Entregas registradas correctamente en Logística.");
+    }
+
     //armado lotes
     @PostMapping("/planificar")
     public ResponseEntity<String> planificarRutas() {

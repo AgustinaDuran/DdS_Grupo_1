@@ -27,7 +27,7 @@ public class LogisticaService {
 
     private static final int MAX_ENTREGAS_POR_LOTE = 100;
 
-    public LogisticaService(EntregaRepository entregaRepository, WebClient.Builder webClientBuilder) {
+    public LogisticaService(EntregaRepository entregaRepository, CamionRepository camionRepository, WebClient.Builder webClientBuilder) {
         this.entregaRepository = entregaRepository;
         this.camionRepository = camionRepository;
         this.webClient = webClientBuilder.build();
@@ -36,6 +36,10 @@ public class LogisticaService {
     @Scheduled(cron = "0 0 3 * * ?") // todos los dias a las 3am x poner
     public void planificarRutasProgramado() {
         planificarRutasDelDia();
+    }
+
+    public void registrarNuevasEntregas(List<Entrega> nuevasEntregas) {
+        entregaRepository.saveAll(nuevasEntregas);
     }
 
     public String planificarRutasDelDia() {
@@ -49,7 +53,6 @@ public class LogisticaService {
             return "No hay camiones disponibles para planificar.";
         }
 
-        // Restricción del proveedor: máximo 100 entregas por ejecución
         List<Entrega> lote = entregasPendientes.size() > MAX_ENTREGAS_POR_LOTE
                 ? entregasPendientes.subList(0, MAX_ENTREGAS_POR_LOTE)
                 : entregasPendientes;
@@ -71,8 +74,7 @@ public class LogisticaService {
 
     public void procesarCallbackPlanificador(List<RutaReparto> rutas) {
         for (RutaReparto ruta : rutas) {
-            Camion camion = camionRepository.findById(ruta.getPatenteCamion())
-                    .orElseThrow(() -> new RuntimeException("Camión no encontrado: " + ruta.getPatenteCamion()));
+            Camion camion = camionRepository.findById(ruta.getPatenteCamion()).orElseThrow(() -> new RuntimeException("Camión no encontrado: " + ruta.getPatenteCamion()));
 
             if (camion.getRutaActiva() != null) {
                 throw new IllegalStateException("El camión " + camion.getPatente() + " ya tiene una ruta activa.");
@@ -97,7 +99,7 @@ public class LogisticaService {
         }
     }
 
-    public void actualizarEstadoEntrega(Long id, EstadoEntrega nuevoEstado, String fotoUrl) {
+    public void actualizarEstadoEntrega(Long id, EstadoEntrega nuevoEstado, String fotoUrl, String motivo) {
         Entrega entrega = entregaRepository.findById(id).orElseThrow(() -> new RuntimeException("Entrega no encontrada: " + id));
 
         entrega.CambiarEstado(nuevoEstado, fotoUrl, motivo);
