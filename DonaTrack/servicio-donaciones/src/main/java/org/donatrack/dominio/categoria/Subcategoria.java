@@ -19,6 +19,10 @@ public class Subcategoria{
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Categoria getCategoria(){
         return this.categoria;
     }

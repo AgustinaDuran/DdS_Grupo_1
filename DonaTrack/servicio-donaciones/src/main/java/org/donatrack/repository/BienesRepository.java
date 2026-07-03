@@ -9,12 +9,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class BienesRepository {
     public List<Bien> bienes;
+    private Long nextId = 1L;
 
     public BienesRepository() {
         bienes = new ArrayList<>();
     }
     
     public void save(Bien bien) {
+        if (bien.getId() == null) {
+            bien.setId(nextId++);
+        }
         bienes.add(bien);
     }
 

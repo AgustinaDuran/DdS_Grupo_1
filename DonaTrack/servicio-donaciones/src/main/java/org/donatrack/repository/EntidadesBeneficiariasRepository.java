@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 public class EntidadesBeneficiariasRepository {
     private final List<EntidadBeneficiaria> entidades;
 
+    private Long nextId = 1L;
+
     private static EntidadesBeneficiariasRepository instancia;
 
 
@@ -43,6 +45,9 @@ public class EntidadesBeneficiariasRepository {
     }
 
     public EntidadBeneficiaria save(EntidadBeneficiaria entidad){
+        if (entidad.getId() == null) {
+            entidad.setId(nextId++);
+        }
         entidades.add(entidad);
         return entidad;
     }

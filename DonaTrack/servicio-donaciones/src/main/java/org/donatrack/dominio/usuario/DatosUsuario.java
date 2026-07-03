@@ -23,6 +23,10 @@ public abstract class DatosUsuario {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public List<Contacto> getContactos() {
         return contactos;
     }

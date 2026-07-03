@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UsuariosRepository {
     private final List<DatosUsuario> usuarios = new ArrayList<>();
+    private Long nextId = 1L;
 
     public List<DatosUsuario> findAll() {
         return new ArrayList<>(usuarios);
@@ -27,6 +28,9 @@ public class UsuariosRepository {
     }
 
     public DatosUsuario save(DatosUsuario donante){
+        if (donante.getId() == null) {
+            donante.setId(nextId++);
+        }
         usuarios.add(donante);
         return donante;
     }

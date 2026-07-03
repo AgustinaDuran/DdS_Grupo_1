@@ -78,8 +78,10 @@ public class BienesService {
 
     public List<ItemBien> convertirItemsDTOaItemsBien(List<ItemBienDTO> itemsDTO){
         List<ItemBien> ItemBienes = new ArrayList<>();
-        
+        System.out.println("ItemsDTO: " + itemsDTO);
         for (ItemBienDTO itemBien : itemsDTO) {
+            System.out.println("Subcategoria id: " + itemBien.getSubcategoriaId());
+
             Subcategoria subcategoria = this.categoriasService.obtenerSubcategoriaPorId(itemBien.getSubcategoriaId());
             if (subcategoria == null) {
                 throw new IllegalArgumentException("No se encontró la subcategoría con el ID proporcionado");

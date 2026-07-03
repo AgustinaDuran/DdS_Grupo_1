@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DonantesRepository {
     private final List<Donante> donantes = new ArrayList<>();
+    private Long nextId = 1L;
 
     public List<Donante> findAll() {
         return new ArrayList<>(donantes);
@@ -26,6 +27,9 @@ public class DonantesRepository {
     }
 
     public Donante save(Donante donante){
+        if (donante.getId() == null) {
+            donante.setId(nextId++);
+        }
         donantes.add(donante);
         return donante;
     }

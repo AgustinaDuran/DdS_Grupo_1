@@ -12,6 +12,7 @@ public class CategoriasRepository {
 
     private List<Categoria> categorias;
     private List<Subcategoria> subcategorias;
+    private Long nextId = 1L;
 
     public CategoriasRepository() {
         categorias = new ArrayList<>();
@@ -31,6 +32,9 @@ public class CategoriasRepository {
     }
 
     public void saveCategoria(Categoria categoria) {
+        if (categoria.getId() == null) {
+            categoria.setId(nextId++);
+        }
         categorias.add(categoria);
     }
 
@@ -57,6 +61,9 @@ public class CategoriasRepository {
     }
 
     public void saveSubcategoria(Subcategoria subcategoria) {
+        if (subcategoria.getId() == null) {
+            subcategoria.setId(nextId++);
+        }
         subcategorias.add(subcategoria);
     }
 

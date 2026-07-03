@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 public class NecesidadesRepository {
 
     private List<Necesidad> necesidades;
+    private Long nextId = 1L;
 
     public NecesidadesRepository() {
         necesidades = new ArrayList<>();
@@ -36,6 +37,9 @@ public class NecesidadesRepository {
     }
 
     public void save(Necesidad necesidad) {
+        if (necesidad.getId() == null) {
+            necesidad.setId(nextId++);
+        }
         necesidades.add(necesidad);
     }
 

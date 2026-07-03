@@ -14,6 +14,7 @@ import java.util.List;
 public class DonacionesRepository {
 
     private List<Donacion> donaciones; // a reemplazar por un
+    private Long nextId = 1L;
 
 
     public DonacionesRepository() {
@@ -44,6 +45,9 @@ public class DonacionesRepository {
 
 
     public void save(Donacion donacion){
+        if (donacion.getId() == null) {
+            donacion.setId(nextId++);
+        }
         donaciones.add(donacion);
     }
 

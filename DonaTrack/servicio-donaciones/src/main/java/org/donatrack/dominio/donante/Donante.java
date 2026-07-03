@@ -20,6 +20,10 @@ public abstract class Donante {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     
     public Donante(DatosUsuario datosUsuario) {
         this.datosUsuario = datosUsuario;

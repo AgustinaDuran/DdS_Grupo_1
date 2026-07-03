@@ -23,6 +23,10 @@ public abstract class Necesidad {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public EntidadBeneficiaria getEntidad(){
         return entidad;
     }
