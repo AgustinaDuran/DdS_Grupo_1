@@ -32,6 +32,7 @@ public class DonantesService {
     }
 
     public Donante registrarDonante(CrearDonanteDTO nuevoDonante) {
+        System.out.println("Hola2");
         DatosUsuario datosUsuario;
         Long id = nuevoDonante.getUsuarioId();
         if (id != null) {
@@ -42,11 +43,12 @@ public class DonantesService {
                 throw new IllegalArgumentException("El usuario con ID " + id + " no existe.");
             }
         } else{
+            System.out.println("Hola3");
             datosUsuario = registrarNuevoUsuarioParaDonante(nuevoDonante);
         }
 
         Donante donante;
-
+        System.out.println("Hola4");
         switch (nuevoDonante.getTipo()) {
             case JURIDICA:
                 donante = new DonanteJuridico(datosUsuario, nuevoDonante.getTipoPersonaJuridica(), nuevoDonante.getRubro());

@@ -34,6 +34,10 @@ public class DonantesController {
 
     @PostMapping
     public ResponseEntity<String> nuevoDonante(@RequestBody CrearDonanteDTO nuevoDonante) {
+        System.out.println("DTO RECIBIDO: " + nuevoDonante);
+        System.out.println("ROL USUARIO: " + nuevoDonante.getTipoUsuario());
+        
+
         donantesService.registrarDonante(nuevoDonante);
         return ResponseEntity.ok("Donante añadido correctamente");
     }

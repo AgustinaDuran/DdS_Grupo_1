@@ -24,7 +24,7 @@ public class CrearDonanteDTO {
     private String dni;
     private String genero;
     private String direccion;
-    private Contacto contactoPredeterminado;
+    private ContactoDTO contactoPredeterminado;
 
     //Campos Organizacion:
 
@@ -58,11 +58,11 @@ public class CrearDonanteDTO {
     public void setUsuarioId(Long usuarioId) {
         this.usuarioId = usuarioId;
     }
-    public RolUsuario getRolUsuario() {
+    public RolUsuario getTipoUsuario() {
         return tipoUsuario;
     }
-    public void setRolUsuario(RolUsuario rolUsuario) {
-        this.tipoUsuario = rolUsuario;
+    public void setTipoUsuario(RolUsuario tipoUsuario) {
+        this.tipoUsuario = tipoUsuario;
     }
     public String getNombre() {
         return nombre;
@@ -100,10 +100,10 @@ public class CrearDonanteDTO {
     public void setDireccion(String direccion) {
         this.direccion = direccion;
     }
-    public Contacto getContactoPredeterminado() {
+    public ContactoDTO getContactoDTOPredeterminado() {
         return contactoPredeterminado;
     }
-    public void setContactoPredeterminado(Contacto contactoPredeterminado) {
+    public void setContactoDTOPredeterminado(ContactoDTO contactoPredeterminado) {
         this.contactoPredeterminado = contactoPredeterminado;
     }
     public String getRazonSocial() {
