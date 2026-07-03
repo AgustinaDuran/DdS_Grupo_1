@@ -35,8 +35,11 @@ public class EntidadBeneficiaria {
     public TipoEntidadBeneficiaria getTipoEntidad() { 
         return tipoEntidad; }
 
-    public String getDireccion() { 
+    public String getDireccion() {
         return direccion; }
+
+    public Organizacion getOrganizacion() {
+        return organizacion; }
 
     public List<Necesidad> getNecesidades() { 
         return necesidades; }

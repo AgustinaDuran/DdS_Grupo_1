@@ -1,24 +1,23 @@
 package org.donatrack.service;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.donatrack.controller.dto.*;
 import org.donatrack.controller.dto.Donaciones.ActualizarDonacionDTO;
 import org.donatrack.controller.dto.Donaciones.CrearDonacionDTO;
 import org.donatrack.controller.dto.Donaciones.FiltrosDonacionDTO;
 import org.donatrack.repository.DonacionesRepository;
 import org.donatrack.dominio.donante.*;
 import org.donatrack.dominio.bien.ItemBien;
-import org.donatrack.dominio.categoria.Subcategoria;
 import org.donatrack.dominio.donacion.*;
 import org.donatrack.dominio.entidadBeneficiaria.*;
+import org.donatrack.integracion.DestinatarioResolver;
+import org.donatrack.integracion.IncentivosClient;
+import org.donatrack.integracion.LogisticaClient;
+import org.donatrack.integracion.NotificacionesClient;
+import org.donatrack.integracion.dto.DepositoRequest;
+import org.donatrack.integracion.dto.EntregaRequest;
+import org.donatrack.integracion.dto.RegistrarDonacionRequest;
 
-import java.util.ArrayList;
 import java.util.List;
-
-//quiza esto se mueve a dependencies / inyections (archivo que inicialize todo)
 
 @Service
 public class DonacionesService {
@@ -26,16 +25,25 @@ public class DonacionesService {
     private DonantesService donantesService;
     private EntidadesBeneficiariasService entidadesBeneficiariasService;
     private BienesService bienesService;
-    private final RestClient restClient;
+
+    private final NotificacionesClient notificacionesClient;
+    private final IncentivosClient incentivosClient;
+    private final LogisticaClient logisticaClient;
+    private final DestinatarioResolver destinatarioResolver;
 
     public DonacionesService(DonacionesRepository donacionesRepository, DonantesService donantesService,
-                             EntidadesBeneficiariasService entidadesBeneficiariasService, BienesService bienesService) {
+                             EntidadesBeneficiariasService entidadesBeneficiariasService, BienesService bienesService,
+                             NotificacionesClient notificacionesClient, IncentivosClient incentivosClient,
+                             LogisticaClient logisticaClient, DestinatarioResolver destinatarioResolver) {
         this.donacionesRepository = donacionesRepository;
         this.donantesService = donantesService;
         this.entidadesBeneficiariasService = entidadesBeneficiariasService;
         this.bienesService = bienesService;
-        this.restClient = RestClient.create("http://localhost:8081");
-    } // o seteado post instanciacion en archivo dependencias
+        this.notificacionesClient = notificacionesClient;
+        this.incentivosClient = incentivosClient;
+        this.logisticaClient = logisticaClient;
+        this.destinatarioResolver = destinatarioResolver;
+    }
 
     public List<Donacion> obtenerDonaciones(FiltrosDonacionDTO filtrosDonacionDTO) {
         List<Donacion> donaciones = donacionesRepository.buscarConFiltros(
@@ -66,8 +74,11 @@ public class DonacionesService {
 
         this.donantesService.guardarDonante(donante);
 
-        //avisar a incentivos de que un donanto donó
-
+        // Avisar a Incentivos que el donante donó (impacta en el progreso de misiones).
+        String nombreUsuario = destinatarioResolver.nombreUsuarioDe(donante);
+        for (Donacion donacion : donacionesSegmentadas) {
+            incentivosClient.registrarDonacion(nombreUsuario, construirRegistroIncentivos(donacion));
+        }
     }
 
     public void eliminarDonacionPorId(Long id) {
@@ -97,30 +108,26 @@ public class DonacionesService {
             throw new Error("La donación no puede ser pasada a este estado desde el que está");
         }
 
-        switch (nuevoEstado) { //aca se mandan las notificaciones
+        switch (nuevoEstado) {
             case EN_DEPOSITO:
                 donacion.siguiente();
                 break;
             case ASIGNACION_REALIZADA:
                 EntidadBeneficiaria entidad = entidadesBeneficiariasService.obtenerEntidadPorId(datosActualizacion.getEntidadId());
                 donacion.siguiente(entidad);
-                //notificacion a entidad que se le asignó
-                //notificacion a donante que se asigno una donacion suya
-                //actualizar necesidades de entidad? para no asignarle a algo ya satisfecho?
+                notificarAsignacion(donacion, entidad);
+                enviarEntregaALogistica(donacion, entidad);
                 break;
             case LISTA_PARA_ENTREGAR:
                 donacion.siguiente();
-
                 break;
             case EN_TRASLADO:
+                // Los eventos de traslado/entrega los origina Logística y se detectan por
+                // polling (LogisticaPollingScheduler); allí se disparan las notificaciones.
                 donacion.siguiente();
-                //notificacion a entidad que su donacion esta en camino
-                //notificacion a donante que su donacion esta en camino
                 break;
             case ENTREGADA:
                 donacion.siguiente();
-                //notificacion a entidad que acepto
-                //notificacion a donante que envio
                 break;
             case ENTREGA_FALLIDA:
                 donacion.falloEnEstado(datosActualizacion.getJustificacionEntregaFallida());
@@ -133,25 +140,41 @@ public class DonacionesService {
 
         }
 
-    
+
         return donacion;
     }
 
-    /* public void asignarDonacion(EntidadBeneficiaria entidadBeneficiaria, Donacion donacion) {
-        donacion.asignar(entidadBeneficiaria);
-        
-        CrearDonacionDTO notificacionDTO = new CrearNotificacionDTO()
-        
+    private void notificarAsignacion(Donacion donacion, EntidadBeneficiaria entidad) {
+        String descripcion = descripcionDonacion(donacion);
+        notificacionesClient.enviar(destinatarioResolver.paraEntidad(entidad,
+                "Se te asignó una donación (" + descripcion + ") en base a tus necesidades."));
+        notificacionesClient.enviar(destinatarioResolver.paraDonante(donacion.getDonante(),
+                "Tu donación (" + descripcion + ") fue asignada a una entidad beneficiaria."));
+    }
 
+    private void enviarEntregaALogistica(Donacion donacion, EntidadBeneficiaria entidad) {
+        // Donaciones deja disponible la info de la entrega; Logística nunca llama a donaciones.
+        EntregaRequest entrega = new EntregaRequest(String.valueOf(donacion.getId()), entidad.getDireccion());
+        logisticaClient.registrarEntregas(new DepositoRequest(List.of(entrega)));
+    }
 
-        this.restClient.post()
-            .uri("/api/notificaciones")
-            .body(notificacionDTO)
-            .retrieve()
-            .toBodilessEntity();
-        //notificacion a notificacion-service [EVENTO]
+    private RegistrarDonacionRequest construirRegistroIncentivos(Donacion donacion) {
+        String subcategoria = donacion.getSubcategoria() != null ? donacion.getSubcategoria().getNombre() : null;
+        List<String> bienes = donacion.getItemBienes().stream()
+                .map(item -> item.getBien().getNombre())
+                .toList();
+        return new RegistrarDonacionRequest(
+                subcategoria,
+                bienes,
+                null,
+                donacion.getFechaIngreso() != null ? donacion.getFechaIngreso().toLocalDate() : null);
+    }
 
-
-    } */
+    private String descripcionDonacion(Donacion donacion) {
+        if (donacion.getSubcategoria() != null) {
+            return donacion.getSubcategoria().getNombre();
+        }
+        return donacion.getDescripcion() != null ? donacion.getDescripcion() : "donación";
+    }
 
 }
