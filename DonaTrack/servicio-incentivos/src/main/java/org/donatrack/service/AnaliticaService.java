@@ -89,7 +89,7 @@ public class AnaliticaService {
         }
     
         Long personasAdelante = donanteRepository.countDonantesConMasDonaciones(nombreUsuario);
-        return (int) personasAdelante + 1;
+        return personasAdelante.intValue() + 1;
     }
 
     public PodioMensualDTO ObtenerPodioDestacadoDelMes(YearMonth mesAConsultar) {

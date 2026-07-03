@@ -1,6 +1,6 @@
 package org.donatrack.controller.dto.Bienes;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.donatrack.dominio.bien.Bien;
 import org.donatrack.dominio.bien.BienEstado;
@@ -24,7 +24,7 @@ public class ResponseBienDTO {
     private Float cantidadBien;
 
     // Solo BienMediblePerecedero
-    private LocalDateTime fechaVencimiento;
+    private LocalDate fechaVencimiento;
 
     public ResponseBienDTO(Bien bien) {
         this.id = bien.getId();
@@ -79,7 +79,7 @@ public class ResponseBienDTO {
         return cantidadBien;
     }
 
-    public LocalDateTime getFechaVencimiento() {
+    public LocalDate getFechaVencimiento() {
         return fechaVencimiento;
     }
 }
