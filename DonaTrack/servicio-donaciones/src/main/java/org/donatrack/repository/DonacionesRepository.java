@@ -31,7 +31,7 @@ public class DonacionesRepository {
 
     public Donacion findById(Long id){
         return donaciones.stream()
-                .filter(d -> d.getId() == id)
+                .filter(d -> d.getId() != null && d.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }
