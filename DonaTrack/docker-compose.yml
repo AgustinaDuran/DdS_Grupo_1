@@ -7,26 +7,58 @@ services:
     container_name: donatrack-db
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: donatrack
+      MYSQL_DATABASE: donatrack_logistica
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   # Servicio de Donaciones
   servicio-donaciones:
-    build: 
+    build:
       context: ./servicio-donaciones  # Apunta a la carpeta donde está su Dockerfile
     container_name: api-donaciones
     ports:
       - "8080:8080"
+    environment:
+      SERVICES_NOTIFICACIONES_URL: http://servicio-notificaciones:8081
+      SERVICES_INCENTIVOS_URL: http://servicio-incentivos:8082
+      SERVICES_LOGISTICA_URL: http://servicio-logistica:8083
     depends_on:
       - db
+      - servicio-notificaciones
+      - servicio-incentivos
+      - servicio-logistica
+
+  # Servicio de Notificaciones
+  servicio-notificaciones:
+    build:
+      context: ./servicio-notificaciones
+    container_name: api-notificaciones
+    ports:
+      - "8081:8081"
+
+  # Servicio de Incentivos
+  servicio-incentivos:
+    build:
+      context: ./servicio-incentivos
+    container_name: api-incentivos
+    ports:
+      - "8082:8082"
 
   # Servicio de Logística
   servicio-logistica:
-    build: 
+    build:
       context: ./servicio-logistica
     container_name: api-logistica
     ports:
-      - "8081:8081"
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/donatrack_logistica?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_PASSWORD: root
     depends_on:
-      - db
+      db:
+        condition: service_healthy
