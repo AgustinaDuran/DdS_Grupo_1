@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # Base de Datos Unificada
+  db:
+    image: mysql:8.0
+    container_name: donatrack-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: donatrack
+    ports:
+      - "3306:3306"
+
+  # Servicio de Donaciones
+  servicio-donaciones:
+    build: 
+      context: ./servicio-donaciones  # Apunta a la carpeta donde está su Dockerfile
+    container_name: api-donaciones
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  # Servicio de Logística
+  servicio-logistica:
+    build: 
+      context: ./servicio-logistica
+    container_name: api-logistica
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
