@@ -1,11 +1,13 @@
 package org.donatrack.service;
 
 import org.donatrack.controller.dto.Usuarios.CrearUsuarioDTO;
+import org.donatrack.dominio.contacto.Contacto;
 import org.donatrack.dominio.usuario.DatosUsuario;
 import org.donatrack.dominio.usuario.organizacion.Organizacion;
 import org.donatrack.repository.UsuariosRepository;
 import org.donatrack.dominio.usuario.persona.Persona;
 import org.springframework.stereotype.Service;
+import org.donatrack.dominio.usuario.RolUsuario;
 
 @Service
 public class UsuariosService {
@@ -17,17 +19,26 @@ public class UsuariosService {
 
     public DatosUsuario registrarUsuario(CrearUsuarioDTO crearUsuarioDTO) {
         DatosUsuario nuevoUsuario;
+
+        /* if(crearUsuarioDTO.getRolUsuario() == null) {
+            crearUsuarioDTO.setRolUsuario(RolUsuario.PERSONA);
+        } */
+
         switch (crearUsuarioDTO.getRolUsuario()) {
             case PERSONA:
                 if (crearUsuarioDTO.getNombre() == null || crearUsuarioDTO.getApellido() == null) {
                     throw new IllegalArgumentException("Nombre y apellido son obligatorios para el rol PERSONA");
                 }
+                Contacto contactoPredeterminado = new Contacto(
+                    crearUsuarioDTO.getContactoDTOPredeterminado().getMedio(), 
+                    crearUsuarioDTO.getContactoDTOPredeterminado().getValor());
                 nuevoUsuario = new Persona(
                     crearUsuarioDTO.getNombre(), crearUsuarioDTO.getApellido(),
                     crearUsuarioDTO.getEdad(), crearUsuarioDTO.getDni(),
                     crearUsuarioDTO.getGenero(), crearUsuarioDTO.getDireccion(),
-                    crearUsuarioDTO.getContactoPredeterminado()
+                    contactoPredeterminado
                 );
+                
                 break;
             case ORGANIZACION:
                 if (crearUsuarioDTO.getRazonSocial() == null || crearUsuarioDTO.getCuit() == null) {
@@ -64,7 +75,11 @@ public class UsuariosService {
                 persona.setDni(crearUsuarioDTO.getDni());
                 persona.setGenero(crearUsuarioDTO.getGenero());
                 persona.setDireccion(crearUsuarioDTO.getDireccion());
-                persona.setContactoPredeterminado(crearUsuarioDTO.getContactoPredeterminado());
+
+                persona.setContactoPredeterminado(new Contacto(
+                    crearUsuarioDTO.getContactoDTOPredeterminado().getMedio(),
+                    crearUsuarioDTO.getContactoDTOPredeterminado().getValor()
+                ));
                 break;
             case ORGANIZACION:
                 if (!(usuarioExistente instanceof Organizacion organizacion)) {

@@ -1,5 +1,6 @@
 package org.donatrack.controller.dto.Usuarios;
 
+import org.donatrack.controller.dto.Donantes.ContactoDTO;
 import org.donatrack.controller.dto.Donantes.CrearDonanteDTO;
 import org.donatrack.dominio.contacto.Contacto;
 import org.donatrack.dominio.usuario.RolUsuario;
@@ -14,7 +15,7 @@ public class CrearUsuarioDTO {
     private String dni;
     private String genero;
     private String direccion;
-    private Contacto contactoPredeterminado;
+    private ContactoDTO contactoPredeterminado;
 
     //Campos Organizacion:
 
@@ -25,8 +26,8 @@ public class CrearUsuarioDTO {
     private RolUsuario rolUsuario;
 
     public CrearUsuarioDTO(CrearDonanteDTO crearDonanteDTO) {
-        
-        this.rolUsuario = crearDonanteDTO.getRolUsuario();
+        System.out.println("Creando CrearUsuarioDTO a partir de CrearDonanteDTO: " + crearDonanteDTO);
+        this.rolUsuario = crearDonanteDTO.getTipoUsuario();
 
         if (rolUsuario == RolUsuario.PERSONA) {
             this.nombre = crearDonanteDTO.getNombre();
@@ -35,7 +36,7 @@ public class CrearUsuarioDTO {
             this.dni = crearDonanteDTO.getDni();
             this.genero = crearDonanteDTO.getGenero();
             this.direccion = crearDonanteDTO.getDireccion();
-            this.contactoPredeterminado = crearDonanteDTO.getContactoPredeterminado();
+            this.contactoPredeterminado = crearDonanteDTO.getContactoDTOPredeterminado();
         } else {
             this.razonSocial = crearDonanteDTO.getRazonSocial();
             this.cuit = crearDonanteDTO.getCuit();
@@ -82,10 +83,10 @@ public class CrearUsuarioDTO {
     public void setDireccion(String direccion) {
         this.direccion = direccion;
     }
-    public Contacto getContactoPredeterminado() {
+    public ContactoDTO getContactoDTOPredeterminado() {
         return contactoPredeterminado;
     }
-    public void setContactoPredeterminado(Contacto contactoPredeterminado) {
+    public void setContactoDTOPredeterminado(ContactoDTO contactoPredeterminado) {
         this.contactoPredeterminado = contactoPredeterminado;
     }
     public String getRazonSocial() {
