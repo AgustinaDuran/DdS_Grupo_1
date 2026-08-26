@@ -30,7 +30,7 @@ public class UsuariosService {
                     throw new IllegalArgumentException("Nombre y apellido son obligatorios para el rol PERSONA");
                 }
                 Contacto contactoPredeterminado = new Contacto(
-                    crearUsuarioDTO.getContactoDTOPredeterminado().getMedio(), 
+                    crearUsuarioDTO.getContactoDTOPredeterminado().getMedio(),
                     crearUsuarioDTO.getContactoDTOPredeterminado().getValor());
                 nuevoUsuario = new Persona(
                     crearUsuarioDTO.getNombre(), crearUsuarioDTO.getApellido(),
@@ -38,7 +38,7 @@ public class UsuariosService {
                     crearUsuarioDTO.getGenero(), crearUsuarioDTO.getDireccion(),
                     contactoPredeterminado
                 );
-                
+
                 break;
             case ORGANIZACION:
                 if (crearUsuarioDTO.getRazonSocial() == null || crearUsuarioDTO.getCuit() == null) {
@@ -51,6 +51,16 @@ public class UsuariosService {
             default:
                 throw new IllegalArgumentException("Rol de usuario no válido");
         }
+
+        // El medio de contacto predeterminado (obligatoriamente el email) también se guarda en la
+        // lista de contactos, de modo que sea posible ubicar al usuario por email (upsert de la
+        // importación masiva) y notificarlo, tanto para PERSONA como para ORGANIZACION.
+        if (crearUsuarioDTO.getContactoDTOPredeterminado() != null) {
+            nuevoUsuario.agregarContacto(new Contacto(
+                crearUsuarioDTO.getContactoDTOPredeterminado().getMedio(),
+                crearUsuarioDTO.getContactoDTOPredeterminado().getValor()));
+        }
+
         return usuariosRepository.save(nuevoUsuario);
     }
 

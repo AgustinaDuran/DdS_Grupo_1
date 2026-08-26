@@ -36,11 +36,13 @@ public class CrearUsuarioDTO {
             this.dni = crearDonanteDTO.getDni();
             this.genero = crearDonanteDTO.getGenero();
             this.direccion = crearDonanteDTO.getDireccion();
-            this.contactoPredeterminado = crearDonanteDTO.getContactoDTOPredeterminado();
         } else {
             this.razonSocial = crearDonanteDTO.getRazonSocial();
             this.cuit = crearDonanteDTO.getCuit();
         }
+
+        // El medio de contacto (email obligatorio) aplica a ambos tipos de donante.
+        this.contactoPredeterminado = crearDonanteDTO.getContactoDTOPredeterminado();
     
     }
 

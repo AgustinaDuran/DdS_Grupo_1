@@ -35,3 +35,6 @@ bin/
 ### Mac OS ###
 .DS_Store
 
+### Secretos ###
+.env
+!.env.example

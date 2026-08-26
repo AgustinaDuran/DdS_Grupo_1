@@ -2,6 +2,7 @@ package org.donatrack.service;
 
 import org.donatrack.controller.dto.EntidadBeneficiaria.CrearEntidadBeneficiariaDTO;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
+import org.donatrack.dominio.usuario.organizacion.Organizacion;
 import org.donatrack.repository.EntidadesBeneficiariasRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -24,10 +25,11 @@ public class EntidadesBeneficiariasService {
     }
 
     public EntidadBeneficiaria registrarEntidad(CrearEntidadBeneficiariaDTO nuevaEntidad) {
+        Organizacion organizacion = nuevaEntidad.getOrganizacion().toOrganizacion();
         EntidadBeneficiaria entidad = new EntidadBeneficiaria(
                 nuevaEntidad.getTipoEntidad(),
                 nuevaEntidad.getDireccion(),
-                nuevaEntidad.getOrganizacion());
+                organizacion);
         return entidadesBeneficiariasRepository.save(entidad);
     }
 

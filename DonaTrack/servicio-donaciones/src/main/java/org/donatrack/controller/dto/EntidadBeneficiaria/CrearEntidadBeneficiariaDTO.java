@@ -1,12 +1,12 @@
 package org.donatrack.controller.dto.EntidadBeneficiaria;
 
 import org.donatrack.dominio.entidadBeneficiaria.TipoEntidadBeneficiaria;
-import org.donatrack.dominio.usuario.organizacion.Organizacion;
+import org.donatrack.controller.dto.Organizacion.OrganizacionDTO;
 public class CrearEntidadBeneficiariaDTO {
 
     private TipoEntidadBeneficiaria tipoEntidad;
     private String direccion;
-    private Organizacion organizacion;
+    private OrganizacionDTO organizacion;
 
     public CrearEntidadBeneficiariaDTO() {
     }
@@ -27,11 +27,11 @@ public class CrearEntidadBeneficiariaDTO {
         this.direccion = direccion;
     }
 
-    public Organizacion getOrganizacion(){
+    public OrganizacionDTO getOrganizacion(){
         return organizacion;
     }
 
-    public void setOrganizacion(Organizacion org){
+    public void setOrganizacion(OrganizacionDTO org){
         this.organizacion = org;
     }
 }

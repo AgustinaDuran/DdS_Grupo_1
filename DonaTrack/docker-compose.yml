@@ -40,6 +40,11 @@ services:
     container_name: api-notificaciones
     ports:
       - "8081:8081"
+    environment:
+      # Se toman de DonaTrack/.env (ver .env.example). Nunca commitear la API key.
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      BREVO_REMITENTE: ${BREVO_REMITENTE:-}
+      BREVO_REMITENTE_NOMBRE: ${BREVO_REMITENTE_NOMBRE:-DonaTrack}
 
   # Servicio de Incentivos
   servicio-incentivos:
