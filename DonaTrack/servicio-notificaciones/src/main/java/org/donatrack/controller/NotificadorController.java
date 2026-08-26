@@ -1,31 +1,44 @@
 package org.donatrack.controller;
 
+import java.util.List;
+
 import org.donatrack.controller.dto.CrearNotificacionDTO;
+import org.donatrack.controller.dto.NotificacionResultadoDTO;
 import org.donatrack.model.Notificacion;
 import org.donatrack.service.Notificador;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/notificaciones")
 @CrossOrigin(origins = "*")
-public class NotificadorController{
+public class NotificadorController {
+
     private final Notificador notificador;
 
     public NotificadorController(Notificador notificador) {
         this.notificador = notificador;
     }
 
-    //http://localhost:8080/api/notificaciones -> POST
+    /**
+     * Recibe un pedido de notificacion y lo procesa.
+     * Devuelve 200 porque el pedido se recibio y quedo registrado; el resultado
+     * real del envio (ENVIADA o FALLIDA) viaja en el cuerpo.
+     */
     @PostMapping
-    public ResponseEntity<String> recibirNotificacion(
-        @RequestBody CrearNotificacionDTO notificacionDTO) {
+    public ResponseEntity<NotificacionResultadoDTO> recibirNotificacion(
+            @Valid @RequestBody CrearNotificacionDTO notificacionDTO) {
 
-        notificador.notificar(notificacionDTO);
+        Notificacion notificacion = notificador.notificar(notificacionDTO);
 
-        return ResponseEntity.ok("Notificacion enviada correctamente");
+        return ResponseEntity.ok(new NotificacionResultadoDTO(notificacion));
     }
 
     @GetMapping
@@ -33,29 +46,3 @@ public class NotificadorController{
         return ResponseEntity.ok(notificador.obtenerNotificaciones());
     }
 }
-
-
-/*
-private void enviarAlServicioDeNotificaciones(String nombre, List<Contacto> contactos, String mensaje) {
-        CrearNotificacionDTO dto = new CrearNotificacionDTO();
-        dto.setNombreDestinatario(nombre);
-        dto.setMensaje(mensaje);
-        dto.setContactos(contactos);
-
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.postForObject("http://localhost:8080/api/notificaciones", dto, String.class);
-    }
-}
-
-public void registrarMisionCumplida(Donante donante, Mision mision) {
-        donante.ganarInsignia(mision.getInsignia());
-
-        // Llaman al método de abajo pasándole los datos en una sola línea
-        enviarAlServicioDeNotificaciones(
-            donante.getNombre(),
-            donante.getContactos(),
-            "¡Felicitaciones! Cumpliste la misión: " + mision.getNombre() //
-        );
-    }
-}
-* */

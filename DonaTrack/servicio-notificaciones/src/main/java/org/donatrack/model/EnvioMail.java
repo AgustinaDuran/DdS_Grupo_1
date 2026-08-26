@@ -1,15 +1,18 @@
 package org.donatrack.model;
 
-public class EnvioMail extends MedioEnvio {
-    
+import org.donatrack.service.email.ClienteEmail;
 
-    public EnvioMail(String direccionMail) {
+public class EnvioMail extends MedioEnvio {
+
+    private final ClienteEmail clienteEmail;
+
+    public EnvioMail(String direccionMail, ClienteEmail clienteEmail) {
         this.destino = direccionMail;
+        this.clienteEmail = clienteEmail;
     }
-    
+
     @Override
     public void notificar(String nombreDestinatario, String mensaje) {
-        //comunicacion con la api
+        clienteEmail.enviar(this.destino, nombreDestinatario, mensaje);
     }
-
 }

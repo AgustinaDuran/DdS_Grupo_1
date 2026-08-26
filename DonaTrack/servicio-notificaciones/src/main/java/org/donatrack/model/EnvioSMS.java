@@ -2,13 +2,12 @@ package org.donatrack.model;
 
 public class EnvioSMS extends MedioEnvio {
 
-    public EnvioSMS(String nroTelefono) {
-        this.destino = nroTelefono;
+    public EnvioSMS(String numeroTelefono) {
+        this.destino = numeroTelefono;
     }
+
     @Override
     public void notificar(String nombreDestinatario, String mensaje) {
-        //comunicacion con la api
-
-
+        throw new MedioNoSoportadoException("SMS");
     }
 }

@@ -1,49 +1,35 @@
 package org.donatrack.repository;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.List;
+
 import org.donatrack.model.Notificacion;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * Historial de notificaciones en memoria. Se pierde al reiniciar el servicio.
+ */
 @Repository
-public class NotificacionesRepository { // singleton
+public class NotificacionesRepository {
 
-    private List<Notificacion> notificaciones;
-    private static NotificacionesRepository instancia;
+    private final List<Notificacion> notificaciones = new CopyOnWriteArrayList<>();
 
-    public NotificacionesRepository() {
-        notificaciones = new ArrayList<>();
+    public List<Notificacion> findAll() {
+        return List.copyOf(notificaciones);
     }
 
-    public static NotificacionesRepository getInstance(){
-        if(instancia == null){
-            instancia = new NotificacionesRepository();
-        }
-        return instancia;
-    }
-
-
-    public List<Notificacion> findAll(){
-        return notificaciones;
-    }
-
-    public Notificacion findById(Long id){
+    public Notificacion findById(Long id) {
         return notificaciones.stream()
-                .filter(n -> n.getId() == id)
+                .filter(n -> n.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }
 
-    public void save(Notificacion notificacion){
+    public void save(Notificacion notificacion) {
         notificaciones.add(notificacion);
     }
 
-    public void delete(Long id){
-        notificaciones = notificaciones.stream()
-                .filter(n -> !n.getId().equals(id))
-                .toList();
+    public void delete(Long id) {
+        notificaciones.removeIf(n -> n.getId().equals(id));
     }
-
-
 }

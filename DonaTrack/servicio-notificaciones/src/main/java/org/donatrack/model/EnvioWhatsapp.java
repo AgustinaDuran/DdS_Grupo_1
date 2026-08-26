@@ -1,12 +1,13 @@
 package org.donatrack.model;
 
 public class EnvioWhatsapp extends MedioEnvio {
-    public EnvioWhatsapp(String nroTelefono) {
-        this.destino = nroTelefono;
+
+    public EnvioWhatsapp(String numeroTelefono) {
+        this.destino = numeroTelefono;
     }
+
     @Override
     public void notificar(String nombreDestinatario, String mensaje) {
-        //comunicacion con la api
+        throw new MedioNoSoportadoException("WHATSAPP");
     }
 }
-
