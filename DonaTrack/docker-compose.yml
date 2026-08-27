@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Base de Datos Unificada
   db:
@@ -14,7 +12,11 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      # En el primer arranque MySQL inicializa su directorio de datos y tarda mas de un minuto:
+      # start_period no cuenta los fallos de ese periodo, asi que el contenedor no se marca
+      # unhealthy y logistica no se cae por "dependency failed to start".
+      start_period: 90s
+      retries: 20
 
   # Servicio de Donaciones
   servicio-donaciones:

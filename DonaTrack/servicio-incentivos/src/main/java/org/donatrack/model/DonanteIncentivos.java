@@ -194,19 +194,26 @@ public class DonanteIncentivos {
         return this.insigniasGanadas.contains(insignia);
     }
 
+    /**
+     * categoriaActual es @Transient: al recuperar el donante de la base viene en null y hay que
+     * reconstruirla a partir del nombre persistido. El default evita que un nombre inesperado
+     * (o nulo) devuelva null y termine en un NPE dentro del cálculo de misiones.
+     */
     public CategoriaDonante GetCategoriaActual() {
         if(categoriaActual == null){
-            switch(nombreCategoriaActual){
-                case "Colaborador":
-                    categoriaActual = new Colaborador();
-                    break;
+            switch(nombreCategoriaActual == null ? "" : nombreCategoriaActual){
                 case "Sostenedor":
                     categoriaActual = new Sostenedor();
                     break;
                 case "Transformador":
                     categoriaActual = new Transformador();
                     break;
+                case "Colaborador":
+                default:
+                    categoriaActual = new Colaborador();
+                    break;
             }
+            this.nombreCategoriaActual = categoriaActual.GetNombre();
         }
         return categoriaActual;
     }

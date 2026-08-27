@@ -5,17 +5,23 @@ import org.donatrack.controller.dto.SolicitudOptimizadorDTO;
 import org.donatrack.model.*;
 import org.donatrack.repository.CamionRepository;
 import org.donatrack.repository.EntregaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
- 
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
- 
+
 @Service
 public class LogisticaService {
+
+    private static final Logger log = LoggerFactory.getLogger(LogisticaService.class);
 
     private final EntregaRepository entregaRepository;
     private final CamionRepository camionRepository;
@@ -84,14 +90,59 @@ public class LogisticaService {
     public void procesarCallbackPlanificador(List<RutaReparto> rutas) {
         for (RutaReparto ruta : rutas) {
             Camion camion = camionRepository.findById(ruta.getPatenteCamion()).orElseThrow(() -> new RuntimeException("Camión no encontrado: " + ruta.getPatenteCamion()));
- 
+
             if (camion.getRutaActiva() != null) {
                 throw new IllegalStateException("El camión " + camion.getPatente() + " ya tiene una ruta activa.");
             }
- 
+
+            ruta.setEntregas(resolverEntregasPersistidas(ruta.getEntregas()));
+            if (ruta.getEntregas().isEmpty()) {
+                log.warn("La ruta devuelta para el camión {} no contiene ninguna entrega conocida: no se asigna.",
+                        ruta.getPatenteCamion());
+                continue;
+            }
+
             camion.setRutaActiva(ruta);
             camionRepository.save(camion);
         }
+    }
+
+    /**
+     * El planificador externo devuelve las mismas entregas que le enviamos, pero como objetos
+     * nuevos deserializados del JSON. Hay que volver a vincularlas con las filas ya persistidas:
+     * si se deja la instancia del JSON, el cascade de la ruta la inserta como una entrega nueva
+     * y la donación termina con entregas duplicadas.
+     */
+    private List<Entrega> resolverEntregasPersistidas(List<Entrega> entrantes) {
+        List<Entrega> resueltas = new ArrayList<>();
+        if (entrantes == null) {
+            return resueltas;
+        }
+        for (Entrega entrante : entrantes) {
+            Entrega persistida = buscarEntregaPersistida(entrante);
+            if (persistida == null) {
+                log.warn("El planificador devolvió una entrega desconocida (id={}, donacionId={}): se ignora.",
+                        entrante.getId(), entrante.getDonacionId());
+                continue;
+            }
+            persistida.setOrdenVisita(entrante.getOrdenVisita());
+            resueltas.add(persistida);
+        }
+        return resueltas;
+    }
+
+    private Entrega buscarEntregaPersistida(Entrega entrante) {
+        if (entrante.getId() != null) {
+            return entregaRepository.findById(entrante.getId()).orElse(null);
+        }
+        if (entrante.getDonacionId() == null) {
+            return null;
+        }
+        // Sin id, la entrega se identifica por su donación entre las que siguen pendientes.
+        return entregaRepository.findByDonacionIdAndEstado(entrante.getDonacionId(), EstadoEntrega.PENDIENTE)
+                .stream()
+                .min(Comparator.comparing(Entrega::getId))
+                .orElse(null);
     }
 
     public void iniciarRuta(String patente) {

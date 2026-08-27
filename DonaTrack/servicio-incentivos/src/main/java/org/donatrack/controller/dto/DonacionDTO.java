@@ -41,7 +41,31 @@ public class DonacionDTO {
     public LocalDate GetFechaIngreso() { return fechaIngreso; }
 
     public Integer GetCantidadBienes() {
-        return bienes.size();
+        return bienes == null ? 0 : bienes.size();
     }
+
+    // Accessors JavaBean: Jackson sólo reconoce el prefijo 'get' en minúscula y campos públicos,
+    // así que sin estos métodos el JSON entrante llegaba con todos los campos en null y el DTO
+    // no se podía serializar en la respuesta del perfil.
+
+    public String getNombreUsuario() { return nombreUsuario; }
+
+    public void setNombreUsuario(String nombreUsuario) { this.nombreUsuario = nombreUsuario; }
+
+    public String getSubcategoria() { return subcategoria; }
+
+    public void setSubcategoria(String subcategoria) { this.subcategoria = subcategoria; }
+
+    public List<String> getBienes() { return bienes; }
+
+    public void setBienes(List<String> bienes) { this.bienes = bienes; }
+
+    public String getOrganizacion() { return organizacion; }
+
+    public void setOrganizacion(String organizacion) { this.organizacion = organizacion; }
+
+    public LocalDate getFechaIngreso() { return fechaIngreso; }
+
+    public void setFechaIngreso(LocalDate fechaIngreso) { this.fechaIngreso = fechaIngreso; }
 
 }

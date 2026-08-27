@@ -1,11 +1,13 @@
 package org.donatrack.service;
 
 import org.donatrack.controller.dto.*;
+import org.donatrack.controller.exception.DonanteNoEncontradoException;
 import org.donatrack.controller.exception.RankingNoProcesadoException;
 import org.donatrack.model.*;
 import org.donatrack.repository.DonanteRepository;
 import org.donatrack.repository.RankingRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.util.*;
@@ -23,8 +25,14 @@ public class AnaliticaService {
         this.automatizacionService = automatizacionService;
     }
 
+    @Transactional
     public void RegistrarDonacionDeUsuario(String nombreUsuario, DonacionDTO donacionDto) {
-        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario)
+        .orElseGet(() -> new DonanteIncentivos(nombreUsuario));
+
+        // El donante viaja por query param, así que la donación llega sin dueño: se lo asigna
+        // acá para que quede persistido y aparezca en el perfil.
+        donacionDto.setNombreUsuario(nombreUsuario);
 
         ResultadoActividad resultado = donante.RegistrarActividad(donacionDto);
 
@@ -40,8 +48,9 @@ public class AnaliticaService {
         }
     }
 
+    @Transactional(readOnly = true)
     public PerfilAnaliticoDTO ObtenerEstadisticasGenerales(String nombreUsuario) {
-        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new DonanteNoEncontradoException(nombreUsuario));
 
         Integer posicionRanking = CalcularPosicionRanking(nombreUsuario);
 
@@ -57,8 +66,9 @@ public class AnaliticaService {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<MisionProgresoDTO> ObtenerProgresoMisiones(String nombreUsuario) {
-        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new DonanteNoEncontradoException(nombreUsuario));
 
         List<MisionProgresoDTO> progresoList = new ArrayList<>();
         
@@ -74,8 +84,9 @@ public class AnaliticaService {
         return progresoList;
     }
 
+    @Transactional(readOnly = true)
     public List<InsigniaDTO> ObtenerInsignias(String nombreUsuario) {
-        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new DonanteNoEncontradoException(nombreUsuario));
 
         List<InsigniaDTO> dtos = new ArrayList<>();
         for (Insignia insignia : donante.GetInsigniasGanadas()) {
@@ -93,6 +104,7 @@ public class AnaliticaService {
         return personasAdelante.intValue() + 1;
     }
 
+    @Transactional(readOnly = true)
     public PodioMensualDTO ObtenerPodioDestacadoDelMes(YearMonth mesAConsultar) {
         RankingMensual ranking = rankingRepository.findById(mesAConsultar.toString())
             .orElseThrow(() -> new RankingNoProcesadoException(mesAConsultar.toString()));

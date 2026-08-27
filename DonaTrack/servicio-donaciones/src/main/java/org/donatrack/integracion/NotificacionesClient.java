@@ -27,6 +27,13 @@ public class NotificacionesClient {
      * interrumpen el flujo de negocio que originó la notificación.
      */
     public void enviar(NotificacionRequest request) {
+        // Sin contactos el Servicio de Notificaciones rechaza el pedido con un 400 que no
+        // explica nada: conviene decir acá que al destinatario le falta cargar un contacto.
+        if (request.getContactos() == null || request.getContactos().isEmpty()) {
+            log.warn("No se notificó a '{}': no tiene ningún contacto cargado.",
+                    request.getNombreDestinatario());
+            return;
+        }
         try {
             restClient.post()
                     .uri("/api/notificaciones")

@@ -1,0 +1,778 @@
+{
+  "info": {
+    "name": "DonaTrack - ENTREGA_3",
+    "_postman_id": "d0naTr4ck-ent3-0000-0000-000000000000",
+    "description": "Endpoints REST de las Entregas 1, 2 y 3, verificados contra los cuatro servicios corriendo el 27/08/2026 sobre la rama ENTREGA_3.\n\nOrden de ejecucion dentro de 'Servicio de Donaciones': Categorias > Subcategorias > Donantes > Entidades Beneficiarias > Necesidades > Donaciones. El sistema arranca con las listas vacias, asi que ese orden es obligatorio.\n\nDos cosas que hacen fallar la demo si se omiten: la entidad beneficiaria necesita al menos un representante con contacto para poder ser notificada, y el callback del planificador debe incluir el 'id' de cada entrega.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "donacionesUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "notificacionesUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "incentivosUrl",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "logisticaUrl",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "categoriaId",
+      "value": ""
+    },
+    {
+      "key": "subcategoriaId",
+      "value": ""
+    },
+    {
+      "key": "donanteId",
+      "value": ""
+    },
+    {
+      "key": "entidadId",
+      "value": ""
+    },
+    {
+      "key": "necesidadId",
+      "value": ""
+    },
+    {
+      "key": "bienId",
+      "value": ""
+    },
+    {
+      "key": "donacionId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Servicio de Donaciones (8080)",
+      "item": [
+        {
+          "name": "Categor\u00edas",
+          "item": [
+            {
+              "name": "Crear categor\u00eda",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Alimentos\"\n}"
+                },
+                "url": "{{donacionesUrl}}/api/categorias"
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// La respuesta es texto plano; guardar el id manualmente tras GET /categorias si hace falta encadenar."
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Listar categor\u00edas",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/categorias"
+              }
+            },
+            {
+              "name": "Obtener categor\u00eda por id",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/categorias/{{categoriaId}}"
+              }
+            },
+            {
+              "name": "Actualizar categor\u00eda",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Alimentos no perecederos\"\n}"
+                },
+                "url": "{{donacionesUrl}}/api/categorias/{{categoriaId}}"
+              }
+            },
+            {
+              "name": "Eliminar categor\u00eda",
+              "request": {
+                "method": "DELETE",
+                "url": "{{donacionesUrl}}/api/categorias/{{categoriaId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Subcategor\u00edas",
+          "item": [
+            {
+              "name": "Crear subcategor\u00eda",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Fideos secos\",\n  \"categoriaId\": {{categoriaId}}\n}"
+                },
+                "url": "{{donacionesUrl}}/api/subcategorias"
+              }
+            },
+            {
+              "name": "Listar subcategor\u00edas (filtros opcionales por query params)",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/subcategorias"
+              }
+            },
+            {
+              "name": "Obtener subcategor\u00eda por id",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/subcategorias/{{subcategoriaId}}"
+              }
+            },
+            {
+              "name": "Actualizar subcategor\u00eda",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Fideos secos tipo espagueti\",\n  \"categoriaId\": {{categoriaId}}\n}"
+                },
+                "url": "{{donacionesUrl}}/api/subcategorias/{{subcategoriaId}}"
+              }
+            },
+            {
+              "name": "Eliminar subcategor\u00eda",
+              "request": {
+                "method": "DELETE",
+                "url": "{{donacionesUrl}}/api/subcategorias/{{subcategoriaId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Donantes",
+          "item": [
+            {
+              "name": "Crear donante HUMANA",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipo\": \"HUMANA\",\n  \"tipoUsuario\": \"PERSONA\",\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Perez\",\n  \"edad\": 30,\n  \"dni\": \"12345678\",\n  \"genero\": \"F\",\n  \"direccion\": \"Calle Falsa 123\",\n  \"contactoDTOPredeterminado\": { \"medio\": \"MAIL\", \"valor\": \"ana@mail.com\" }\n}"
+                },
+                "url": "{{donacionesUrl}}/api/donantes",
+                "description": "OJO: el JSON de contacto debe llamarse 'contactoDTOPredeterminado' (no 'contactoPredeterminado') por el nombre del getter/setter en CrearDonanteDTO. Y 'tipoUsuario' (PERSONA/ORGANIZACION) es obligatorio adem\u00e1s de 'tipo' (HUMANA/JURIDICA); si falta, la API devuelve 500 en vez de 400. Ver informe de correcciones."
+              }
+            },
+            {
+              "name": "Crear donante JURIDICA",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipo\": \"JURIDICA\",\n  \"tipoUsuario\": \"ORGANIZACION\",\n  \"tipoPersonaJuridica\": \"EMPRESA\",\n  \"rubro\": \"Alimentos\",\n  \"razonSocial\": \"Arcos Plateados S.A.\",\n  \"cuit\": \"30-12345678-9\",\n  \"contactoDTOPredeterminado\": { \"medio\": \"MAIL\", \"valor\": \"contacto@arcos.com\" }\n}"
+                },
+                "url": "{{donacionesUrl}}/api/donantes"
+              }
+            },
+            {
+              "name": "Listar donantes",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/donantes"
+              }
+            },
+            {
+              "name": "Obtener donante por id",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/donantes/{{donanteId}}"
+              }
+            },
+            {
+              "name": "Eliminar donante",
+              "request": {
+                "method": "DELETE",
+                "url": "{{donacionesUrl}}/api/donantes/{{donanteId}}"
+              }
+            },
+            {
+              "name": "Importar donantes por CSV",
+              "request": {
+                "method": "POST",
+                "url": "{{donacionesUrl}}/api/donantes/importar",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": ""
+                    }
+                  ]
+                },
+                "description": "Columnas del CSV: TipoPersona,TipoDoc,Documento,Nombre/RazonSocial,Email,Telefono. Probado OK con un archivo de 2 filas."
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entidades Beneficiarias",
+          "item": [
+            {
+              "name": "Crear entidad beneficiaria",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoEntidad\": \"COMEDOR\",\n  \"direccion\": \"Av. Siempreviva 742\",\n  \"organizacion\": {\n    \"razonSocial\": \"Comedor Escobar Sonrisas\",\n    \"cuit\": \"30-99999999-9\",\n    \"representantes\": [\n      {\n        \"nombre\": \"Laura\",\n        \"apellido\": \"Gomez\",\n        \"contacto\": {\n          \"medio\": \"MAIL\",\n          \"valor\": \"tumail@frba.utn.edu.ar\"\n        }\n      }\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "{{donacionesUrl}}/api/entidades-beneficiarias",
+                "description": "tipoEntidad admite solo: ESCUELARURAL, COMEDOR, ESPACIOTUTORIA.\n\nIMPORTANTE: a la entidad se la notifica a traves de las personas representantes designadas. Sin al menos un representante con contacto, la entidad no recibe ninguna notificacion (asignacion, inicio de ruta ni entrega) y el log de donaciones avisa que no tiene contactos cargados.\n\nEl GET del listado devuelve razonSocial y los representantes, para verificar que quedaron cargados."
+              }
+            },
+            {
+              "name": "Listar entidades beneficiarias",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/entidades-beneficiarias"
+              }
+            },
+            {
+              "name": "Obtener entidad por id",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/entidades-beneficiarias/{{entidadId}}"
+              }
+            },
+            {
+              "name": "Eliminar entidad",
+              "request": {
+                "method": "DELETE",
+                "url": "{{donacionesUrl}}/api/entidades-beneficiarias/{{entidadId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Necesidades",
+          "item": [
+            {
+              "name": "Crear necesidad RECURRENTE",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"entidadId\": {{entidadId}},\n  \"subcategoriaId\": {{subcategoriaId}},\n  \"descripcion\": \"Fideos para la semana\",\n  \"cantidad\": 100,\n  \"tipo\": \"RECURRENTE\",\n  \"tipoPeriodo\": \"SEMANA\",\n  \"frecuencia\": 1\n}"
+                },
+                "url": "{{donacionesUrl}}/api/necesidades"
+              }
+            },
+            {
+              "name": "Crear necesidad EXTRAORDINARIA",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"entidadId\": {{entidadId}},\n  \"subcategoriaId\": {{subcategoriaId}},\n  \"descripcion\": \"Sillas por inundaci\u00f3n\",\n  \"cantidad\": 30,\n  \"tipo\": \"EXTRAORDINARIA\",\n  \"motivo\": \"Inundaci\u00f3n en el aula\"\n}"
+                },
+                "url": "{{donacionesUrl}}/api/necesidades"
+              }
+            },
+            {
+              "name": "Listar necesidades (filtros opcionales)",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/necesidades"
+              }
+            },
+            {
+              "name": "Obtener necesidad por id",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/necesidades/{{necesidadId}}"
+              }
+            },
+            {
+              "name": "Actualizar necesidad",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cantidad\": 50\n}"
+                },
+                "url": "{{donacionesUrl}}/api/necesidades/{{necesidadId}}"
+              }
+            },
+            {
+              "name": "Eliminar necesidad",
+              "request": {
+                "method": "DELETE",
+                "url": "{{donacionesUrl}}/api/necesidades/{{necesidadId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bienes",
+          "item": [
+            {
+              "name": "Crear bien (alta directa, uso interno)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nombre\": \"Fideos secos 500g\",\n  \"subcategoriaId\": {{subcategoriaId}},\n  \"unidad\": \"KILOGRAMO\",\n  \"cantidadBien\": 5.0\n}"
+                },
+                "url": "{{donacionesUrl}}/api/bienes",
+                "description": "unidad admite solo: GRAMO, KILOGRAMO, LITRO, y describe el contenido de cada pieza.\n\nNo hace falta una unidad tipo 'pieza': la cantidad de piezas va en ItemBien.cantidad al crear la donacion, y los bienes cuyo estado importa (sillas, ropa) se modelan con estadoUso en lugar de unidad."
+              }
+            },
+            {
+              "name": "Listar bienes",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/bienes"
+              }
+            },
+            {
+              "name": "Actualizar bien",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"descripcion\": \"Paquete de 500g\"\n}"
+                },
+                "url": "{{donacionesUrl}}/api/bienes/{{bienId}}"
+              }
+            },
+            {
+              "name": "Eliminar bien",
+              "request": {
+                "method": "DELETE",
+                "url": "{{donacionesUrl}}/api/bienes/{{bienId}}"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Donaciones",
+          "item": [
+            {
+              "name": "Crear donacion (segmenta por subcategoria)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"donanteId\": \"{{donanteId}}\",\n  \"descripcion\": \"Donacion de la planta de pastas\",\n  \"items\": [\n    {\n      \"nombre\": \"Fideos secos\",\n      \"descripcion\": \"paquete de 500 g\",\n      \"subcategoriaId\": \"{{subcategoriaId}}\",\n      \"cantidad\": 100,\n      \"unidad\": \"GRAMO\",\n      \"cantidadBien\": 500,\n      \"fechaVencimiento\": \"2027-01-01\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "{{donacionesUrl}}/api/donaciones",
+                "description": "Se carga todo junto y el sistema segmenta: si los items pertenecen a dos subcategorias distintas, el GET devuelve dos donaciones separadas. Cada una arranca en EN_DEPOSITO.\n\ncantidad = cuantos paquetes se donan. cantidadBien + unidad = el contenido de cada uno (500 g). Para bienes que no se miden (sillas, camperas) omitir ambos y usar estadoUso: true si son usados.\n\nfechaVencimiento va SOLO con fecha: 2027-01-01. Con hora incluida responde 500."
+              }
+            },
+            {
+              "name": "Listar donaciones (filtros opcionales)",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/donaciones"
+              }
+            },
+            {
+              "name": "Obtener donacion por id",
+              "request": {
+                "method": "GET",
+                "url": "{{donacionesUrl}}/api/donaciones/{{donacionId}}"
+              }
+            },
+            {
+              "name": "Cambiar estado / asignar entidad",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tipoEstado\": \"ASIGNACION_REALIZADA\",\n  \"entidadId\": {{entidadId}}\n}"
+                },
+                "url": "{{donacionesUrl}}/api/donaciones/{{donacionId}}",
+                "description": "Estados validos: EN_DEPOSITO, ASIGNACION_REALIZADA (requiere entidadId), LISTA_PARA_ENTREGAR, EN_TRASLADO, ENTREGADA, ENTREGA_FALLIDA (agregar JustificacionEntregaFallida), VENCIDA.\n\nASIGNACION_REALIZADA dispara dos integraciones: notifica al donante y a la entidad, y empuja la entrega a Logistica. Si Logistica esta caida devuelve 200 igual y solo loguea un warning."
+              }
+            },
+            {
+              "name": "Eliminar donacion",
+              "request": {
+                "method": "DELETE",
+                "url": "{{donacionesUrl}}/api/donaciones/{{donacionId}}"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Servicio de Incentivos (8082)",
+      "item": [
+        {
+          "name": "Perfil analitico de donante",
+          "request": {
+            "method": "GET",
+            "url": "{{incentivosUrl}}/api/incentivos/donantes/ana/perfil-analitico",
+            "description": "Totales historicos, evolucion por periodo, comparacion mensual, organizaciones ayudadas, impacto acumulado y posicion en el ranking.\n\nDevuelve 404 si el donante todavia no registro ninguna donacion."
+          },
+          "description": "Siempre 500 'Donante no encontrado': no existe ning\u00fan endpoint para dar de alta un DonanteIncentivos en este servicio. Ver informe de correcciones."
+        },
+        {
+          "name": "Registrar donacion de usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subcategoria\": \"alimentos\",\n  \"bienes\": [\n    \"arroz\",\n    \"fideos\"\n  ],\n  \"organizacion\": \"Comedor Norte\",\n  \"fechaIngreso\": \"2026-06-05\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{incentivosUrl}}/api/incentivos/registrar-donacion?nombreUsuario=ana",
+            "description": "Crea al donante si no existia y registra la donacion, recalculando misiones e insignias.\n\nEl donante va por query param (nombreUsuario), no en el body. bienes y fechaIngreso son obligatorios: la fecha en formato YYYY-MM-DD y bienes como array no vacio (su tamano es la cantidad de bienes que evalua la mision Habil Donador).\n\nSecuencia sugerida para la demo, tres POST con estos datos: (1) alimentos / [arroz,fideos] / Comedor Norte / 2026-06-05, (2) ropa / [campera] / Escuela 12 / 2026-07-08, (3) juguetes / [pelota] / Hogar Sur / 2026-08-10. Con eso ana completa las cuatro misiones de bronce, gana cuatro insignias y asciende a Sostenedor."
+          }
+        },
+        {
+          "name": "Progreso de misiones",
+          "request": {
+            "method": "GET",
+            "url": "{{incentivosUrl}}/api/incentivos/donantes/ana/misiones-progreso",
+            "description": "Las cuatro misiones de la categoria actual con progreso, objetivo y distancia restante.\n\nEs la respuesta mas demostrable: despues de las tres donaciones sugeridas, ana esta en Sostenedor y las cuatro misiones de plata quedan a mitad de camino."
+          }
+        },
+        {
+          "name": "Vitrina de insignias",
+          "request": {
+            "method": "GET",
+            "url": "{{incentivosUrl}}/api/incentivos/donantes/ana/vitrina",
+            "description": "Insignias ganadas con la URL de su imagen. Las imagenes se sirven desde el propio servicio (por ejemplo http://localhost:8082/insignias/racha_bronce.png)."
+          }
+        },
+        {
+          "name": "Procesar ranking a demanda",
+          "request": {
+            "method": "POST",
+            "url": "{{incentivosUrl}}/api/incentivos/ranking/procesar",
+            "description": "Calcula y persiste el ranking del periodo, y devuelve el podio resultante. Existe para no depender del cron del dia 1 a medianoche.\n\nAcepta el query param opcional 'periodo' (YYYY-MM); sin el usa el mes en curso. Un periodo mal formado devuelve 400."
+          }
+        },
+        {
+          "name": "Podio destacado del mes",
+          "request": {
+            "method": "GET",
+            "url": "{{incentivosUrl}}/api/incentivos/ranking/destacados",
+            "description": "Podio del periodo indicado con el query param opcional 'periodo' (formato YYYY-MM). Sin parametro usa el mes en curso.\n\nDevuelve 404 mientras ese periodo no haya sido procesado: correr antes 'Procesar ranking a demanda'. El proceso programado corre el dia 1 de cada mes y persiste el mes que cerro, asi que para consultarlo hay que pasar ese periodo explicitamente."
+          },
+          "description": "No probado end-to-end (depende de que existan donantes con misiones cumplidas, bloqueado por el mismo motivo que los anteriores). Responde 500 si a\u00fan no se ejecut\u00f3 el ranking programado del mes."
+        }
+      ],
+      "description": "Incentivos se entera de los donantes por las donaciones que le informa el Servicio de Donaciones: no hay alta aparte. El primer POST de registrar-donacion crea al donante, asi que hay que correrlo antes de los tres GET."
+    },
+    {
+      "name": "Servicio de Notificaciones (8081)",
+      "item": [
+        {
+          "name": "Enviar notificaci\u00f3n",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombreDestinatario\": \"Ana Perez\",\n  \"mensaje\": \"Prueba de notificacion\",\n  \"contactos\": [ { \"tipo\": \"MAIL\", \"valor\": \"ana@mail.com\" } ]\n}"
+            },
+            "url": "{{notificacionesUrl}}/api/notificaciones",
+            "description": "OJO: ac\u00e1 el campo del contacto se llama 'tipo' (no 'medio' como en servicio-donaciones). Sin BREVO_API_KEY/BREVO_REMITENTE configurados responde 200 con estado FALLIDA (comportamiento esperado en este entorno de prueba)."
+          }
+        },
+        {
+          "name": "Listar historial de notificaciones",
+          "request": {
+            "method": "GET",
+            "url": "{{notificacionesUrl}}/api/notificaciones"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Servicio de Logistica (8083)",
+      "description": "Requiere MySQL escuchando en 3306 con la base donatrack_logistica. Es el unico servicio con persistencia real: sin base no arranca, porque Hibernate necesita conectarse al iniciar (ddl-auto=update). El BeanCreationException del arranque es eso, no un bug.\n\nLas requests estan en orden de ejecucion: se puede correr la carpeta entera de arriba abajo. Primero el camion (sin camion no hay ruta), despues las entregas, la planificacion y el recorrido. 'Dar de baja camion' va ultima porque un camion con ruta activa no se puede desactivar.\n\nAntes de 'Recibir nuevas entregas', el Servicio de Donaciones ya empuja una entrega al asignar una donacion; el id que use el callback se obtiene de 'Listar entregas'.",
+      "item": [
+        {
+          "name": "Crear cami\u00f3n",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patente\": \"AB123CD\",\n  \"capacidadVolumen\": 10.0,\n  \"altura\": 2.5,\n  \"capacidadCarga\": 1500.0\n}"
+            },
+            "url": "{{logisticaUrl}}/api/logistica/camiones"
+          }
+        },
+        {
+          "name": "Listar camiones",
+          "request": {
+            "method": "GET",
+            "url": "{{logisticaUrl}}/api/logistica/camiones"
+          }
+        },
+        {
+          "name": "Modificar cami\u00f3n",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patente\": \"AB123CD\",\n  \"capacidadVolumen\": 12.0,\n  \"altura\": 2.5,\n  \"capacidadCarga\": 1600.0\n}"
+            },
+            "url": "{{logisticaUrl}}/api/logistica/camiones/AB123CD"
+          }
+        },
+        {
+          "name": "Actualizar ubicaci\u00f3n del cami\u00f3n",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitud\": -34.6,\n  \"longitud\": -58.4\n}"
+            },
+            "url": "{{logisticaUrl}}/api/logistica/camiones/AB123CD/ubicacion"
+          }
+        },
+        {
+          "name": "Recibir nuevas entregas (push desde Donaciones)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entregas\": [ { \"donacionId\": \"1\", \"direccionDestino\": \"Av Siempreviva 742\" } ]\n}"
+            },
+            "url": "{{logisticaUrl}}/api/logistica/entregas"
+          }
+        },
+        {
+          "name": "Listar entregas (filtro opcional por estado)",
+          "request": {
+            "method": "GET",
+            "url": "{{logisticaUrl}}/api/logistica/entregas"
+          }
+        },
+        {
+          "name": "Consultar entrega por id",
+          "request": {
+            "method": "GET",
+            "url": "{{logisticaUrl}}/api/logistica/entregas/1"
+          }
+        },
+        {
+          "name": "Planificar rutas del d\u00eda",
+          "request": {
+            "method": "POST",
+            "url": "{{logisticaUrl}}/api/logistica/planificar"
+          }
+        },
+        {
+          "name": "Callback del planificador externo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"patenteCamion\": \"AB123CD\",\n    \"entregas\": [\n      {\n        \"id\": 1,\n        \"donacionId\": \"1\",\n        \"direccionDestino\": \"Av. Siempreviva 742\",\n        \"ordenVisita\": 1\n      }\n    ]\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{logisticaUrl}}/api/logistica/callback-planificador",
+            "description": "Simula la respuesta del planificador externo. Mandar SIEMPRE el id de cada entrega: es como Logistica vuelve a vincularlas con las filas que ya existen.\n\nSin id, Logistica intenta resolverla por donacionId entre las entregas pendientes; si tampoco matchea, la ignora y lo deja en el log, en lugar de insertar una entrega nueva duplicada.\n\nObtene los ids con GET /api/logistica/entregas despues de que Donaciones haya empujado las entregas."
+          }
+        },
+        {
+          "name": "Consultar ruta activa de un cami\u00f3n",
+          "request": {
+            "method": "GET",
+            "url": "{{logisticaUrl}}/api/logistica/camiones/AB123CD/ruta-activa"
+          }
+        },
+        {
+          "name": "Listar rutas activas",
+          "request": {
+            "method": "GET",
+            "url": "{{logisticaUrl}}/api/logistica/rutas-activas"
+          }
+        },
+        {
+          "name": "Chofer inicia ruta",
+          "request": {
+            "method": "PUT",
+            "url": "{{logisticaUrl}}/api/logistica/camiones/AB123CD/iniciar-ruta"
+          }
+        },
+        {
+          "name": "Cambiar estado de una entrega",
+          "request": {
+            "method": "PUT",
+            "url": "{{logisticaUrl}}/api/logistica/entregas/1/estado?nuevoEstado=ENTREGADA&fotoUrl=http://example.com/foto.jpg"
+          }
+        },
+        {
+          "name": "Dar de baja cami\u00f3n",
+          "request": {
+            "method": "DELETE",
+            "url": "{{logisticaUrl}}/api/logistica/camiones/AB123CD"
+          }
+        }
+      ]
+    }
+  ]
+}

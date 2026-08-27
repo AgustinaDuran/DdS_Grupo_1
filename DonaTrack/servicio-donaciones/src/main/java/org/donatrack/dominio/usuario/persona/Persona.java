@@ -21,6 +21,11 @@ public class Persona extends DatosUsuario {
     private String direccion;
     private Contacto contactoPredeterminado;
 
+    /** De un representante de organización sólo se conoce su nombre y cómo contactarlo. */
+    public Persona(String nombre, String apellido, Contacto contactoPredeterminado) {
+        this(nombre, apellido, null, null, null, null, contactoPredeterminado);
+    }
+
     public Persona(String nombre, String apellido, Integer edad, String dni, String genero, String direccion, Contacto contactoPredeterminado) {
         this.nombre = nombre;
         this.apellido = apellido;

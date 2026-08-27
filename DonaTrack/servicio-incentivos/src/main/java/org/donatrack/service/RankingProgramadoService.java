@@ -4,6 +4,7 @@ import org.donatrack.model.*;
 import org.donatrack.repository.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -24,9 +25,22 @@ public class RankingProgramadoService {
 
     @Scheduled(cron = "0 0 0 1 * ?") // 0 segs - 0 mins - 0 hs - dia 1 - cada mes - cualquier dia
     public void ejecutarProcesamientoMensual() {
+        // Al cierre de cada mes se persiste el ranking del mes que terminó.
+        procesarPeriodo(YearMonth.now().minusMonths(1));
+    }
 
-        YearMonth mesPasado = YearMonth.now().minusMonths(1);
-        
+    /**
+     * Calcula y persiste el ranking de un período. Se expone además a demanda porque el cron
+     * sólo corre el día 1 a medianoche y sin esto el podio no se puede demostrar.
+     *
+     * Es transaccional porque la colección de donaciones del donante es LAZY y el hilo del
+     * scheduler no tiene el interceptor web que mantiene la sesión abierta.
+     */
+    @Transactional
+    public RankingMensual procesarPeriodo(YearMonth periodo) {
+
+        YearMonth mesPasado = periodo;
+
         Iterable<DonanteIncentivos> todos = donanteRepository.findAll();
         List<DonanteIncentivos> listaDonantes = new ArrayList<>();
         todos.forEach(listaDonantes::add);
@@ -49,6 +63,6 @@ public class RankingProgramadoService {
             rankingDelMes.AgregarAlPodio(puesto);
         }
 
-        rankingRepository.save(rankingDelMes);
+        return rankingRepository.save(rankingDelMes);
     }
 }

@@ -17,7 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Servicio de Donaciones — Notificaciones de Eventos por Logística (Entrega 3).
@@ -55,8 +58,8 @@ public class LogisticaPollingScheduler {
 
     @Scheduled(fixedDelayString = "${logistica.polling.intervalo-ms:60000}")
     public void sincronizarEventosDeLogistica() {
-        List<EntregaResponse> entregas = logisticaClient.listarEntregas();
-        
+        List<EntregaResponse> entregas = ultimaEntregaPorDonacion(logisticaClient.listarEntregas());
+
         for (EntregaResponse entrega : entregas) {
             try {
                 procesarEntrega(entrega);
@@ -64,6 +67,38 @@ public class LogisticaPollingScheduler {
                 log.warn("Error procesando la entrega {} de Logística: {}", entrega.getId(), e.getMessage());
             }
         }
+    }
+
+    /**
+     * Una donación puede tener más de una entrega en Logística: si una queda no recibida y la
+     * donación se replanifica, se crea otra. Sólo interesa el último intento.
+     *
+     * Comparar todas las entregas contra el único estado local de la donación haría que, ante
+     * dos entregas en estados distintos, cada ciclo detecte una diferencia y vuelva a notificar
+     * indefinidamente.
+     *
+     * Visible en el paquete para poder testear la selección sin levantar el ciclo completo.
+     */
+    List<EntregaResponse> ultimaEntregaPorDonacion(List<EntregaResponse> entregas) {
+        Map<String, EntregaResponse> ultimas = new LinkedHashMap<>();
+        for (EntregaResponse entrega : entregas) {
+            if (entrega.getDonacionId() == null) {
+                continue;
+            }
+            EntregaResponse previa = ultimas.get(entrega.getDonacionId());
+            if (previa == null || esPosterior(entrega, previa)) {
+                ultimas.put(entrega.getDonacionId(), entrega);
+            }
+        }
+        return new ArrayList<>(ultimas.values());
+    }
+
+    /** El id autoincremental de Logística ordena los intentos: el mayor es el más reciente. */
+    private boolean esPosterior(EntregaResponse candidata, EntregaResponse actual) {
+        if (candidata.getId() == null) {
+            return false;
+        }
+        return actual.getId() == null || candidata.getId() > actual.getId();
     }
 
     private void procesarEntrega(EntregaResponse entrega) {

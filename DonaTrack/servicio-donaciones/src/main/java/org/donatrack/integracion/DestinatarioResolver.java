@@ -57,18 +57,33 @@ public class DestinatarioResolver {
 
     private List<ContactoNotificacion> contactosDe(DatosUsuario datos) {
         List<ContactoNotificacion> resultado = new ArrayList<>();
+        recolectarContactos(datos, resultado);
+        return resultado;
+    }
+
+    /**
+     * Acumula sobre una única lista para que agregar(...) pueda deduplicar entre los
+     * contactos propios y los de cada representante.
+     */
+    private void recolectarContactos(DatosUsuario datos, List<ContactoNotificacion> destino) {
         if (datos == null) {
-            return resultado;
+            return;
         }
         if (datos instanceof Persona persona) {
-            agregar(resultado, persona.getContactoPredeterminado());
+            agregar(destino, persona.getContactoPredeterminado());
         }
         if (datos.getContactos() != null) {
             for (Contacto contacto : datos.getContactos()) {
-                agregar(resultado, contacto);
+                agregar(destino, contacto);
             }
         }
-        return resultado;
+        // A una organización se la contacta a través de las personas representantes
+        // designadas: son quienes reciben los avisos en nombre de la entidad.
+        if (datos instanceof Organizacion organizacion && organizacion.getRepresentantes() != null) {
+            for (Persona representante : organizacion.getRepresentantes()) {
+                recolectarContactos(representante, destino);
+            }
+        }
     }
 
     private void agregar(List<ContactoNotificacion> destino, Contacto contacto) {

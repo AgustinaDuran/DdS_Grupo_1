@@ -8,5 +8,8 @@ import java.util.List;
 
 @Repository
 public interface EntregaRepository extends JpaRepository<Entrega, Long> { // entregas no planidicadas noi q salieron
-    List<Entrega> findByEstado(EstadoEntrega estado); 
+    List<Entrega> findByEstado(EstadoEntrega estado);
+
+    // Para volver a vincular las entregas que devuelve el planificador externo sin el id.
+    List<Entrega> findByDonacionIdAndEstado(String donacionId, EstadoEntrega estado);
 }

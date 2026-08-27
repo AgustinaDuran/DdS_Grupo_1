@@ -15,7 +15,7 @@ import jakarta.persistence.*;
 public class Organizacion extends DatosUsuario {
     private String razonSocial;
     private String cuit;
-    private List<Persona> representantes;
+    private List<Persona> representantes = new ArrayList<>();
     private List<RolesOrganizacion> rolesOrganizacion;
 
     public Organizacion() {
