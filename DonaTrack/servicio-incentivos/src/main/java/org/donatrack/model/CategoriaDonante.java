@@ -3,6 +3,11 @@ import java.util.List;
 
 public abstract class CategoriaDonante {  
     protected List<Mision> misiones;
+    protected FabricaInsignias fabricaInsignias;
+
+    protected CategoriaDonante(FabricaInsignias fabricaInsignias) {  // ← nuevo constructor
+        this.fabricaInsignias = fabricaInsignias;
+    }
 
     public abstract String GetNombre();
 

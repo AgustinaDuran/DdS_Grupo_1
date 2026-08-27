@@ -3,12 +3,12 @@ package org.donatrack.model;
 import java.util.List;
 
 public class Transformador extends CategoriaDonante {
-    public Transformador() {
+    public Transformador(FabricaInsignias fabricaInsignias) {
       
-        Insignia rachaOro = FabricaInsignias.Crear(TipoInsignia.RACHA, NivelInsignia.ORO);
-        Insignia completitudOro = FabricaInsignias.Crear(TipoInsignia.COMPLETITUD, NivelInsignia.ORO);
-        Insignia habilOro = FabricaInsignias.Crear(TipoInsignia.HABIL_DONADOR, NivelInsignia.ORO);
-        Insignia exitosasOro = FabricaInsignias.Crear(TipoInsignia.DONACIONES_EXITOSAS, NivelInsignia.ORO);
+        Insignia rachaOro = fabricaInsignias.Crear(TipoInsignia.RACHA, NivelInsignia.ORO);
+        Insignia completitudOro = fabricaInsignias.Crear(TipoInsignia.COMPLETITUD, NivelInsignia.ORO);
+        Insignia habilOro = fabricaInsignias.Crear(TipoInsignia.HABIL_DONADOR, NivelInsignia.ORO);
+        Insignia exitosasOro = fabricaInsignias.Crear(TipoInsignia.DONACIONES_EXITOSAS, NivelInsignia.ORO);
 
         this.misiones = List.of(
             new MisionRacha("Completa donaciones durante X meses consecutivos", rachaOro, 12),

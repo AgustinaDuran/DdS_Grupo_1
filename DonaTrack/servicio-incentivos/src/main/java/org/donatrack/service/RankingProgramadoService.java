@@ -24,8 +24,10 @@ public class RankingProgramadoService {
 
     @Scheduled(cron = "0 0 0 1 * ?") // 0 segs - 0 mins - 0 hs - dia 1 - cada mes - cualquier dia
     public void ejecutarProcesamientoMensual() {
-
-        YearMonth mesPasado = YearMonth.now().minusMonths(1);
+        
+        GenerarRankingDe(YearMonth.now().minusMonths(1));
+    }
+    public RankingMensual GenerarRankingDe(YearMonth periodo) {
         
         Iterable<DonanteIncentivos> todos = donanteRepository.findAll();
         List<DonanteIncentivos> listaDonantes = new ArrayList<>();
@@ -33,22 +35,20 @@ public class RankingProgramadoService {
 
         Map<String, Integer> misionesPorDonante = new HashMap<>();
         for (DonanteIncentivos donante : listaDonantes) {
-            misionesPorDonante.put(donante.GetNombreUsuario(), donante.CalcularMisionesCumplidasEn(mesPasado));
+            misionesPorDonante.put(donante.GetNombreUsuario(), donante.CalcularMisionesCumplidasEn(periodo));
         }
 
         listaDonantes.sort((d1, d2) -> Integer.compare(misionesPorDonante.get(d2.GetNombreUsuario()), misionesPorDonante.get(d1.GetNombreUsuario())));
 
-        RankingMensual rankingDelMes = new RankingMensual(mesPasado);
+        RankingMensual rankingDelMes = new RankingMensual(periodo);
 
         Integer limitePodio = Math.min(listaDonantes.size(), 3);
         for (Integer i = 0; i < limitePodio; i++) {
             DonanteIncentivos donanteGanador = listaDonantes.get(i);
-            Integer misionesCount = donanteGanador.CalcularMisionesCumplidasEn(mesPasado);
-            
-            PuestoRanking puesto = new PuestoRanking(i + 1, donanteGanador.GetNombreUsuario(), misionesCount);
-            rankingDelMes.AgregarAlPodio(puesto);
+            Integer misionesCount = donanteGanador.CalcularMisionesCumplidasEn(periodo);
+            rankingDelMes.AgregarAlPodio(new PuestoRanking(i + 1, donanteGanador.GetNombreUsuario(), misionesCount));
         }
 
-        rankingRepository.save(rankingDelMes);
+        return rankingRepository.save(rankingDelMes);
     }
 }

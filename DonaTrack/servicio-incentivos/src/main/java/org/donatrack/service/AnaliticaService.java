@@ -1,7 +1,7 @@
 package org.donatrack.service;
 
 import org.donatrack.controller.dto.*;
-import org.donatrack.controller.exception.RankingNoProcesadoException;
+import org.donatrack.controller.exception.*;
 import org.donatrack.model.*;
 import org.donatrack.repository.DonanteRepository;
 import org.donatrack.repository.RankingRepository;
@@ -24,7 +24,7 @@ public class AnaliticaService {
     }
 
     public void RegistrarDonacionDeUsuario(String nombreUsuario, DonacionDTO donacionDto) {
-        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseGet(() -> new DonanteIncentivos(nombreUsuario));
 
         ResultadoActividad resultado = donante.RegistrarActividad(donacionDto);
 
@@ -41,7 +41,7 @@ public class AnaliticaService {
     }
 
     public PerfilAnaliticoDTO ObtenerEstadisticasGenerales(String nombreUsuario) {
-        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new DonanteNoEncontradoException(nombreUsuario));
 
         Integer posicionRanking = CalcularPosicionRanking(nombreUsuario);
 
@@ -58,7 +58,7 @@ public class AnaliticaService {
     }
 
     public List<MisionProgresoDTO> ObtenerProgresoMisiones(String nombreUsuario) {
-        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new DonanteNoEncontradoException(nombreUsuario));
 
         List<MisionProgresoDTO> progresoList = new ArrayList<>();
         
@@ -75,7 +75,7 @@ public class AnaliticaService {
     }
 
     public List<InsigniaDTO> ObtenerInsignias(String nombreUsuario) {
-        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new RuntimeException("Donante no encontrado: " + nombreUsuario));
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new DonanteNoEncontradoException(nombreUsuario));
 
         List<InsigniaDTO> dtos = new ArrayList<>();
         for (Insignia insignia : donante.GetInsigniasGanadas()) {
@@ -94,8 +94,7 @@ public class AnaliticaService {
     }
 
     public PodioMensualDTO ObtenerPodioDestacadoDelMes(YearMonth mesAConsultar) {
-        RankingMensual ranking = rankingRepository.findById(mesAConsultar.toString())
-            .orElseThrow(() -> new RankingNoProcesadoException(mesAConsultar.toString()));
+        RankingMensual ranking = rankingRepository.findById(mesAConsultar.toString()).orElseThrow(() -> new RankingNoProcesadoException(mesAConsultar.toString()));
 
         List<PodioMensualDTO.PuestoGanador> destacadosDTO = new ArrayList<>();
         for (PuestoRanking puesto : ranking.GetPodio()) {
