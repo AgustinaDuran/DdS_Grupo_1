@@ -30,6 +30,8 @@ public class UsuariosRepository {
     public DatosUsuario save(DatosUsuario donante){
         if (donante.getId() == null) {
             donante.setId(nextId++);
+        } else {
+            usuarios.removeIf(existente -> donante.getId().equals(existente.getId()));
         }
         usuarios.add(donante);
         return donante;

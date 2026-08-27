@@ -29,6 +29,8 @@ public class DonantesRepository {
     public Donante save(Donante donante){
         if (donante.getId() == null) {
             donante.setId(nextId++);
+        } else {
+            donantes.removeIf(existente -> donante.getId().equals(existente.getId()));
         }
         donantes.add(donante);
         return donante;

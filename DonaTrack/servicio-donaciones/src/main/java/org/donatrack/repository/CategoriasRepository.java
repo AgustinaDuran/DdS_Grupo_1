@@ -35,6 +35,8 @@ public class CategoriasRepository {
     public void saveCategoria(Categoria categoria) {
         if (categoria.getId() == null) {
             categoria.setId(nextId++);
+        } else {
+            categorias.removeIf(existente -> categoria.getId().equals(existente.getId()));
         }
         categorias.add(categoria);
     }
@@ -64,6 +66,8 @@ public class CategoriasRepository {
     public void saveSubcategoria(Subcategoria subcategoria) {
         if (subcategoria.getId() == null) {
             subcategoria.setId(nextId++);
+        } else {
+            subcategorias.removeIf(existente -> subcategoria.getId().equals(existente.getId()));
         }
         subcategorias.add(subcategoria);
     }

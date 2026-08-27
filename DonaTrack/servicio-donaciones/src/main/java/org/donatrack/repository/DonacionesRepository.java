@@ -48,6 +48,8 @@ public class DonacionesRepository {
     public void save(Donacion donacion){
         if (donacion.getId() == null) {
             donacion.setId(nextId++);
+        } else {
+            donaciones.removeIf(existente -> donacion.getId().equals(existente.getId()));
         }
         donaciones.add(donacion);
     }

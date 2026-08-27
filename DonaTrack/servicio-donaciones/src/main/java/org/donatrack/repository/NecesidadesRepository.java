@@ -40,6 +40,8 @@ public class NecesidadesRepository {
     public void save(Necesidad necesidad) {
         if (necesidad.getId() == null) {
             necesidad.setId(nextId++);
+        } else {
+            necesidades.removeIf(existente -> necesidad.getId().equals(existente.getId()));
         }
         necesidades.add(necesidad);
     }

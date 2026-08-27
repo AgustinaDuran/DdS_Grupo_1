@@ -19,6 +19,8 @@ public class BienesRepository {
     public void save(Bien bien) {
         if (bien.getId() == null) {
             bien.setId(nextId++);
+        } else {
+            bienes.removeIf(existente -> bien.getId().equals(existente.getId()));
         }
         bienes.add(bien);
     }
