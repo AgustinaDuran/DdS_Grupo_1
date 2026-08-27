@@ -2,6 +2,7 @@ package org.donatrack.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.donatrack.dominio.categoria.Categoria;
 import org.donatrack.dominio.categoria.Subcategoria;
@@ -41,7 +42,7 @@ public class CategoriasRepository {
     public void deleteCategoria(Long id) {
         categorias = categorias.stream()
                 .filter(c -> c.getId() != id)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     // ----- Subcategorias -----
@@ -70,7 +71,7 @@ public class CategoriasRepository {
     public void deleteSubcategoria(Long id) {
         subcategorias = subcategorias.stream()
                 .filter(s -> s.getId() != id)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 
@@ -52,11 +53,13 @@ public class DonacionesRepository {
     }
 
     public void saveAll(List<Donacion> donaciones){
-        this.donaciones.addAll(donaciones);
+        for (Donacion donacion : donaciones) {
+            save(donacion);
+        }
     }
 
     public void delete(Long id){
-        donaciones = donaciones.stream().filter(d -> d.getId() != id).toList();
+        donaciones = donaciones.stream().filter(d -> d.getId() != id).collect(Collectors.toCollection(ArrayList::new));
     }
     
 

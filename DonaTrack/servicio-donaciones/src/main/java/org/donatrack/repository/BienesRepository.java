@@ -2,6 +2,7 @@ package org.donatrack.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.donatrack.dominio.bien.Bien;
 import org.springframework.stereotype.Repository;
@@ -29,7 +30,7 @@ public class BienesRepository {
     public void delete(Long id) {
         bienes = bienes.stream()
                 .filter(bien -> bien.getId() != id)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public List<Bien> findAll() {

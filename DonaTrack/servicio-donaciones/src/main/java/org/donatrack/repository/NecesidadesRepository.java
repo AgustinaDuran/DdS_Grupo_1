@@ -2,6 +2,7 @@ package org.donatrack.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.donatrack.dominio.necesidades.Necesidad;
 import org.donatrack.dominio.necesidades.TipoNecesidad;
@@ -50,7 +51,7 @@ public class NecesidadesRepository {
     public void delete(Long id) {
         necesidades = necesidades.stream()
                 .filter(n -> n.getId() == null || n.getId() != id)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 }
