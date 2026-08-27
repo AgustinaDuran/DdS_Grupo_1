@@ -1,5 +1,6 @@
 package org.donatrack.controller.dto.Donantes;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.donatrack.dominio.donante.Donante;
 import org.donatrack.dominio.donante.DonanteJuridico;
 import org.donatrack.dominio.donante.DonantePersona;
@@ -8,6 +9,7 @@ import org.donatrack.dominio.usuario.DatosUsuario;
 import org.donatrack.dominio.donante.TipoPersonaJuridica;
 import org.donatrack.dominio.usuario.persona.Persona;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DonanteDTO {
 
     private Long id;

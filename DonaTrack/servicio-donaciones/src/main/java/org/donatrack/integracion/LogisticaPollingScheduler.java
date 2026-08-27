@@ -56,6 +56,7 @@ public class LogisticaPollingScheduler {
     @Scheduled(fixedDelayString = "${logistica.polling.intervalo-ms:60000}")
     public void sincronizarEventosDeLogistica() {
         List<EntregaResponse> entregas = logisticaClient.listarEntregas();
+        
         for (EntregaResponse entrega : entregas) {
             try {
                 procesarEntrega(entrega);
@@ -87,7 +88,7 @@ public class LogisticaPollingScheduler {
         }
 
         switch (estadoLogistica) {
-            case EN_TRASLADO -> notificarInicioRuta(donacion);
+            case EN_TRASLADO -> notificarInicioRuta(donacion, entrega);
             case ENTREGADA -> notificarEntregaExitosa(donacion, entrega);
             case ENTREGA_FALLIDA -> notificarEntregaFallida(donacion, entrega);
             default -> { return; }
@@ -96,8 +97,8 @@ public class LogisticaPollingScheduler {
         sincronizarEstadoLocal(donacion, estadoLogistica, entrega);
     }
 
-    private void notificarInicioRuta(Donacion donacion) {
-        String mensaje = "Tu entrega inició su recorrido. Seguila en tiempo real en el mapa: " + mapaUrl;
+    private void notificarInicioRuta(Donacion donacion, EntregaResponse entrega) {
+        String mensaje = "Tu entrega inició su recorrido. Seguila en tiempo real en el mapa: " + mapaUrl + "?camion=" + entrega.getPatenteCamion();
         EntidadBeneficiaria entidad = donacion.getEntidadAEntregar();
         if (entidad != null) {
             notificacionesClient.enviar(destinatarioResolver.paraEntidad(entidad, mensaje));
@@ -107,8 +108,8 @@ public class LogisticaPollingScheduler {
 
     private void notificarEntregaExitosa(Donacion donacion, EntregaResponse entrega) {
         String comprobante = "Comprobante de entrega — fecha/hora: "
-                + (entrega.getFechaHoraEntrega() != null ? entrega.getFechaHoraEntrega() : "registrada")
-                + ", camión responsable asignado por Logística.";
+        + (entrega.getFechaHoraEntrega() != null ? entrega.getFechaHoraEntrega() : "registrada")
+        + ", camión responsable: " + entrega.getPatenteCamion() + ".";
         String mensaje = "La donación fue entregada correctamente. " + comprobante;
         EntidadBeneficiaria entidad = donacion.getEntidadAEntregar();
         if (entidad != null) {

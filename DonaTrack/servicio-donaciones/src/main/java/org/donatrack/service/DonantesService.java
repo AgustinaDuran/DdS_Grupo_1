@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.donatrack.controller.dto.Donantes.CrearDonanteDTO;
+import org.donatrack.controller.dto.Donantes.ImportacionCsvResultadoDTO;
 import org.donatrack.dominio.contacto.Contacto;
 import org.donatrack.dominio.donante.Donante;
 import org.donatrack.dominio.donante.DonanteJuridico;
@@ -15,6 +16,8 @@ import org.donatrack.dominio.usuario.persona.Persona;
 import org.donatrack.repository.DonantesRepository;
 import org.springframework.stereotype.Service;
 import org.donatrack.controller.dto.Usuarios.CrearUsuarioDTO;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.context.annotation.Lazy;
 
 @Service
 public class DonantesService {
@@ -22,9 +25,12 @@ public class DonantesService {
     private DonantesRepository donantesRepository;
     private UsuariosService usuariosService;
 
-    public DonantesService(DonantesRepository donantesRepository, UsuariosService usuariosService) {
+    private final ImportacionDonantesService importacionDonantesService;
+
+    public DonantesService(DonantesRepository donantesRepository, UsuariosService usuariosService, @Lazy ImportacionDonantesService importacionDonantesService) {
         this.donantesRepository = donantesRepository;
         this.usuariosService = usuariosService;
+        this.importacionDonantesService = importacionDonantesService;
     }
 
     public List<Donante> obtenerDonantes() {
@@ -70,6 +76,15 @@ public class DonantesService {
     public Donante guardarDonante(Donante donante) {
         return donantesRepository.save(donante);
     }
+
+    /** Alias de guardarDonante que respeta el nombre "actualizarDonante" del diagrama. */
+    public Donante actualizarDonante(Donante donante) {
+        return guardarDonante(donante);
+    }
+
+    public ImportacionCsvResultadoDTO importarDonantesMasivo(MultipartFile archivo) {
+    return importacionDonantesService.generarDonantesDesdeCSV(archivo);
+}
 
     /**
      * Índice email (normalizado) -> Donante, construido en una sola pasada. Lo usa la
@@ -126,6 +141,11 @@ public class DonantesService {
 
     public void eliminarDonante(Long id) {
         donantesRepository.delete(id);
+    }
+
+    /** Alias de eliminarDonante que respeta el nombre "darBajaDonante" del diagrama. */
+    public void darBajaDonante(Long id) {
+        eliminarDonante(id);
     }
 
     private DatosUsuario registrarNuevoUsuarioParaDonante(CrearDonanteDTO nuevoDonante) {

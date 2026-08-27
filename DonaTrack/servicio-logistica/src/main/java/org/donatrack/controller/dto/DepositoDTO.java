@@ -1,17 +1,16 @@
 package org.donatrack.controller.dto;
 
-import org.donatrack.model.Entrega;
 import java.util.List;
 
 public class DepositoDTO {
-    private List<Entrega> entregas;
+    private List<EntregaEntranteDTO> entregas;
 
     public DepositoDTO() {}
 
-    public DepositoDTO(List<Entrega> entregas) {
+    public DepositoDTO(List<EntregaEntranteDTO> entregas) {
         this.entregas = entregas;
     }
 
-    public List<Entrega> getEntregas() { return entregas; }
-    public void setEntregas(List<Entrega> entregas) { this.entregas = entregas; }
+    public List<EntregaEntranteDTO> getEntregas() { return entregas; }
+    public void setEntregas(List<EntregaEntranteDTO> entregas) { this.entregas = entregas; }
 }

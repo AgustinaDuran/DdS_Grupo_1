@@ -1,5 +1,5 @@
 package org.donatrack.service;
- 
+import org.donatrack.controller.dto.EntregaEntranteDTO;
 import org.donatrack.controller.dto.CamionDTO;
 import org.donatrack.controller.dto.SolicitudOptimizadorDTO;
 import org.donatrack.model.*;
@@ -40,8 +40,15 @@ public class LogisticaService {
         planificarRutasDelDia();
     }
 
-    public void registrarNuevasEntregas(List<Entrega> nuevasEntregas) {
-        entregaRepository.saveAll(nuevasEntregas);
+//    public void registrarNuevasEntregas(List<Entrega> nuevasEntregas) {
+//        entregaRepository.saveAll(nuevasEntregas);
+//    }
+
+    public void registrarNuevasEntregas(List<EntregaEntranteDTO> entregas) {
+        List<Entrega> nuevas = entregas.stream()
+                .map(dto -> new Entrega(dto.getDonacionId(), dto.getDireccionDestino()))
+                .toList();
+        entregaRepository.saveAll(nuevas);
     }
 
     public String planificarRutasDelDia() {
@@ -94,8 +101,12 @@ public class LogisticaService {
         if (ruta == null) {
             throw new RuntimeException("El camión " + patente + " no tiene una ruta activa asignada.");
         }
- 
+        if (ruta.getFechaHoraInicio() != null) {
+            throw new IllegalStateException("La ruta del camión " + patente + " ya fue iniciada.");
+        }
+        ruta.setFechaHoraInicio(LocalDateTime.now());
         for (Entrega entrega : ruta.getEntregas()) {
+            entrega.asignarCamion(patente); //para llevar registro en el comprobante de entrega
             entrega.CambiarEstado(EstadoEntrega.EN_TRASLADO, null, null);
             entregaRepository.save(entrega);
         }

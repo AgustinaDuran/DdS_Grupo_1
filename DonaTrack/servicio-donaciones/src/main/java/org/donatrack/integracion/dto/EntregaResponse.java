@@ -18,7 +18,9 @@ public class EntregaResponse {
     private String fotoComprobanteUrl;
     private LocalDateTime fechaHoraEntrega;
     private String motivoNoRecibida;
+    private String patenteCamion;
 
+    
     public Long getId() {
         return id;
     }
@@ -43,6 +45,7 @@ public class EntregaResponse {
         this.direccionDestino = direccionDestino;
     }
 
+    
     public String getEstado() {
         return estado;
     }
@@ -81,5 +84,13 @@ public class EntregaResponse {
 
     public void setMotivoNoRecibida(String motivoNoRecibida) {
         this.motivoNoRecibida = motivoNoRecibida;
+    }
+
+    public String getPatenteCamion(){
+        return this.patenteCamion;
+    }
+
+    public void setPatenteCamion(String patente){
+        this.patenteCamion = patente;
     }
 }

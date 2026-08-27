@@ -42,7 +42,7 @@ public class ImportacionDonantesService {
         this.donantesService = donantesService;
     }
 
-    public ImportacionCsvResultadoDTO importar(MultipartFile archivo) {
+    public ImportacionCsvResultadoDTO generarDonantesDesdeCSV(MultipartFile archivo) {
         ImportacionCsvResultadoDTO resultado = new ImportacionCsvResultadoDTO();
 
         if (archivo == null || archivo.isEmpty()) {
@@ -86,17 +86,22 @@ public class ImportacionDonantesService {
 
             Donante existente = indice.get(email);
             if (existente != null) {
-                actualizar(existente, fila);
+                actualizarDonante(existente, fila);
                 resultado.registrarActualizado();
             } else {
-                Donante creado = donantesService.registrarDonante(mapearACrearDonanteDTO(fila));
-                agregarTelefono(creado.getDatosUsuario(), fila.getTelefono());
+                Donante creado = generarDonante(fila);   // extraído a método propio
                 indice.put(email, creado);
                 resultado.registrarCreado();
             }
         } catch (Exception e) {
             resultado.registrarError(numeroLinea, e.getMessage());
         }
+    }
+
+    private Donante generarDonante(DonanteImportadoDTO fila) {
+        Donante creado = donantesService.registrarDonante(mapearACrearDonanteDTO(fila));
+        agregarTelefono(creado.getDatosUsuario(), fila.getTelefono());
+        return creado;
     }
 
     private DonanteImportadoDTO parsear(String linea, char separador) {
@@ -159,7 +164,7 @@ public class ImportacionDonantesService {
      * conservan la referencia del objeto, por lo que basta con mutarlo (invocar save lo
      * duplicaría en la lista). El email, clave del upsert, no se modifica.
      */
-    private void actualizar(Donante existente, DonanteImportadoDTO fila) {
+    private void actualizarDonante(Donante existente, DonanteImportadoDTO fila) {
         DatosUsuario datos = existente.getDatosUsuario();
         if (datos instanceof Persona persona) {
             String[] nombreApellido = separarNombreApellido(fila.getNombreRazonSocial());

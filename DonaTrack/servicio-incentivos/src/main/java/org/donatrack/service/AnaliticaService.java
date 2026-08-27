@@ -1,6 +1,7 @@
 package org.donatrack.service;
 
 import org.donatrack.controller.dto.*;
+import org.donatrack.controller.exception.RankingNoProcesadoException;
 import org.donatrack.model.*;
 import org.donatrack.repository.DonanteRepository;
 import org.donatrack.repository.RankingRepository;
@@ -93,7 +94,8 @@ public class AnaliticaService {
     }
 
     public PodioMensualDTO ObtenerPodioDestacadoDelMes(YearMonth mesAConsultar) {
-        RankingMensual ranking = rankingRepository.findById(mesAConsultar.toString()).orElseThrow(() -> new RuntimeException("Aún no se ha procesado el ranking para: " + mesAConsultar));
+        RankingMensual ranking = rankingRepository.findById(mesAConsultar.toString())
+            .orElseThrow(() -> new RankingNoProcesadoException(mesAConsultar.toString()));
 
         List<PodioMensualDTO.PuestoGanador> destacadosDTO = new ArrayList<>();
         for (PuestoRanking puesto : ranking.GetPodio()) {

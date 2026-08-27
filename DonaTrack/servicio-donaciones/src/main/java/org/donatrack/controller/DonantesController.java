@@ -8,7 +8,6 @@ import org.donatrack.controller.dto.Donantes.DonanteDTO;
 import org.donatrack.controller.dto.Donantes.ImportacionCsvResultadoDTO;
 import org.donatrack.dominio.donante.Donante;
 import org.donatrack.service.DonantesService;
-import org.donatrack.service.ImportacionDonantesService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,12 +20,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class DonantesController {
 
     private final DonantesService donantesService;
-    private final ImportacionDonantesService importacionDonantesService;
 
-    public DonantesController(DonantesService donantesService,
-                              ImportacionDonantesService importacionDonantesService) {
+    public DonantesController(DonantesService donantesService) {
         this.donantesService = donantesService;
-        this.importacionDonantesService = importacionDonantesService;
     }
 
     @GetMapping
@@ -50,9 +46,8 @@ public class DonantesController {
     }
 
     @PostMapping(value = "/importar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ImportacionCsvResultadoDTO> importarDonantes(
-            @RequestParam("file") MultipartFile file) {
-        ImportacionCsvResultadoDTO resultado = importacionDonantesService.importar(file);
+    public ResponseEntity<ImportacionCsvResultadoDTO> importarDonantes(@RequestParam("file") MultipartFile file) {
+        ImportacionCsvResultadoDTO resultado = donantesService.importarDonantesMasivo(file);
         return ResponseEntity.ok(resultado);
     }
 

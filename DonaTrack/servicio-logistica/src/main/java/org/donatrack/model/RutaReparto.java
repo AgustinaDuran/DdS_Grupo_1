@@ -2,6 +2,7 @@ package org.donatrack.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,9 @@ public class RutaReparto {
     private String patenteCamion;
 
     private LocalDate fechaPlanificacion;
+
+    private LocalDateTime fechaHoraInicio;  //de iniciarRuta()
+
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "ruta_id")
@@ -37,7 +41,8 @@ public class RutaReparto {
         }
         return !entregas.isEmpty();
     }
-
+    public LocalDateTime getFechaHoraInicio() { return fechaHoraInicio; }
+    public void setFechaHoraInicio(LocalDateTime fechaHoraInicio) { this.fechaHoraInicio = fechaHoraInicio; }
     public String getPatenteCamion() { return patenteCamion; }
     public void setPatenteCamion(String patenteCamion) { this.patenteCamion = patenteCamion; }
     public Long getId() { return id; }

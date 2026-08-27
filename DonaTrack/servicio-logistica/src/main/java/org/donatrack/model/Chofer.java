@@ -11,7 +11,7 @@ public class Chofer {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "camion_id", referencedColumnName = "id")
+    @JoinColumn(name = "camion_patente", referencedColumnName = "patente")
     private Camion camion;
 
     public Chofer() {}

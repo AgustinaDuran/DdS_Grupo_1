@@ -14,12 +14,14 @@ public class Entrega {
     private String direccionDestino;  
     
     @Enumerated(EnumType.STRING)
-    private EstadoEntrega estado;
+    private EstadoEntrega estado= EstadoEntrega.PENDIENTE;
     
     private Integer ordenVisita;
     private String fotoComprobanteUrl;
     private LocalDateTime fechaHoraEntrega; 
     private String motivoNoRecibida;
+    private String patenteCamion;
+
 
     public Entrega() {}
 
@@ -55,6 +57,13 @@ public class Entrega {
         if (nuevoEstado == EstadoEntrega.PENDIENTE) {
             this.ordenVisita = null; //vuelve al depostito
         }
+    }
+    public void asignarCamion(String patenteCamion) {
+        this.patenteCamion = patenteCamion;
+    }
+
+    public String getPatenteCamion() { 
+        return patenteCamion;
     }
 
     public Boolean EsEstadoTerminal() {

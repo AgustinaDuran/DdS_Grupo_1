@@ -3,6 +3,7 @@ package org.donatrack.controller.dto.Donantes;
 import org.donatrack.dominio.donante.TipoPersonaJuridica;
 import org.donatrack.dominio.usuario.RolUsuario;
 import org.donatrack.dominio.contacto.Contacto;
+import java.util.List;
 
 public class CrearDonanteDTO {
 
@@ -16,6 +17,8 @@ public class CrearDonanteDTO {
 
     // Campos CrearUsuarioDTO
     private RolUsuario tipoUsuario;
+    private List<ContactoDTO> contactos;
+
 
     // Campos Persona:
     private String nombre;

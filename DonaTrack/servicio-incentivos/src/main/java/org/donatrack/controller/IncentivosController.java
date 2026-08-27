@@ -1,12 +1,15 @@
 package org.donatrack.controller;
 
 import org.donatrack.controller.dto.*;
+import org.donatrack.controller.exception.RankingNoProcesadoException;
 import org.donatrack.service.AnaliticaService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/incentivos")
@@ -51,5 +54,14 @@ public class IncentivosController {
     public ResponseEntity<PodioMensualDTO> ObtenerPodioDestacado() {
         YearMonth mesActual = YearMonth.now(); 
         return ResponseEntity.ok(this.analiticaService.ObtenerPodioDestacadoDelMes(mesActual));
+    }
+
+    @ExceptionHandler(RankingNoProcesadoException.class)
+    public ResponseEntity<Map<String, Object>> manejarRankingNoProcesado(RankingNoProcesadoException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "status", HttpStatus.NOT_FOUND.value(),
+                "error", "Not Found",
+                "message", exception.getMessage()
+        ));
     }
 }
