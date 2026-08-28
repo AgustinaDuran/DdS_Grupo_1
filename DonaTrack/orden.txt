@@ -1,0 +1,53 @@
+1. Servicio de Donaciones — catálogo base
+
+1. POST /api/categorias → anotar categoriaId del GET siguiente
+2. GET /api/categorias
+3. POST /api/subcategorias (usa categoriaId)
+4. GET /api/subcategorias → anotar subcategoriaId
+
+2. Donantes y entidades
+
+5. POST /api/donantes (HUMANA) — el contacto va en contactoDTOPredeterminado, no contactoPredeterminado
+6. POST /api/donantes (JURIDICA)
+7. GET /api/donantes → anotar donanteId
+8. POST /api/entidades-beneficiarias — incluir al menos un representante con contacto (es quien recibe las notificaciones)
+9. GET /api/entidades-beneficiarias → anotar entidadId
+
+3. Necesidades, bienes y donación
+
+10. POST /api/necesidades (RECURRENTE, usa entidadId + subcategoriaId)
+11. POST /api/bienes
+12. POST /api/donaciones — la respuesta debe traer id numérico, no null
+13. GET /api/donaciones/{{donacionId}}
+14. PATCH /api/donaciones/{{donacionId}} → ASIGNACION_REALIZADA + entidadId (dispara notificaciones al representante y al donante)
+
+4. Casos negativos de Donaciones — acá falla
+
+15. POST /api/donantes sin tipoUsuario → da 500, debería ser 400
+16. PATCH /api/donaciones/999 (id inexistente) → da 500, debería ser 404
+
+Los dos son el mismo bug raíz: servicio-donaciones no tiene ningún @ControllerAdvice/@ExceptionHandler global, así que cualquier excepción de negocio cae en el manejador por defecto de Spring, que siempre devuelve 500. No lo toqué en los pasos anteriores porque no era parte de lo que me pediste traer de ENTREGA_3 — sigue igual en ambas ramas.
+
+5. Servicio de Notificaciones
+
+17. GET /api/notificaciones — confirmar que aparecen las 2 notificaciones automáticas del paso 14
+18. POST /api/notificaciones manual — el contacto usa tipo, no medio
+
+6. Servicio de Incentivos
+
+19. POST /api/incentivos/registrar-donacion?nombreUsuario=ana
+20. GET /api/incentivos/donantes/ana/perfil-analitico — confirmar que subcategoria/bienes/organizacion no vienen en null
+21. GET /api/incentivos/donantes/ana/misiones-progreso
+22. GET /api/incentivos/donantes/ana/vitrina
+23. GET /api/incentivos/donantes/nadie/perfil-analitico → 404 (correcto)
+24. GET /api/incentivos/ranking/destacados sin período → 404 esperado (mes anterior sin procesar)
+25. POST /api/incentivos/ranking/generar?periodo=2026-08
+26. GET /api/incentivos/ranking/destacados?periodo=2026-08
+
+7. Servicio de Logística
+
+27. POST /api/logistica/camiones
+28. GET /api/logistica/camiones
+29. GET /api/logistica/entregas — ya debe existir una entrega ligada a la donación del paso 12, en PENDIENTE
+30. PUT /api/logistica/camiones/AB123CD/iniciar-ruta
+31. PUT /api/logistica/entregas/1/estado?nuevoEstado=ENTREGADA&fotoUrl=...
