@@ -18,7 +18,7 @@ public class AutomatizacionService {
 
     /**
      * Con timeouts explícitos: un RestTemplate por defecto espera indefinidamente, así que si el
-     * webhook de n8n acepta la conexión y no responde, el request que originó la notificación
+     * webhook de make acepta la conexión y no responde, el request que originó la notificación
      * queda colgado. La publicación en redes es accesoria y no debe frenar la donación.
      */
     private final RestTemplate restTemplate = new RestTemplateBuilder()
@@ -26,19 +26,19 @@ public class AutomatizacionService {
             .readTimeout(Duration.ofSeconds(3))
             .build();
 
-    @Value("${n8n.webhook.url}")
-    private String n8nWebhookUrl;
+    @Value("${make.webhook.url}")
+    private String makeWebhookUrl;
 
     public void NotificarInsigniaGanada(String nombre, String descripcionMision, String urlImagenInsignia) { 
-        Map<String, Object> datos = new HashMap<>(); //pal n8n
+        Map<String, Object> datos = new HashMap<>(); //pal make
         datos.put("usuario", nombre);
         datos.put("texto", "¡Felicitaciones a @" + nombre + " por cumplir la misión: " + descripcionMision + "!");
         datos.put("imagenUrl", urlImagenInsignia);
 
         try {
-            restTemplate.postForObject(n8nWebhookUrl, datos, String.class);
+            restTemplate.postForObject(makeWebhookUrl, datos, String.class);
         } catch (Exception e) {
-            log.warn("No se pudo publicar el hito en n8n: {}", e.getMessage());
+            log.warn("No se pudo publicar el hito en make: {}", e.getMessage());
         }
     }
 
@@ -48,9 +48,9 @@ public class AutomatizacionService {
     datos.put("texto", "¡Felicitaciones a @" + nombre + " por ascender a la categoría " + nuevaCategoria + "!");
 
     try {
-        restTemplate.postForObject(n8nWebhookUrl, datos, String.class);
+        restTemplate.postForObject(makeWebhookUrl, datos, String.class);
     } catch (Exception e) {
-        log.warn("No se pudo publicar el ascenso en n8n: {}", e.getMessage());
+        log.warn("No se pudo publicar el ascenso en make: {}", e.getMessage());
     }
 }
 }
