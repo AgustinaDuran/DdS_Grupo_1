@@ -23,7 +23,7 @@ public class UsuariosRepository {
 
     public Optional<DatosUsuario> findById(Long id) {
         return usuarios.stream()
-                .filter(d -> d.getId() == id)
+                .filter(d -> d.getId().equals(id))
                 .findFirst();
     }
 
@@ -38,6 +38,6 @@ public class UsuariosRepository {
     }
 
     public void delete(Long id){
-        usuarios.removeIf(d -> d.getId() == id);
+        usuarios.removeIf(d -> d.getId().equals(id));
     }
 }

@@ -39,7 +39,7 @@ public class EntidadesBeneficiariasRepository {
 
     public EntidadBeneficiaria findById(Long id) {
         return entidades.stream()
-                .filter(d -> d.getId() == id)
+                .filter(d -> d.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }
@@ -53,7 +53,7 @@ public class EntidadesBeneficiariasRepository {
     }
 
     public void delete(Long id){
-        entidades.removeIf(d -> d.getId() == id);
+        entidades.removeIf(d -> d.getId().equals(id));
     }
 
 }

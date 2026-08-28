@@ -22,7 +22,7 @@ public class DonantesRepository {
 
     public Optional<Donante> findById(Long id) {
         return donantes.stream()
-                .filter(d -> d.getId() == id)
+                .filter(d -> d.getId().equals(id))
                 .findFirst();
     }
 
@@ -37,7 +37,7 @@ public class DonantesRepository {
     }
 
     public void delete(Long id){
-        donantes.removeIf(d -> d.getId() == id);
+        donantes.removeIf(d -> d.getId().equals(id));
     }
 
 }

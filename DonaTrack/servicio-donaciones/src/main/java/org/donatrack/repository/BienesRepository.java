@@ -31,7 +31,7 @@ public class BienesRepository {
 
     public void delete(Long id) {
         bienes = bienes.stream()
-                .filter(bien -> bien.getId() != id)
+                .filter(bien -> !bien.getId().equals(id))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -41,7 +41,7 @@ public class BienesRepository {
 
     public Bien findById(Long id) {
         return bienes.stream()
-                .filter(bien -> bien.getId() == id)
+                .filter(bien -> bien.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }

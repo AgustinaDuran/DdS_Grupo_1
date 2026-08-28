@@ -61,7 +61,7 @@ public class DonacionesRepository {
     }
 
     public void delete(Long id){
-        donaciones = donaciones.stream().filter(d -> d.getId() != id).collect(Collectors.toCollection(ArrayList::new));
+        donaciones = donaciones.stream().filter(d -> !d.getId().equals(id)).collect(Collectors.toCollection(ArrayList::new));
     }
     
 

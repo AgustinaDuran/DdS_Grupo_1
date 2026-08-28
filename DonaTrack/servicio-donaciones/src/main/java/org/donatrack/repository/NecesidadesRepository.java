@@ -28,7 +28,7 @@ public class NecesidadesRepository {
 
     public Necesidad findById(Long id) {
         return necesidades.stream()
-                .filter(n -> n.getId() != null && n.getId() == id)
+                .filter(n -> n.getId() != null && n.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }
@@ -52,7 +52,7 @@ public class NecesidadesRepository {
 
     public void delete(Long id) {
         necesidades = necesidades.stream()
-                .filter(n -> n.getId() == null || n.getId() != id)
+                .filter(n -> n.getId() == null || !n.getId().equals(id))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -88,7 +88,7 @@ public class NecesidadesRepository {
 
     public Necesidad findById(Long id) {
         return necesidades.stream()
-                .filter(n -> n.getId() != null && n.getId() == id)
+                .filter(n -> n.getId() != null && n.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }

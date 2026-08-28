@@ -27,7 +27,7 @@ public class CategoriasRepository {
 
     public Categoria findCategoriaById(Long id) {
         return categorias.stream()
-                .filter(c -> c.getId() == id)
+                .filter(c -> c.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }
@@ -43,7 +43,7 @@ public class CategoriasRepository {
 
     public void deleteCategoria(Long id) {
         categorias = categorias.stream()
-                .filter(c -> c.getId() != id)
+                .filter(c -> !c.getId().equals(id))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -54,7 +54,7 @@ public class CategoriasRepository {
 
     public Subcategoria findSubcategoriaById(Long id) {
         return subcategorias.stream()
-                .filter(s -> s.getId() == id)
+                .filter(s -> s.getId().equals(id))
                 .findFirst()
                 .orElse(null);
     }
@@ -74,7 +74,7 @@ public class CategoriasRepository {
 
     public void deleteSubcategoria(Long id) {
         subcategorias = subcategorias.stream()
-                .filter(s -> s.getId() != id)
+                .filter(s -> !s.getId().equals(id))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
