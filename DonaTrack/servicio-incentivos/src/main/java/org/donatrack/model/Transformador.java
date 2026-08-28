@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Transformador extends CategoriaDonante {
     public Transformador() {
-      
+
         Insignia rachaOro = FabricaInsignias.Crear(TipoInsignia.RACHA, NivelInsignia.ORO);
         Insignia completitudOro = FabricaInsignias.Crear(TipoInsignia.COMPLETITUD, NivelInsignia.ORO);
         Insignia habilOro = FabricaInsignias.Crear(TipoInsignia.HABIL_DONADOR, NivelInsignia.ORO);
@@ -25,5 +25,5 @@ public class Transformador extends CategoriaDonante {
     public CategoriaDonante GetSiguienteCategoria() {
         return null;
     }
-    
+
 }

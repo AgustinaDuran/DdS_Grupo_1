@@ -49,6 +49,7 @@ public class ActualizarDonacionDTO {
         this.entidadId = entidadId;
     }
 
-
-
+    public void setTipoEstado(TipoEstado tipoEstado) {
+        this.tipoEstado = tipoEstado;
+    }
 }

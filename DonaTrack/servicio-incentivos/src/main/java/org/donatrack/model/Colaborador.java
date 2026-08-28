@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Colaborador extends CategoriaDonante {
     public Colaborador() {
-    
+
         Insignia rachaBronce = FabricaInsignias.Crear(TipoInsignia.RACHA, NivelInsignia.BRONCE);
         Insignia completitudBronce = FabricaInsignias.Crear(TipoInsignia.COMPLETITUD, NivelInsignia.BRONCE);
         Insignia habilBronce = FabricaInsignias.Crear(TipoInsignia.HABIL_DONADOR, NivelInsignia.BRONCE);
@@ -25,5 +25,5 @@ public class Colaborador extends CategoriaDonante {
     public CategoriaDonante GetSiguienteCategoria() {
         return new Sostenedor();
     }
-    
+
 }

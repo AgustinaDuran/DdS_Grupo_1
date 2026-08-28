@@ -1,8 +1,7 @@
 package org.donatrack.controller;
 
 import org.donatrack.controller.dto.*;
-import org.donatrack.controller.exception.PeriodoInvalidoException;
-import org.donatrack.controller.exception.RankingNoProcesadoException;
+import org.donatrack.controller.exception.RecursoNoEncontradoException;
 import org.donatrack.service.AnaliticaService;
 import org.donatrack.service.RankingProgramadoService;
 import org.springframework.http.HttpStatus;
@@ -55,43 +54,42 @@ public class IncentivosController {
     public ResponseEntity<List<InsigniaDTO>> ObtenerVitrina(@PathVariable String nombreUsuario) {
         return ResponseEntity.ok(this.analiticaService.ObtenerInsignias(nombreUsuario));
     }
-    /**
-     * Podio del período indicado (formato YYYY-MM). Sin parámetro usa el mes en curso, que es
-     * el que genera la ejecución a demanda de abajo; el proceso programado del día 1 persiste
-     * el mes que acaba de cerrar, así que para consultarlo hay que pasarlo explícitamente.
-     */
+    //http://localhost:8080/api/incentivos/ranking/destacados
     @GetMapping("/ranking/destacados")
     public ResponseEntity<PodioMensualDTO> ObtenerPodioDestacado(
             @RequestParam(required = false) String periodo) {
         return ResponseEntity.ok(this.analiticaService.ObtenerPodioDestacadoDelMes(parsearPeriodo(periodo)));
     }
 
-    /** Ejecución a demanda del ranking, para no depender del cron del día 1 a medianoche. */
-    @PostMapping("/ranking/procesar")
-    public ResponseEntity<PodioMensualDTO> ProcesarRanking(
+    @PostMapping("/ranking/generar")
+    public ResponseEntity<PodioMensualDTO> GenerarRankingManual(
             @RequestParam(required = false) String periodo) {
         YearMonth mes = parsearPeriodo(periodo);
-        rankingProgramadoService.procesarPeriodo(mes);
+        rankingProgramadoService.GenerarRankingDe(mes);
         return ResponseEntity.ok(this.analiticaService.ObtenerPodioDestacadoDelMes(mes));
     }
 
     private YearMonth parsearPeriodo(String periodo) {
-        if (periodo == null || periodo.isBlank()) {
-            return YearMonth.now();
-        }
-        try {
-            return YearMonth.parse(periodo.trim());
-        } catch (DateTimeParseException e) {
-            throw new PeriodoInvalidoException(periodo);
-        }
+        return (periodo == null || periodo.isBlank())
+                ? YearMonth.now().minusMonths(1)
+                : YearMonth.parse(periodo.trim());
     }
 
-    @ExceptionHandler(RankingNoProcesadoException.class)
-    public ResponseEntity<Map<String, Object>> manejarRankingNoProcesado(RankingNoProcesadoException exception) {
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ResponseEntity<Map<String, Object>> manejarRecursoNoEncontrado(RecursoNoEncontradoException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                 "status", HttpStatus.NOT_FOUND.value(),
                 "error", "Not Found",
                 "message", exception.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<Map<String, Object>> manejarPeriodoInvalido(DateTimeParseException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "status", HttpStatus.BAD_REQUEST.value(),
+                "error", "Bad Request",
+                "message", "El parámetro 'periodo' debe tener el formato yyyy-MM"
         ));
     }
 }

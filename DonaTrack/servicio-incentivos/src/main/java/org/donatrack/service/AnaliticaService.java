@@ -1,8 +1,7 @@
 package org.donatrack.service;
 
 import org.donatrack.controller.dto.*;
-import org.donatrack.controller.exception.DonanteNoEncontradoException;
-import org.donatrack.controller.exception.RankingNoProcesadoException;
+import org.donatrack.controller.exception.*;
 import org.donatrack.model.*;
 import org.donatrack.repository.DonanteRepository;
 import org.donatrack.repository.RankingRepository;

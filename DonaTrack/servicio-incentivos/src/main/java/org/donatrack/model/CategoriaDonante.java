@@ -1,7 +1,7 @@
 package org.donatrack.model;
 import java.util.List;
 
-public abstract class CategoriaDonante {  
+public abstract class CategoriaDonante {
     protected List<Mision> misiones;
 
     public abstract String GetNombre();
@@ -11,7 +11,7 @@ public abstract class CategoriaDonante {
     public Boolean CompletoTodasLasMisiones(DonanteIncentivos donante) {
         for (Mision mision : misiones) {
             if (!mision.EstaCumplidaPor(donante)) {
-                return false; 
+                return false;
             }
         }
         return true;
