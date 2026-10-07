@@ -10,40 +10,43 @@ import org.donatrack.controller.dto.Categorias.FiltrosSubcategoriaDTO;
 import org.donatrack.dominio.categoria.Categoria;
 import org.donatrack.dominio.categoria.Subcategoria;
 import org.donatrack.repository.CategoriasRepository;
+import org.donatrack.repository.SubcategoriaRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CategoriasService {
 
     private final CategoriasRepository categoriasRepository;
+    private final SubcategoriaRepository subcategoriaRepository;
 
-    public CategoriasService(CategoriasRepository categoriasRepository) {
+    public CategoriasService(CategoriasRepository categoriasRepository, SubcategoriaRepository subcategoriaRepository) {
         this.categoriasRepository = categoriasRepository;
+        this.subcategoriaRepository = subcategoriaRepository;
     }
 
     // ----- Subcategorias -----
     public List<Subcategoria> obtenerSubcategorias(FiltrosSubcategoriaDTO filtros) {
-        return categoriasRepository.buscarSubcategorias(filtros.getCategoriaId(), filtros.getNombre());
+        return subcategoriaRepository.buscarSubcategorias(filtros.getCategoriaId(), filtros.getNombre());
     }
 
     public Subcategoria obtenerSubcategoriaPorId(Long id) {
-        return categoriasRepository.findSubcategoriaById(id);
+        return subcategoriaRepository.findById(id).orElse(null);
     }
 
     public void registrarSubcategoria(CrearSubcategoriaDTO nuevaSubcategoria) {
         Categoria categoria = null;
         if (nuevaSubcategoria.getCategoriaId() != null) {
-            categoria = categoriasRepository.findCategoriaById(nuevaSubcategoria.getCategoriaId());
+            categoria = categoriasRepository.findById(nuevaSubcategoria.getCategoriaId()).orElse(null);
         }
         Subcategoria subcategoria = new Subcategoria(nuevaSubcategoria.getNombre(), categoria);
-        categoriasRepository.saveSubcategoria(subcategoria);
+        subcategoriaRepository.save(subcategoria);
         if (categoria != null) {
             categoria.agregarSubcategoria(subcategoria);
         }
     }
 
     public void actualizarSubcategoria(Long id, ActualizarSubcategoriaDTO datosActualizacion) {
-        Subcategoria subcategoria = categoriasRepository.findSubcategoriaById(id);
+        Subcategoria subcategoria = subcategoriaRepository.findById(id).orElse(null);
         if (subcategoria == null) {
             throw new IllegalArgumentException("No se encontró la subcategoría con el ID proporcionado");
         }
@@ -55,7 +58,7 @@ public class CategoriasService {
     }
 
     public void eliminarSubCategoriaPorId(Long id) {
-        categoriasRepository.deleteSubcategoria(id);
+        subcategoriaRepository.deleteById(id);
     }
 
     // ----- Categorias -----
@@ -64,7 +67,7 @@ public class CategoriasService {
     }
 
     public Categoria obtenerCategoriaId(Long id) {
-        return categoriasRepository.findCategoriaById(id);
+        return categoriasRepository.findById(id).orElse(null);
     }
 
     public void registrarCategoria(CrearCategoriaDTO nuevaCategoria) {
@@ -73,7 +76,7 @@ public class CategoriasService {
     }
 
     public void actualizarCategoria(Long id, ActualizarCategoriaDTO datosActualizacion) {
-        Categoria categoria = categoriasRepository.findCategoriaById(id);
+        Categoria categoria = categoriasRepository.findById(id).orElse(null);
         if (categoria == null) {
             throw new IllegalArgumentException("No se encontró la categoría con el ID proporcionado");
         }

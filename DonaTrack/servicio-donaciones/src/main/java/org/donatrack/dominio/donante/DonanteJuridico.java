@@ -2,12 +2,20 @@ package org.donatrack.dominio.donante;
 import org.donatrack.dominio.usuario.organizacion.Organizacion;
 
 import org.donatrack.dominio.usuario.DatosUsuario;
-/* import java.util.ArrayList;
-import java.util.List; */
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "donantes_juridicos")
 public class DonanteJuridico extends Donante {
+    @Enumerated(EnumType.STRING)
     private TipoPersonaJuridica tipoPersonaJuridica;
     private String rubro;
+
+    protected DonanteJuridico() {
+    }
 
 
     public DonanteJuridico(DatosUsuario datosUsuario, TipoPersonaJuridica tipoPersonaJuridica, String rubro) {

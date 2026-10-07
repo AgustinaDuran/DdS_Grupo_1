@@ -4,7 +4,11 @@ import java.time.LocalDateTime;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "estados_en_deposito")
 public class EstadoEnDeposito extends EstadoDonacion {
 
     public EstadoEnDeposito() {

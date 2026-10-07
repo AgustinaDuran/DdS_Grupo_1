@@ -1,8 +1,8 @@
 {
   "info": {
-    "name": "DonaTrack - ENTREGA_3",
+    "name": "DonaTrack - pruebas completas automáticas",
     "_postman_id": "d0naTr4ck-ent3-0000-0000-000000000000",
-    "description": "Endpoints REST de las Entregas 1, 2 y 3, verificados contra los cuatro servicios corriendo el 27/08/2026 sobre la rama ENTREGA_3.\n\nOrden de ejecucion dentro de 'Servicio de Donaciones': Categorias > Subcategorias > Donantes > Entidades Beneficiarias > Necesidades > Donaciones. El sistema arranca con las listas vacias, asi que ese orden es obligatorio.\n\nDos cosas que hacen fallar la demo si se omiten: la entidad beneficiaria necesita al menos un representante con contacto para poder ser notificada, y el callback del planificador debe incluir el 'id' de cada entrega.",
+    "description": "Ejecutar las requests en el orden en que aparecen. Las requests de listado guardan automáticamente los ids creados en variables de colección; no es necesario copiar ningún id manualmente. Para comenzar desde cero, usar docker compose down -v y luego docker compose up --build.\n\nLa limpieza quedó separada al final y la importación CSV se excluyó del Runner porque requiere seleccionar un archivo manualmente.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -49,6 +49,10 @@
     {
       "key": "donacionId",
       "value": ""
+    },
+    {
+      "key": "entregaId",
+      "value": ""
     }
   ],
   "item": [
@@ -56,10 +60,10 @@
       "name": "Servicio de Donaciones (8080)",
       "item": [
         {
-          "name": "Categor\u00edas",
+          "name": "Categorías",
           "item": [
             {
-              "name": "Crear categor\u00eda",
+              "name": "Crear categoría",
               "request": {
                 "method": "POST",
                 "header": [
@@ -78,29 +82,54 @@
                 {
                   "listen": "test",
                   "script": {
+                    "type": "text/javascript",
                     "exec": [
-                      "// La respuesta es texto plano; guardar el id manualmente tras GET /categorias si hace falta encadenar."
+                      "pm.test('Categoría creada', function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+                      "pm.sendRequest({ url: pm.collectionVariables.get('donacionesUrl') + '/api/categorias', method: 'GET' }, function (error, response) {",
+                      "  if (error) { console.error(error); return; }",
+                      "  const lista = response.json();",
+                      "  const categoria = lista.filter(x => x.nombre === 'Alimentos').pop() || lista[lista.length - 1];",
+                      "  if (categoria && categoria.id != null) pm.collectionVariables.set('categoriaId', String(categoria.id));",
+                      "  console.log('categoriaId =', pm.collectionVariables.get('categoriaId'));",
+                      "});"
                     ]
                   }
                 }
               ]
             },
             {
-              "name": "Listar categor\u00edas",
+              "name": "Listar categorías",
               "request": {
                 "method": "GET",
                 "url": "{{donacionesUrl}}/api/categorias"
-              }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('La respuesta es exitosa', function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+                      "const data = pm.response.json();",
+                      "const lista = Array.isArray(data) ? data : (data.content || []);",
+                      "const encontrado = lista.filter(x => x.nombre === 'Alimentos').pop() || lista[lista.length - 1];",
+                      "pm.test('Se obtuvo categoriaId', function () { pm.expect(encontrado && encontrado.id).to.exist; });",
+                      "if (encontrado && encontrado.id != null) pm.collectionVariables.set('categoriaId', String(encontrado.id));",
+                      "console.log('categoriaId =', pm.collectionVariables.get('categoriaId'));"
+                    ]
+                  }
+                }
+              ]
             },
             {
-              "name": "Obtener categor\u00eda por id",
+              "name": "Obtener categoría por id",
               "request": {
                 "method": "GET",
                 "url": "{{donacionesUrl}}/api/categorias/{{categoriaId}}"
               }
             },
             {
-              "name": "Actualizar categor\u00eda",
+              "name": "Actualizar categoría",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -115,21 +144,14 @@
                 },
                 "url": "{{donacionesUrl}}/api/categorias/{{categoriaId}}"
               }
-            },
-            {
-              "name": "Eliminar categor\u00eda",
-              "request": {
-                "method": "DELETE",
-                "url": "{{donacionesUrl}}/api/categorias/{{categoriaId}}"
-              }
             }
           ]
         },
         {
-          "name": "Subcategor\u00edas",
+          "name": "Subcategorías",
           "item": [
             {
-              "name": "Crear subcategor\u00eda",
+              "name": "Crear subcategoría",
               "request": {
                 "method": "POST",
                 "header": [
@@ -146,21 +168,38 @@
               }
             },
             {
-              "name": "Listar subcategor\u00edas (filtros opcionales por query params)",
+              "name": "Listar subcategorías (filtros opcionales por query params)",
               "request": {
                 "method": "GET",
                 "url": "{{donacionesUrl}}/api/subcategorias"
-              }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('La respuesta es exitosa', function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+                      "const data = pm.response.json();",
+                      "const lista = Array.isArray(data) ? data : (data.content || []);",
+                      "const encontrado = lista.filter(x => x.nombre && x.nombre.indexOf('Fideos secos') === 0).pop() || lista[lista.length - 1];",
+                      "pm.test('Se obtuvo subcategoriaId', function () { pm.expect(encontrado && encontrado.id).to.exist; });",
+                      "if (encontrado && encontrado.id != null) pm.collectionVariables.set('subcategoriaId', String(encontrado.id));",
+                      "console.log('subcategoriaId =', pm.collectionVariables.get('subcategoriaId'));"
+                    ]
+                  }
+                }
+              ]
             },
             {
-              "name": "Obtener subcategor\u00eda por id",
+              "name": "Obtener subcategoría por id",
               "request": {
                 "method": "GET",
                 "url": "{{donacionesUrl}}/api/subcategorias/{{subcategoriaId}}"
               }
             },
             {
-              "name": "Actualizar subcategor\u00eda",
+              "name": "Actualizar subcategoría",
               "request": {
                 "method": "PUT",
                 "header": [
@@ -173,13 +212,6 @@
                   "mode": "raw",
                   "raw": "{\n  \"nombre\": \"Fideos secos tipo espagueti\",\n  \"categoriaId\": {{categoriaId}}\n}"
                 },
-                "url": "{{donacionesUrl}}/api/subcategorias/{{subcategoriaId}}"
-              }
-            },
-            {
-              "name": "Eliminar subcategor\u00eda",
-              "request": {
-                "method": "DELETE",
                 "url": "{{donacionesUrl}}/api/subcategorias/{{subcategoriaId}}"
               }
             }
@@ -203,7 +235,7 @@
                   "raw": "{\n  \"tipo\": \"HUMANA\",\n  \"tipoUsuario\": \"PERSONA\",\n  \"nombre\": \"Ana\",\n  \"apellido\": \"Perez\",\n  \"edad\": 30,\n  \"dni\": \"12345678\",\n  \"genero\": \"F\",\n  \"direccion\": \"Calle Falsa 123\",\n  \"contactoDTOPredeterminado\": { \"medio\": \"MAIL\", \"valor\": \"ana@mail.com\" }\n}"
                 },
                 "url": "{{donacionesUrl}}/api/donantes",
-                "description": "OJO: el JSON de contacto debe llamarse 'contactoDTOPredeterminado' (no 'contactoPredeterminado') por el nombre del getter/setter en CrearDonanteDTO. Y 'tipoUsuario' (PERSONA/ORGANIZACION) es obligatorio adem\u00e1s de 'tipo' (HUMANA/JURIDICA); si falta, la API devuelve 500 en vez de 400. Ver informe de correcciones."
+                "description": "OJO: el JSON de contacto debe llamarse 'contactoDTOPredeterminado' (no 'contactoPredeterminado') por el nombre del getter/setter en CrearDonanteDTO. Y 'tipoUsuario' (PERSONA/ORGANIZACION) es obligatorio además de 'tipo' (HUMANA/JURIDICA); si falta, la API devuelve 500 en vez de 400. Ver informe de correcciones."
               }
             },
             {
@@ -228,38 +260,30 @@
               "request": {
                 "method": "GET",
                 "url": "{{donacionesUrl}}/api/donantes"
-              }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('La respuesta es exitosa', function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+                      "const data = pm.response.json();",
+                      "const lista = Array.isArray(data) ? data : (data.content || []);",
+                      "const encontrado = lista.filter(x => x.nombre === 'Ana').pop() || lista[lista.length - 1];",
+                      "pm.test('Se obtuvo donanteId', function () { pm.expect(encontrado && encontrado.id).to.exist; });",
+                      "if (encontrado && encontrado.id != null) pm.collectionVariables.set('donanteId', String(encontrado.id));",
+                      "console.log('donanteId =', pm.collectionVariables.get('donanteId'));"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Obtener donante por id",
               "request": {
                 "method": "GET",
                 "url": "{{donacionesUrl}}/api/donantes/{{donanteId}}"
-              }
-            },
-            {
-              "name": "Eliminar donante",
-              "request": {
-                "method": "DELETE",
-                "url": "{{donacionesUrl}}/api/donantes/{{donanteId}}"
-              }
-            },
-            {
-              "name": "Importar donantes por CSV",
-              "request": {
-                "method": "POST",
-                "url": "{{donacionesUrl}}/api/donantes/importar",
-                "body": {
-                  "mode": "formdata",
-                  "formdata": [
-                    {
-                      "key": "file",
-                      "type": "file",
-                      "src": ""
-                    }
-                  ]
-                },
-                "description": "Columnas del CSV: TipoPersona,TipoDoc,Documento,Nombre/RazonSocial,Email,Telefono. Probado OK con un archivo de 2 filas."
               }
             }
           ]
@@ -295,19 +319,29 @@
               "request": {
                 "method": "GET",
                 "url": "{{donacionesUrl}}/api/entidades-beneficiarias"
-              }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('La respuesta es exitosa', function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+                      "const data = pm.response.json();",
+                      "const lista = Array.isArray(data) ? data : (data.content || []);",
+                      "const encontrado = lista.filter(x => x.direccion === 'Av. Siempreviva 742').pop() || lista[lista.length - 1];",
+                      "pm.test('Se obtuvo entidadId', function () { pm.expect(encontrado && encontrado.id).to.exist; });",
+                      "if (encontrado && encontrado.id != null) pm.collectionVariables.set('entidadId', String(encontrado.id));",
+                      "console.log('entidadId =', pm.collectionVariables.get('entidadId'));"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Obtener entidad por id",
               "request": {
                 "method": "GET",
-                "url": "{{donacionesUrl}}/api/entidades-beneficiarias/{{entidadId}}"
-              }
-            },
-            {
-              "name": "Eliminar entidad",
-              "request": {
-                "method": "DELETE",
                 "url": "{{donacionesUrl}}/api/entidades-beneficiarias/{{entidadId}}"
               }
             }
@@ -345,7 +379,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"entidadId\": {{entidadId}},\n  \"subcategoriaId\": {{subcategoriaId}},\n  \"descripcion\": \"Sillas por inundaci\u00f3n\",\n  \"cantidad\": 30,\n  \"tipo\": \"EXTRAORDINARIA\",\n  \"motivo\": \"Inundaci\u00f3n en el aula\"\n}"
+                  "raw": "{\n  \"entidadId\": {{entidadId}},\n  \"subcategoriaId\": {{subcategoriaId}},\n  \"descripcion\": \"Sillas por inundación\",\n  \"cantidad\": 30,\n  \"tipo\": \"EXTRAORDINARIA\",\n  \"motivo\": \"Inundación en el aula\"\n}"
                 },
                 "url": "{{donacionesUrl}}/api/necesidades"
               }
@@ -355,7 +389,24 @@
               "request": {
                 "method": "GET",
                 "url": "{{donacionesUrl}}/api/necesidades"
-              }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('La respuesta es exitosa', function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+                      "const data = pm.response.json();",
+                      "const lista = Array.isArray(data) ? data : (data.content || []);",
+                      "const encontrado = lista.filter(x => x.descripcion && x.descripcion.indexOf('Fideos para') === 0).pop() || lista[lista.length - 1];",
+                      "pm.test('Se obtuvo necesidadId', function () { pm.expect(encontrado && encontrado.id).to.exist; });",
+                      "if (encontrado && encontrado.id != null) pm.collectionVariables.set('necesidadId', String(encontrado.id));",
+                      "console.log('necesidadId =', pm.collectionVariables.get('necesidadId'));"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Obtener necesidad por id",
@@ -378,13 +429,6 @@
                   "mode": "raw",
                   "raw": "{\n  \"cantidad\": 50\n}"
                 },
-                "url": "{{donacionesUrl}}/api/necesidades/{{necesidadId}}"
-              }
-            },
-            {
-              "name": "Eliminar necesidad",
-              "request": {
-                "method": "DELETE",
                 "url": "{{donacionesUrl}}/api/necesidades/{{necesidadId}}"
               }
             }
@@ -416,7 +460,24 @@
               "request": {
                 "method": "GET",
                 "url": "{{donacionesUrl}}/api/bienes"
-              }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('La respuesta es exitosa', function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+                      "const data = pm.response.json();",
+                      "const lista = Array.isArray(data) ? data : (data.content || []);",
+                      "const encontrado = lista.filter(x => x.nombre === 'Fideos secos 500g').pop() || lista[lista.length - 1];",
+                      "pm.test('Se obtuvo bienId', function () { pm.expect(encontrado && encontrado.id).to.exist; });",
+                      "if (encontrado && encontrado.id != null) pm.collectionVariables.set('bienId', String(encontrado.id));",
+                      "console.log('bienId =', pm.collectionVariables.get('bienId'));"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Actualizar bien",
@@ -432,13 +493,6 @@
                   "mode": "raw",
                   "raw": "{\n  \"descripcion\": \"Paquete de 500g\"\n}"
                 },
-                "url": "{{donacionesUrl}}/api/bienes/{{bienId}}"
-              }
-            },
-            {
-              "name": "Eliminar bien",
-              "request": {
-                "method": "DELETE",
                 "url": "{{donacionesUrl}}/api/bienes/{{bienId}}"
               }
             }
@@ -475,7 +529,24 @@
               "request": {
                 "method": "GET",
                 "url": "{{donacionesUrl}}/api/donaciones"
-              }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('La respuesta es exitosa', function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+                      "const data = pm.response.json();",
+                      "const lista = Array.isArray(data) ? data : (data.content || []);",
+                      "const encontrado = lista.filter(x => x.id != null).pop() || lista[lista.length - 1];",
+                      "pm.test('Se obtuvo donacionId', function () { pm.expect(encontrado && encontrado.id).to.exist; });",
+                      "if (encontrado && encontrado.id != null) pm.collectionVariables.set('donacionId', String(encontrado.id));",
+                      "console.log('donacionId =', pm.collectionVariables.get('donacionId'));"
+                    ]
+                  }
+                }
+              ]
             },
             {
               "name": "Obtener donacion por id",
@@ -501,13 +572,6 @@
                 "url": "{{donacionesUrl}}/api/donaciones/{{donacionId}}",
                 "description": "Estados validos: EN_DEPOSITO, ASIGNACION_REALIZADA (requiere entidadId), LISTA_PARA_ENTREGAR, EN_TRASLADO, ENTREGADA, ENTREGA_FALLIDA (agregar JustificacionEntregaFallida), VENCIDA.\n\nASIGNACION_REALIZADA dispara dos integraciones: notifica al donante y a la entidad, y empuja la entrega a Logistica. Si Logistica esta caida devuelve 200 igual y solo loguea un warning."
               }
-            },
-            {
-              "name": "Eliminar donacion",
-              "request": {
-                "method": "DELETE",
-                "url": "{{donacionesUrl}}/api/donaciones/{{donacionId}}"
-              }
             }
           ]
         }
@@ -523,7 +587,7 @@
             "url": "{{incentivosUrl}}/api/incentivos/donantes/ana/perfil-analitico",
             "description": "Totales historicos, evolucion por periodo, comparacion mensual, organizaciones ayudadas, impacto acumulado y posicion en el ranking.\n\nDevuelve 404 si el donante todavia no registro ninguna donacion."
           },
-          "description": "Siempre 500 'Donante no encontrado': no existe ning\u00fan endpoint para dar de alta un DonanteIncentivos en este servicio. Ver informe de correcciones."
+          "description": "Siempre 500 'Donante no encontrado': no existe ningún endpoint para dar de alta un DonanteIncentivos en este servicio. Ver informe de correcciones."
         },
         {
           "name": "Registrar donacion de usuario",
@@ -579,7 +643,7 @@
             "url": "{{incentivosUrl}}/api/incentivos/ranking/destacados",
             "description": "Podio del periodo indicado con el query param opcional 'periodo' (formato YYYY-MM). Sin parametro usa el mes en curso.\n\nDevuelve 404 mientras ese periodo no haya sido procesado: correr antes 'Procesar ranking a demanda'. El proceso programado corre el dia 1 de cada mes y persiste el mes que cerro, asi que para consultarlo hay que pasar ese periodo explicitamente."
           },
-          "description": "No probado end-to-end (depende de que existan donantes con misiones cumplidas, bloqueado por el mismo motivo que los anteriores). Responde 500 si a\u00fan no se ejecut\u00f3 el ranking programado del mes."
+          "description": "No probado end-to-end (depende de que existan donantes con misiones cumplidas, bloqueado por el mismo motivo que los anteriores). Responde 500 si aún no se ejecutó el ranking programado del mes."
         }
       ],
       "description": "Incentivos se entera de los donantes por las donaciones que le informa el Servicio de Donaciones: no hay alta aparte. El primer POST de registrar-donacion crea al donante, asi que hay que correrlo antes de los tres GET."
@@ -588,7 +652,7 @@
       "name": "Servicio de Notificaciones (8081)",
       "item": [
         {
-          "name": "Enviar notificaci\u00f3n",
+          "name": "Enviar notificación",
           "request": {
             "method": "POST",
             "header": [
@@ -602,7 +666,7 @@
               "raw": "{\n  \"nombreDestinatario\": \"Ana Perez\",\n  \"mensaje\": \"Prueba de notificacion\",\n  \"contactos\": [ { \"tipo\": \"MAIL\", \"valor\": \"ana@mail.com\" } ]\n}"
             },
             "url": "{{notificacionesUrl}}/api/notificaciones",
-            "description": "OJO: ac\u00e1 el campo del contacto se llama 'tipo' (no 'medio' como en servicio-donaciones). Sin BREVO_API_KEY/BREVO_REMITENTE configurados responde 200 con estado FALLIDA (comportamiento esperado en este entorno de prueba)."
+            "description": "OJO: acá el campo del contacto se llama 'tipo' (no 'medio' como en servicio-donaciones). Sin BREVO_API_KEY/BREVO_REMITENTE configurados responde 200 con estado FALLIDA (comportamiento esperado en este entorno de prueba)."
           }
         },
         {
@@ -619,7 +683,7 @@
       "description": "Requiere MySQL escuchando en 3306 con la base donatrack_logistica. Es el unico servicio con persistencia real: sin base no arranca, porque Hibernate necesita conectarse al iniciar (ddl-auto=update). El BeanCreationException del arranque es eso, no un bug.\n\nLas requests estan en orden de ejecucion: se puede correr la carpeta entera de arriba abajo. Primero el camion (sin camion no hay ruta), despues las entregas, la planificacion y el recorrido. 'Dar de baja camion' va ultima porque un camion con ruta activa no se puede desactivar.\n\nAntes de 'Recibir nuevas entregas', el Servicio de Donaciones ya empuja una entrega al asignar una donacion; el id que use el callback se obtiene de 'Listar entregas'.",
       "item": [
         {
-          "name": "Crear cami\u00f3n",
+          "name": "Crear camión",
           "request": {
             "method": "POST",
             "header": [
@@ -643,7 +707,7 @@
           }
         },
         {
-          "name": "Modificar cami\u00f3n",
+          "name": "Modificar camión",
           "request": {
             "method": "PUT",
             "header": [
@@ -660,7 +724,7 @@
           }
         },
         {
-          "name": "Actualizar ubicaci\u00f3n del cami\u00f3n",
+          "name": "Actualizar ubicación del camión",
           "request": {
             "method": "PUT",
             "header": [
@@ -688,7 +752,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"entregas\": [ { \"donacionId\": \"1\", \"direccionDestino\": \"Av Siempreviva 742\" } ]\n}"
+              "raw": "{\n  \"entregas\": [ { \"donacionId\": \"{{donacionId}}\", \"direccionDestino\": \"Av Siempreviva 742\" } ]\n}"
             },
             "url": "{{logisticaUrl}}/api/logistica/entregas"
           }
@@ -698,17 +762,34 @@
           "request": {
             "method": "GET",
             "url": "{{logisticaUrl}}/api/logistica/entregas"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('La respuesta es exitosa', function () { pm.expect(pm.response.code).to.be.within(200, 299); });",
+                  "const data = pm.response.json();",
+                  "const lista = Array.isArray(data) ? data : (data.content || []);",
+                  "const encontrado = lista.filter(x => x.id != null).pop() || lista[lista.length - 1];",
+                  "pm.test('Se obtuvo entregaId', function () { pm.expect(encontrado && encontrado.id).to.exist; });",
+                  "if (encontrado && encontrado.id != null) pm.collectionVariables.set('entregaId', String(encontrado.id));",
+                  "console.log('entregaId =', pm.collectionVariables.get('entregaId'));"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Consultar entrega por id",
           "request": {
             "method": "GET",
-            "url": "{{logisticaUrl}}/api/logistica/entregas/1"
+            "url": "{{logisticaUrl}}/api/logistica/entregas/{{entregaId}}"
           }
         },
         {
-          "name": "Planificar rutas del d\u00eda",
+          "name": "Planificar rutas del día",
           "request": {
             "method": "POST",
             "url": "{{logisticaUrl}}/api/logistica/planificar"
@@ -726,7 +807,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "[\n  {\n    \"patenteCamion\": \"AB123CD\",\n    \"entregas\": [\n      {\n        \"id\": 1,\n        \"donacionId\": \"1\",\n        \"direccionDestino\": \"Av. Siempreviva 742\",\n        \"ordenVisita\": 1\n      }\n    ]\n  }\n]",
+              "raw": "[\n  {\n    \"patenteCamion\": \"AB123CD\",\n    \"entregas\": [\n      {\n        \"id\": {{entregaId}},\n        \"donacionId\": \"{{donacionId}}\",\n        \"direccionDestino\": \"Av. Siempreviva 742\",\n        \"ordenVisita\": 1\n      }\n    ]\n  }\n]",
               "options": {
                 "raw": {
                   "language": "json"
@@ -738,7 +819,7 @@
           }
         },
         {
-          "name": "Consultar ruta activa de un cami\u00f3n",
+          "name": "Consultar ruta activa de un camión",
           "request": {
             "method": "GET",
             "url": "{{logisticaUrl}}/api/logistica/camiones/AB123CD/ruta-activa"
@@ -762,11 +843,66 @@
           "name": "Cambiar estado de una entrega",
           "request": {
             "method": "PUT",
-            "url": "{{logisticaUrl}}/api/logistica/entregas/1/estado?nuevoEstado=ENTREGADA&fotoUrl=http://example.com/foto.jpg"
+            "url": "{{logisticaUrl}}/api/logistica/entregas/{{entregaId}}/estado?nuevoEstado=ENTREGADA&fotoUrl=http://example.com/foto.jpg"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Limpieza opcional (ejecutar al final)",
+      "description": "Estas requests eliminan datos. No ejecutarlas antes de completar el flujo principal.",
+      "item": [
+        {
+          "name": "Eliminar categoría",
+          "request": {
+            "method": "DELETE",
+            "url": "{{donacionesUrl}}/api/categorias/{{categoriaId}}"
           }
         },
         {
-          "name": "Dar de baja cami\u00f3n",
+          "name": "Eliminar subcategoría",
+          "request": {
+            "method": "DELETE",
+            "url": "{{donacionesUrl}}/api/subcategorias/{{subcategoriaId}}"
+          }
+        },
+        {
+          "name": "Eliminar donante",
+          "request": {
+            "method": "DELETE",
+            "url": "{{donacionesUrl}}/api/donantes/{{donanteId}}"
+          }
+        },
+        {
+          "name": "Eliminar entidad",
+          "request": {
+            "method": "DELETE",
+            "url": "{{donacionesUrl}}/api/entidades-beneficiarias/{{entidadId}}"
+          }
+        },
+        {
+          "name": "Eliminar necesidad",
+          "request": {
+            "method": "DELETE",
+            "url": "{{donacionesUrl}}/api/necesidades/{{necesidadId}}"
+          }
+        },
+        {
+          "name": "Eliminar bien",
+          "request": {
+            "method": "DELETE",
+            "url": "{{donacionesUrl}}/api/bienes/{{bienId}}"
+          }
+        },
+        {
+          "name": "Eliminar donacion",
+          "request": {
+            "method": "DELETE",
+            "url": "{{donacionesUrl}}/api/donaciones/{{donacionId}}"
+          }
+        },
+        {
+          "name": "Dar de baja camión",
           "request": {
             "method": "DELETE",
             "url": "{{logisticaUrl}}/api/logistica/camiones/AB123CD"

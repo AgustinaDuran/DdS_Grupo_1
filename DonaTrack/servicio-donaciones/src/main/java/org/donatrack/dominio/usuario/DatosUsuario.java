@@ -6,13 +6,19 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "usuarios")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class DatosUsuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
     
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "usuario_id")
     protected List<Contacto> contactos;
 
+    @Enumerated(EnumType.STRING)
     protected RolUsuario rolUsuario;
 
     public DatosUsuario() {

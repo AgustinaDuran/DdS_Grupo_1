@@ -11,40 +11,53 @@ import java.util.List;
 
 
 @Entity
-@Table(name = "donacionesSegmentadas")
+@Table(name = "donaciones_segmentadas")
 public class Donacion {
 
     
 
     private String descripcion;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "estado_actual_id")
     private EstadoDonacion estadoDonacion;
     
+    @ElementCollection
+    @CollectionTable(name = "donacion_items", joinColumns = @JoinColumn(name = "donacion_id"))
     private List<ItemBien> itemBienes;
     private LocalDateTime fechaIngreso;
     private String fotoEntrega;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "donacion_historial_estados",
+            joinColumns = @JoinColumn(name = "donacion_id"),
+            inverseJoinColumns = @JoinColumn(name = "estado_id"))
     private List<EstadoDonacion> historialEstadoDonacion = new ArrayList<>();
 
-
     @ManyToOne
-    //@JoinColumn //no se como se usa esto todavia
+    @JoinColumn(name = "donante_id")
     private Donante donante;
 
     @ManyToOne
+    @JoinColumn(name = "subcategoria_id")
     private Subcategoria subcategoria;
 
-    
+    @ManyToOne
+    @JoinColumn(name = "entidad_beneficiaria_id")
     private EntidadBeneficiaria entidadAEntregar;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public Donacion(Donante donante, List<ItemBien> itemBienes) { // donacion instanciada por administrador
+    protected Donacion() {
+        this.itemBienes = new ArrayList<>();
+    }
+
+    public Donacion(Donante donante, List<ItemBien> itemBienes) {
         this.donante = donante;
         this.itemBienes = itemBienes;
     }
 
-    public Donacion(Donante donante, ItemBien itemBien, Subcategoria subcategoria) { // donacion instanciada por sistema, segmentada
+    public Donacion(Donante donante, ItemBien itemBien, Subcategoria subcategoria) {
         this.donante = donante;
         this.itemBienes = new ArrayList<>();
         this.itemBienes.add(itemBien);
@@ -147,38 +160,6 @@ public class Donacion {
     }
 
 
-    /*
-    public void asignar(EntidadBeneficiaria e) {
-        estadoDonacion.asignar(this);
-        setEntidadAEntregar(e);
-
-    }
-
-    public void planificarRuta() {
-        estadoDonacion.planificarRuta(this);
-    }
-
-    public void iniciarTraslado() {
-        estadoDonacion.iniciarTraslado(this);
-    }
-
-    public void confirmarEntrega() {
-        estadoDonacion.confirmarEntrega(this);
-        entidadAEntregar.agregarDonacionRecibida(this);
-    }
-
-    public void registrarEntregaFallida(String justificacion) {
-        estadoDonacion.registrarEntregaFallida(this, justificacion);
-    }
-
-    public void marcarComoVencida() {
-        estadoDonacion.marcarComoVencida(this);
-    }
-
-    public void volverADeposito() {
-        estadoDonacion.volverADeposito(this);
-    }
-*/
     public void agregarListaEstadoDonacion(EstadoDonacion estadoObtenido) {
         this.historialEstadoDonacion.add(estadoObtenido);
     }
@@ -188,7 +169,6 @@ public class Donacion {
     }
 
     public List<Donacion> segmentarDonacion() {
-        Donante Donante = this.donante;
         List<Donacion> donacionesSegmentadas = new ArrayList<>();
         List<ItemBien> bienesDonacion = this.itemBienes;
 

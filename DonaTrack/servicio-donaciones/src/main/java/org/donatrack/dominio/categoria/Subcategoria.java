@@ -1,14 +1,21 @@
 package org.donatrack.dominio.categoria;
-import org.donatrack.dominio.bien.Bien;
 import jakarta.persistence.*;
 
+@Entity
+@Table(name = "subcategorias")
 public class Subcategoria{
     private String nombre;
+
+    @ManyToOne
+    @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    protected Subcategoria() {
+    }
 
     public Subcategoria(String nombre,Categoria categoria){
         this.nombre= nombre;

@@ -140,7 +140,7 @@ public class DonantesService {
     }
 
     public void eliminarDonante(Long id) {
-        donantesRepository.delete(id);
+        donantesRepository.deleteById(id);
     }
 
     /** Alias de eliminarDonante que respeta el nombre "darBajaDonante" del diagrama. */

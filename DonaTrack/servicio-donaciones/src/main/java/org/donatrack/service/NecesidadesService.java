@@ -39,7 +39,7 @@ public class NecesidadesService {
     }
 
     public Necesidad obtenerNecesidadPorId(Long id) {
-        return necesidadesRepository.findById(id);
+        return necesidadesRepository.findById(id).orElse(null);
     }
 
     public void registrarNecesidad(CrearNecesidadDTO nuevaNecesidad) {
@@ -69,7 +69,7 @@ public class NecesidadesService {
     }
 
     public void actualizarNecesidad(Long id, ActualizarNecesidadDTO datosActualizacion) {
-        Necesidad necesidad = necesidadesRepository.findById(id);
+        Necesidad necesidad = necesidadesRepository.findById(id).orElse(null);
         if (necesidad == null) {
             throw new IllegalArgumentException("No se encontró la necesidad con el ID proporcionado");
         }
@@ -93,6 +93,6 @@ public class NecesidadesService {
     }
 
     public void eliminarNecesidadPorId(Long id) {
-        necesidadesRepository.delete(id);
+        necesidadesRepository.deleteById(id);
     }
 }

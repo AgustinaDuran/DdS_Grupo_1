@@ -11,23 +11,26 @@ import java.util.List;
 
 
 @Entity
-@Table(name = "donacionesCompletas")
+@Table(name = "donaciones_completas")
 public class DonacionCompleta {
 
-    
-
     private String descripcion;   
+    @ElementCollection
+    @CollectionTable(name = "donacion_completa_items", joinColumns = @JoinColumn(name = "donacion_completa_id"))
     private List<ItemBien> itemBienes;
     private LocalDateTime fechaIngreso;
 
-
     @ManyToOne
-    //@JoinColumn //no se como se usa esto todavia
+    @JoinColumn(name = "donante_id")
     private Donante donante;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    protected DonacionCompleta() {
+        this.itemBienes = new ArrayList<>();
+    }
 
     public DonacionCompleta(Donante donante, List<ItemBien> itemBienes, String descripcion) {
         this.donante = donante;
@@ -74,7 +77,6 @@ public class DonacionCompleta {
 
 
     public List<Donacion> segmentarDonacion() {
-        Donante Donante = this.donante;
         List<Donacion> donacionesSegmentadas = new ArrayList<>();
         List<ItemBien> bienesDonacion = this.itemBienes;
 

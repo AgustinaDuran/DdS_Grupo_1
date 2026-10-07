@@ -3,8 +3,11 @@ package org.donatrack.dominio.donacion;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
-
+@Entity
+@Table(name = "estados_lista_para_entregar")
 public class EstadoListaParaEntregar extends EstadoDonacion {
 
     public EstadoListaParaEntregar() {

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class LogisticaService {
 
     private static final Logger log = LoggerFactory.getLogger(LogisticaService.class);
@@ -237,7 +239,11 @@ public class LogisticaService {
  
     public RutaReparto ConsultarRutaActiva(String patente) {
         Camion camion = camionRepository.findById(patente).orElseThrow(() -> new RuntimeException("Camión no encontrado: " + patente));
-        return camion.getRutaActiva();
+        RutaReparto ruta = camion.getRutaActiva();
+        if (ruta != null) {
+            ruta.getEntregas().size();
+        }
+        return ruta;
     }
 
     public List<Entrega> listarEntregas(EstadoEntrega estado) {
@@ -250,6 +256,7 @@ public class LogisticaService {
     public List<RutaReparto> listarRutasActivas() {
         return camionRepository.findByRutaActivaIsNotNull().stream()
                 .map(Camion::getRutaActiva)
+                .peek(ruta -> ruta.getEntregas().size())
                 .toList();
     }
 }

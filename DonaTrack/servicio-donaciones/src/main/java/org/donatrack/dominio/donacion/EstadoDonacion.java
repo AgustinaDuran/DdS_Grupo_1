@@ -5,10 +5,21 @@ import java.util.ArrayList;
 import java.util.List;
 import org.donatrack.dominio.bien.TipoUnidad;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "estados_donacion")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class EstadoDonacion {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private LocalDateTime fechaIngresoEstado;
+
+    @Enumerated(EnumType.STRING)
     protected TipoEstado estado;
+
     protected List<TipoEstado> estadosValidos;
 
     public EstadoDonacion(){
@@ -84,4 +95,3 @@ public abstract class EstadoDonacion {
     
 
 }
-

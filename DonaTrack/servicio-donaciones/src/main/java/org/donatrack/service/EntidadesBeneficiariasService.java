@@ -21,7 +21,7 @@ public class EntidadesBeneficiariasService {
     }
 
     public EntidadBeneficiaria obtenerEntidadPorId(Long id) {
-        return entidadesBeneficiariasRepository.findById(id);
+        return entidadesBeneficiariasRepository.findById(id).orElse(null);
     }
 
     public EntidadBeneficiaria registrarEntidad(CrearEntidadBeneficiariaDTO nuevaEntidad) {
@@ -34,7 +34,7 @@ public class EntidadesBeneficiariasService {
     }
 
     public void eliminarEntidad(Long id) {
-        entidadesBeneficiariasRepository.delete(id);
+        entidadesBeneficiariasRepository.deleteById(id);
     }
 
 }

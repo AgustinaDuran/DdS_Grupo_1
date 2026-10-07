@@ -12,13 +12,16 @@ import java.util.Set;
 public class CoordinadorAsignacion {
 
     private List<AlgoritmoAsignacion> algoritmos;
+    private EntidadesBeneficiariasRepository entidadesRepository;
 
-    public CoordinadorAsignacion(List<AlgoritmoAsignacion> algoritmos) {
+    public CoordinadorAsignacion(List<AlgoritmoAsignacion> algoritmos,
+                                 EntidadesBeneficiariasRepository entidadesRepository) {
         this.algoritmos = algoritmos;
+        this.entidadesRepository = entidadesRepository;
     }
 
     public List<ResultadoAsignacion> generarRecomendaciones() {
-        List<EntidadBeneficiaria> entidades = EntidadesBeneficiariasRepository.getInstance().findAll();
+        List<EntidadBeneficiaria> entidades = entidadesRepository.findAll();
         List<Donacion> deposito = Deposito.getInstance().getDonacionesEnDeposito();
 
         List<ResultadoAsignacion> resultados = new ArrayList<>();

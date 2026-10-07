@@ -4,14 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.*;
 
+@Entity
+@Table(name = "categorias")
 public class Categoria {
 
     private String nombre;
+    @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL)
     private List<Subcategoria> subcategorias;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    protected Categoria() {
+        this.subcategorias = new ArrayList<>();
+    }
 
     public Categoria(String nombre) {
         this.nombre = nombre;

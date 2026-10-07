@@ -10,12 +10,22 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "donantes")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Donante {
+    @OneToMany(mappedBy = "donante")
     protected List<Donacion>  donacionesHistoricas = new ArrayList<>();
+
+    @OneToOne
+    @JoinColumn(name = "usuario_id")
     protected DatosUsuario datosUsuario;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
+
+    protected Donante() {
+    }
     public Long getId() {
         return id;
     }

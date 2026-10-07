@@ -12,14 +12,23 @@ import java.util.List;
 import java.util.ArrayList;
 import jakarta.persistence.*;
 
+@Entity
+@Table(name = "organizaciones")
 public class Organizacion extends DatosUsuario {
     private String razonSocial;
     private String cuit;
+    @ManyToMany(cascade = CascadeType.PERSIST)
+    @JoinTable(name = "organizacion_representantes",
+            joinColumns = @JoinColumn(name = "organizacion_id"),
+            inverseJoinColumns = @JoinColumn(name = "persona_id"))
     private List<Persona> representantes = new ArrayList<>();
+
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "organizacion_roles", joinColumns = @JoinColumn(name = "organizacion_id"))
     private List<RolesOrganizacion> rolesOrganizacion;
 
-    public Organizacion() {
-
+    protected Organizacion() {
     }
 
     public Organizacion(String razonSocial, String cuit) {

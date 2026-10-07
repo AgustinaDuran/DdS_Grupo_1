@@ -1,9 +1,19 @@
 package org.donatrack.dominio.contacto;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "contactos")
 public class Contacto {
-    // medio identifica el canal: MAIL, SMS o WHATSAPP
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String medio;
-    // valor es la dirección/número concreto (mail, teléfono, etc.)
     private String valor;
 
     public Contacto() {
@@ -28,5 +38,9 @@ public class Contacto {
 
     public void setValor(String valor) {
         this.valor = valor;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

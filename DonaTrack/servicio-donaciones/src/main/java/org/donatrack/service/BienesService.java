@@ -56,7 +56,7 @@ public class BienesService {
     }
 
     public void actualizarBien(Long id, ActualizarBienDTO datosActualizacion) {
-        Bien bienExistente = bienesRepository.findById(id);
+        Bien bienExistente = bienesRepository.findById(id).orElse(null);
         if (bienExistente == null) {
             throw new IllegalArgumentException("No se encontró el bien con el ID proporcionado");
         }
@@ -73,7 +73,7 @@ public class BienesService {
     }
 
     public void eliminarBienPorId(Long id) {
-        bienesRepository.delete(id);
+        bienesRepository.deleteById(id);
     }
 
     public List<ItemBien> convertirItemsDTOaItemsBien(List<ItemBienDTO> itemsDTO){
@@ -87,7 +87,7 @@ public class BienesService {
                 throw new IllegalArgumentException("No se encontró la subcategoría con el ID proporcionado");
             }
             if (itemBien.getBienId() != null) {
-                Bien bienExistente = this.bienesRepository.findById(itemBien.getBienId());
+                Bien bienExistente = this.bienesRepository.findById(itemBien.getBienId()).orElse(null);
                 if (bienExistente == null) {
                     throw new IllegalArgumentException("No se encontró el bien con el ID proporcionado");
                 }

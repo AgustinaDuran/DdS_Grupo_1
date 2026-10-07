@@ -3,6 +3,9 @@ import org.donatrack.dominio.categoria.Subcategoria;
 import jakarta.persistence.*;
 
 
+@Entity
+@Table(name = "bienes")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Bien {
     
     @Id
@@ -11,7 +14,12 @@ public abstract class Bien {
     protected String nombre;
     protected String descripcion;
     protected String foto;
+    @ManyToOne
+    @JoinColumn(name = "subcategoria_id")
     protected Subcategoria subcategoria;
+
+    protected Bien() {
+    }
 
     public Bien(String nombre, String descripcion, Subcategoria subcategoria) {
         this.nombre = nombre;

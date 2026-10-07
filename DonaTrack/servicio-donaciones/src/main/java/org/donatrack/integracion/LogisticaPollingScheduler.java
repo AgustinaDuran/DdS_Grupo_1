@@ -112,7 +112,7 @@ public class LogisticaPollingScheduler {
             return;
         }
 
-        Donacion donacion = donacionesRepository.findById(donacionId);
+        Donacion donacion = donacionesRepository.findById(donacionId).orElse(null);
         if (donacion == null) {
             return;
         }

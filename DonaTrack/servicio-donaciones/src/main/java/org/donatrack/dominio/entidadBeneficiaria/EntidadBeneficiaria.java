@@ -4,24 +4,38 @@ import org.donatrack.dominio.donacion.*;
 import org.donatrack.dominio.necesidades.Necesidad;
 import org.donatrack.dominio.usuario.organizacion.Organizacion;
 
-import org.springframework.data.annotation.Id;
 import jakarta.persistence.*;
 
 import java.util.List;
 import java.util.ArrayList;
 
 
+@Entity
+@Table(name = "entidades_beneficiarias")
 public class EntidadBeneficiaria {
     
+    @Enumerated(EnumType.STRING)
     private TipoEntidadBeneficiaria tipoEntidad;
     private String direccion;
+
+    @OneToMany(mappedBy = "entidad")
     private List<Necesidad> necesidades;
+
+    @OneToMany(mappedBy = "entidadAEntregar")
     private List<Donacion> donacionesRecibidas;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "organizacion_id")
     private Organizacion organizacion;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    protected EntidadBeneficiaria() {
+        this.necesidades = new ArrayList<>();
+        this.donacionesRecibidas = new ArrayList<>();
+    }
 
 
     public EntidadBeneficiaria(TipoEntidadBeneficiaria tipoEntidad, String direccion, Organizacion organizacion) {
@@ -44,7 +58,7 @@ public class EntidadBeneficiaria {
     public List<Necesidad> getNecesidades() { 
         return necesidades; }
 
-    public void auditarEntidad(){ //para un futuro
+    public void auditarEntidad(){
 
     }
     
@@ -52,29 +66,6 @@ public class EntidadBeneficiaria {
         necesidades.add(necesidad);
     }
 
-    /* public void confirmarRecepcionDonacion(Necesidad necesidad){ //confirma cuando una necesidad es saldada
-        necesidad.marcarComoSaldada();
-    }
-
-    public void verEstadoDonaciones(List<Donacion> donaciones){
-
-       for (Donacion donacion : donaciones){
-            System.out.println(donacion.getDescripcion() + " -> " + donacion.getEstadoDonacion());
-        }
-    }
-
-    public void seguirEntregasActivas(List<Donacion> donaciones) {
-        for (Donacion donacion : donaciones) {
-            if (donacion.getEstadoDonacion().entregaActiva()) {
-                System.out.println("Entrega activa: "+ donacion.getDescripcion());
-            }
-        }
-    }
-
-    public void recibirNotificacion(String mensaje){
-        System.out.println("Notificación: " + mensaje);
-    }
- */
     public List<Donacion> getDonacionesRecibidas() {    
     return donacionesRecibidas;
     }
@@ -91,10 +82,4 @@ public class EntidadBeneficiaria {
         this.id = id;
     }
 
-
-   /*  public void cargarFotoDonacion(String foto, Donacion donacion){
-        GestorDonaciones.agregarFotoEntrega(foto, donacion);
-    } es algo que hacen los service, clase del dominio no manda a los service*/
-
 }
-

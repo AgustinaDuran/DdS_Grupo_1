@@ -1,114 +1,57 @@
 package org.donatrack.repository;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import org.donatrack.dominio.necesidades.Necesidad;
 import org.donatrack.dominio.necesidades.TipoNecesidad;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class NecesidadesRepository {
+public interface NecesidadesRepository extends JpaRepository<Necesidad, Long> {
+    default void agregarNecesidades(List<Necesidad> necesidades) { saveAll(necesidades); }
 
-    private List<Necesidad> necesidades;
-    private Long nextId = 1L;
-
-    public NecesidadesRepository() {
-        necesidades = new ArrayList<>();
-    }
-
-    public void agregarNecesidades(List<Necesidad> necesidades) {
-        this.necesidades.addAll(necesidades);
-    }
-
-    public List<Necesidad> findAll() {
-        return necesidades;
-    }
-
-    public Necesidad findById(Long id) {
-        return necesidades.stream()
-                .filter(n -> n.getId() != null && n.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public List<Necesidad> buscarConFiltros(Long entidadId, Long subcategoriaId, TipoNecesidad tipo, Boolean activa) {
-        return necesidades;
-    }
-
-    public void save(Necesidad necesidad) {
-        if (necesidad.getId() == null) {
-            necesidad.setId(nextId++);
-        } else {
-            necesidades.removeIf(existente -> necesidad.getId().equals(existente.getId()));
+    default List<Necesidad> buscarConFiltros(Long entidadId, Long subcategoriaId,
+                                             TipoNecesidad tipo, Boolean activa) {
+        if (tipo == null) {
+            return buscarSinTipo(entidadId, subcategoriaId, activa);
         }
-        necesidades.add(necesidad);
+        if (tipo == TipoNecesidad.RECURRENTE) {
+            return buscarRecurrentes(entidadId, subcategoriaId, activa);
+        }
+        return buscarExtraordinarias(entidadId, subcategoriaId, activa);
     }
 
-    public void saveAll(List<Necesidad> necesidades) {
-        this.necesidades.addAll(necesidades);
-    }
+    @Query("""
+        select n from Necesidad n
+        where (:entidadId is null or n.entidad.id = :entidadId)
+        and (:subcategoriaId is null or n.subcategoria.id = :subcategoriaId)
+        and (:activa is null or n.activa = :activa)
+        """)
+    List<Necesidad> buscarSinTipo(@Param("entidadId") Long entidadId,
+                                  @Param("subcategoriaId") Long subcategoriaId,
+                                  @Param("activa") Boolean activa);
 
-    public void delete(Long id) {
-        necesidades = necesidades.stream()
-                .filter(n -> n.getId() == null || !n.getId().equals(id))
-                .collect(Collectors.toCollection(ArrayList::new));
-    }
+    @Query("""
+        select n from Necesidad n
+        where type(n) = NecesidadRecurrente
+        and (:entidadId is null or n.entidad.id = :entidadId)
+        and (:subcategoriaId is null or n.subcategoria.id = :subcategoriaId)
+        and (:activa is null or n.activa = :activa)
+        """)
+    List<Necesidad> buscarRecurrentes(@Param("entidadId") Long entidadId,
+                                      @Param("subcategoriaId") Long subcategoriaId,
+                                      @Param("activa") Boolean activa);
 
+    @Query("""
+        select n from Necesidad n
+        where type(n) = NecesidadExtraordinaria
+        and (:entidadId is null or n.entidad.id = :entidadId)
+        and (:subcategoriaId is null or n.subcategoria.id = :subcategoriaId)
+        and (:activa is null or n.activa = :activa)
+        """)
+    List<Necesidad> buscarExtraordinarias(@Param("entidadId") Long entidadId,
+                                          @Param("subcategoriaId") Long subcategoriaId,
+                                          @Param("activa") Boolean activa);
 }
-
-/*
-// Variante como bean de Spring en memoria (para que funcione la inyección por constructor)
-package org.donatrack.repository;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.donatrack.dominio.necesidades.Necesidad;
-import org.donatrack.dominio.necesidades.TipoNecesidad;
-import org.springframework.stereotype.Repository;
-
-@Repository
-public class NecesidadesRepository {
-
-    private List<Necesidad> necesidades;
-
-    public NecesidadesRepository() {
-        necesidades = new ArrayList<>();
-    }
-
-    public void agregarNecesidades(List<Necesidad> necesidades) {
-        this.necesidades.addAll(necesidades);
-    }
-
-    public List<Necesidad> findAll() {
-        return necesidades;
-    }
-
-    public Necesidad findById(Long id) {
-        return necesidades.stream()
-                .filter(n -> n.getId() != null && n.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public List<Necesidad> buscarConFiltros(Long entidadId, Long subcategoriaId, TipoNecesidad tipo, Boolean activa) {
-        return necesidades;
-    }
-
-    public void save(Necesidad necesidad) {
-        necesidades.add(necesidad);
-    }
-
-    public void saveAll(List<Necesidad> necesidades) {
-        this.necesidades.addAll(necesidades);
-    }
-
-    public void delete(Long id) {
-        necesidades = necesidades.stream()
-                .filter(n -> n.getId() == null || n.getId() != id)
-                .toList();
-    }
-}
-*/

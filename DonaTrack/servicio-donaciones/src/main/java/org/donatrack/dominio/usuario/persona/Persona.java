@@ -1,5 +1,4 @@
 package org.donatrack.dominio.usuario.persona;
-import org.donatrack.dominio.donante.DonantePersona;
 import org.donatrack.dominio.contacto.Contacto;
 import org.donatrack.dominio.usuario.DatosUsuario;
 
@@ -7,11 +6,9 @@ import org.donatrack.dominio.usuario.DatosUsuario;
 
 import jakarta.persistence.*;
 
+@Entity
+@Table(name = "personas")
 public class Persona extends DatosUsuario {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     private String nombre;
     private String apellido;
@@ -19,9 +16,13 @@ public class Persona extends DatosUsuario {
     private String dni;
     private String genero;
     private String direccion;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "contacto_predeterminado_id")
     private Contacto contactoPredeterminado;
 
-    /** De un representante de organización sólo se conoce su nombre y cómo contactarlo. */
+    protected Persona() {
+    }
+
     public Persona(String nombre, String apellido, Contacto contactoPredeterminado) {
         this(nombre, apellido, null, null, null, null, contactoPredeterminado);
     }
@@ -35,12 +36,6 @@ public class Persona extends DatosUsuario {
         this.direccion = direccion;
         this.contactoPredeterminado = contactoPredeterminado;
 
-    }
-
-    // --- GETTERS Y SETTERS ---
-
-    public Long getId() {
-        return id;
     }
 
     public String getNombre() {

@@ -1,84 +1,11 @@
 package org.donatrack.repository;
 
 import java.util.List;
-
-import java.util.Optional;
-
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
-
-import java.util.ArrayList;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class EntidadesBeneficiariasRepository {
-    private final List<EntidadBeneficiaria> entidades;
-
-    private Long nextId = 1L;
-
-    private static EntidadesBeneficiariasRepository instancia;
-
-
-    public static EntidadesBeneficiariasRepository getInstance(){
-        if(instancia == null){
-            instancia = new EntidadesBeneficiariasRepository();
-        }
-        return instancia;
-    }
-
-    public EntidadesBeneficiariasRepository(){
-        this.entidades = new ArrayList<>();
-    }
-
-    public List<EntidadBeneficiaria> findAll() {
-        return new ArrayList<>(entidades);
-    }
-
-    public void agregarEntidades(List<EntidadBeneficiaria> entidades){
-        this.entidades.addAll(entidades);
-    }
-
-    public EntidadBeneficiaria findById(Long id) {
-        return entidades.stream()
-                .filter(d -> d.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public EntidadBeneficiaria save(EntidadBeneficiaria entidad){
-        if (entidad.getId() == null) {
-            entidad.setId(nextId++);
-        }
-        entidades.add(entidad);
-        return entidad;
-    }
-
-    public void delete(Long id){
-        entidades.removeIf(d -> d.getId().equals(id));
-    }
-
+public interface EntidadesBeneficiariasRepository extends JpaRepository<EntidadBeneficiaria, Long> {
+    default void agregarEntidades(List<EntidadBeneficiaria> entidades) { saveAll(entidades); }
 }
-
-/*
-// Variante como bean de Spring en memoria (para que funcione la inyección por constructor)
-// Nota: se conserva getInstance() porque CoordinadorAsignacion lo utiliza.
-package org.donatrack.repository;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
-import org.springframework.stereotype.Repository;
-
-@Repository
-public class EntidadesBeneficiariasRepository {
-    private final List<EntidadBeneficiaria> entidades = new ArrayList<>();
-
-    public List<EntidadBeneficiaria> findAll() { return new ArrayList<>(entidades); }
-    public void agregarEntidades(List<EntidadBeneficiaria> entidades){ this.entidades.addAll(entidades); }
-    public EntidadBeneficiaria findById(Long id) {
-        return entidades.stream().filter(d -> d.getId() == id).findFirst().orElse(null);
-    }
-    public EntidadBeneficiaria save(EntidadBeneficiaria entidad){ entidades.add(entidad); return entidad; }
-    public void delete(Long id){ entidades.removeIf(d -> d.getId() == id); }
-}
-*/

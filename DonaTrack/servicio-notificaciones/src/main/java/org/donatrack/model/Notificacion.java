@@ -1,29 +1,35 @@
 package org.donatrack.model;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "notificaciones")
 public class Notificacion {
-
-    private static final AtomicLong CONTADOR_ID = new AtomicLong(1);
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String destinatario;
     private String nombreDestinatario;
     private String mensaje;
+    @Transient
     private MedioEnvio medioEnvio;
+    private String tipoMedio;
     private LocalDateTime fechaEnvio;
+    @Enumerated(EnumType.STRING)
     private EnumEstadoNotificacion estado;
     private String motivoFallo;
 
+    protected Notificacion() {
+    }
+
     public Notificacion(String destinatario, String nombreDestinatario, String mensaje, MedioEnvio medioEnvio) {
-        this.id = CONTADOR_ID.getAndIncrement();
         this.destinatario = destinatario;
         this.nombreDestinatario = nombreDestinatario;
         this.mensaje = mensaje;
         this.medioEnvio = medioEnvio;
+        this.tipoMedio = medioEnvio == null ? null : medioEnvio.getClass().getSimpleName();
         this.estado = EnumEstadoNotificacion.PENDIENTE;
         this.fechaEnvio = LocalDateTime.now();
     }

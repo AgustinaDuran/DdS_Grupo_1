@@ -5,9 +5,19 @@ import org.donatrack.dominio.usuario.DatosUsuario;
 
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "donantes_persona")
 public class DonantePersona extends Donante{
+    @Enumerated(EnumType.STRING)
     EstadoActividad estadoActividad;
+
+    protected DonantePersona() {
+    }
 
     public DonantePersona(DatosUsuario datosUsuario) {
         super(datosUsuario);

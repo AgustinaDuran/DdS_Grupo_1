@@ -5,6 +5,7 @@ import org.donatrack.controller.dto.Donaciones.ActualizarDonacionDTO;
 import org.donatrack.controller.dto.Donaciones.CrearDonacionDTO;
 import org.donatrack.controller.dto.Donaciones.FiltrosDonacionDTO;
 import org.donatrack.repository.DonacionesRepository;
+import org.donatrack.repository.DonacionesCompletasRepository;
 import org.donatrack.dominio.donante.*;
 import org.donatrack.dominio.bien.ItemBien;
 import org.donatrack.dominio.donacion.*;
@@ -22,6 +23,7 @@ import java.util.List;
 @Service
 public class DonacionesService {
     private DonacionesRepository donacionesRepository;
+    private DonacionesCompletasRepository donacionesCompletasRepository;
     private DonantesService donantesService;
     private EntidadesBeneficiariasService entidadesBeneficiariasService;
     private BienesService bienesService;
@@ -31,11 +33,14 @@ public class DonacionesService {
     private final LogisticaClient logisticaClient;
     private final DestinatarioResolver destinatarioResolver;
 
-    public DonacionesService(DonacionesRepository donacionesRepository, DonantesService donantesService,
+    public DonacionesService(DonacionesRepository donacionesRepository,
+                             DonacionesCompletasRepository donacionesCompletasRepository,
+                             DonantesService donantesService,
                              EntidadesBeneficiariasService entidadesBeneficiariasService, BienesService bienesService,
                              NotificacionesClient notificacionesClient, IncentivosClient incentivosClient,
                              LogisticaClient logisticaClient, DestinatarioResolver destinatarioResolver) {
         this.donacionesRepository = donacionesRepository;
+        this.donacionesCompletasRepository = donacionesCompletasRepository;
         this.donantesService = donantesService;
         this.entidadesBeneficiariasService = entidadesBeneficiariasService;
         this.bienesService = bienesService;
@@ -56,7 +61,7 @@ public class DonacionesService {
     }
 
     public Donacion obtenerDonacionPorId(Long id) {
-        return donacionesRepository.findById(id);
+        return donacionesRepository.findById(id).orElse(null);
     }
 
     public void registrarDonacion(CrearDonacionDTO nuevaDonacion) {
@@ -65,6 +70,7 @@ public class DonacionesService {
 
 
         DonacionCompleta donacionCompleta = new DonacionCompleta(donante, itemBienes, nuevaDonacion.getDescripcion());
+        donacionesCompletasRepository.save(donacionCompleta);
 
         List<Donacion> donacionesSegmentadas = donacionCompleta.segmentarDonacion();
         donacionesRepository.saveAll(donacionesSegmentadas);
@@ -82,11 +88,11 @@ public class DonacionesService {
     }
 
     public void eliminarDonacionPorId(Long id) {
-        donacionesRepository.delete(id);
+        donacionesRepository.deleteById(id);
     }
 
     public void actualizarDonacion(Long id, ActualizarDonacionDTO datosActualizacion) {
-        Donacion donacion = donacionesRepository.findById(id);
+        Donacion donacion = donacionesRepository.findById(id).orElse(null);
 
         if (donacion == null) {
             throw new IllegalArgumentException("No se encontró la donación con el ID proporcionado");

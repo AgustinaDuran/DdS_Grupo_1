@@ -56,9 +56,13 @@ public class UsuariosService {
         // lista de contactos, de modo que sea posible ubicar al usuario por email (upsert de la
         // importación masiva) y notificarlo, tanto para PERSONA como para ORGANIZACION.
         if (crearUsuarioDTO.getContactoDTOPredeterminado() != null) {
-            nuevoUsuario.agregarContacto(new Contacto(
-                crearUsuarioDTO.getContactoDTOPredeterminado().getMedio(),
-                crearUsuarioDTO.getContactoDTOPredeterminado().getValor()));
+            if (nuevoUsuario instanceof Persona persona) {
+                nuevoUsuario.agregarContacto(persona.getContactoPredeterminado());
+            } else {
+                nuevoUsuario.agregarContacto(new Contacto(
+                    crearUsuarioDTO.getContactoDTOPredeterminado().getMedio(),
+                    crearUsuarioDTO.getContactoDTOPredeterminado().getValor()));
+            }
         }
 
         return usuariosRepository.save(nuevoUsuario);
