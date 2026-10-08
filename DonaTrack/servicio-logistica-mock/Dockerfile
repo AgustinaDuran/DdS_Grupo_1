@@ -4,15 +4,15 @@ WORKDIR /app
 COPY pom.xml .
 COPY mensajeria ./mensajeria
 COPY servicio-donaciones/pom.xml ./servicio-donaciones/pom.xml
+COPY servicio-incentivos/pom.xml ./servicio-incentivos/pom.xml
 COPY servicio-notificaciones/pom.xml ./servicio-notificaciones/pom.xml
 COPY servicio-logistica/pom.xml ./servicio-logistica/pom.xml
 COPY servicio-logistica-mock/pom.xml ./servicio-logistica-mock/pom.xml
-COPY servicio-incentivos/pom.xml ./servicio-incentivos/pom.xml
-COPY servicio-incentivos/src ./servicio-incentivos/src
-RUN mvn -pl servicio-incentivos -am clean package -DskipTests
+COPY servicio-logistica-mock/src ./servicio-logistica-mock/src
+RUN mvn -pl servicio-logistica-mock -am clean package -DskipTests
 
 FROM eclipse-temurin:23-jre
 WORKDIR /app
-COPY --from=build /app/servicio-incentivos/target/*.jar app.jar
-EXPOSE 8082
+COPY --from=build /app/servicio-logistica-mock/target/*.jar app.jar
+EXPOSE 8088
 ENTRYPOINT ["java", "-jar", "app.jar"]

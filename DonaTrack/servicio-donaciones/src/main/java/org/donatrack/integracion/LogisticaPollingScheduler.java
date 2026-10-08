@@ -7,6 +7,7 @@ import org.donatrack.dominio.donacion.EstadoEntregaFallida;
 import org.donatrack.dominio.donacion.EstadoEntregada;
 import org.donatrack.dominio.donacion.TipoEstado;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
+import org.donatrack.integracion.broker.BrokerLogistica;
 import org.donatrack.integracion.dto.ContactoNotificacion;
 import org.donatrack.integracion.dto.EntregaResponse;
 import org.donatrack.integracion.dto.NotificacionRequest;
@@ -34,7 +35,7 @@ public class LogisticaPollingScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(LogisticaPollingScheduler.class);
 
-    private final LogisticaClient logisticaClient;
+    private final BrokerLogistica brokerLogistica;
     private final DonacionesRepository donacionesRepository;
     private final NotificacionesClient notificacionesClient;
     private final DestinatarioResolver destinatarioResolver;
@@ -48,9 +49,9 @@ public class LogisticaPollingScheduler {
     @Value("${services.admin.contacto.valor:admin@donatrack.org}")
     private String adminValor;
 
-    public LogisticaPollingScheduler(LogisticaClient logisticaClient, DonacionesRepository donacionesRepository,
+    public LogisticaPollingScheduler(BrokerLogistica brokerLogistica, DonacionesRepository donacionesRepository,
                                      NotificacionesClient notificacionesClient, DestinatarioResolver destinatarioResolver) {
-        this.logisticaClient = logisticaClient;
+        this.brokerLogistica = brokerLogistica;
         this.donacionesRepository = donacionesRepository;
         this.notificacionesClient = notificacionesClient;
         this.destinatarioResolver = destinatarioResolver;
@@ -58,7 +59,7 @@ public class LogisticaPollingScheduler {
 
     @Scheduled(fixedDelayString = "${logistica.polling.intervalo-ms:60000}")
     public void sincronizarEventosDeLogistica() {
-        List<EntregaResponse> entregas = ultimaEntregaPorDonacion(logisticaClient.listarEntregas());
+        List<EntregaResponse> entregas = ultimaEntregaPorDonacion(brokerLogistica.listarEntregas());
 
         for (EntregaResponse entrega : entregas) {
             try {

@@ -12,7 +12,7 @@ import org.donatrack.dominio.donacion.*;
 import org.donatrack.dominio.entidadBeneficiaria.*;
 import org.donatrack.integracion.DestinatarioResolver;
 import org.donatrack.integracion.IncentivosClient;
-import org.donatrack.integracion.LogisticaClient;
+import org.donatrack.integracion.broker.BrokerLogistica;
 import org.donatrack.integracion.NotificacionesClient;
 import org.donatrack.integracion.dto.DepositoRequest;
 import org.donatrack.integracion.dto.EntregaRequest;
@@ -30,7 +30,7 @@ public class DonacionesService {
 
     private final NotificacionesClient notificacionesClient;
     private final IncentivosClient incentivosClient;
-    private final LogisticaClient logisticaClient;
+    private final BrokerLogistica brokerLogistica;
     private final DestinatarioResolver destinatarioResolver;
 
     public DonacionesService(DonacionesRepository donacionesRepository,
@@ -38,7 +38,7 @@ public class DonacionesService {
                              DonantesService donantesService,
                              EntidadesBeneficiariasService entidadesBeneficiariasService, BienesService bienesService,
                              NotificacionesClient notificacionesClient, IncentivosClient incentivosClient,
-                             LogisticaClient logisticaClient, DestinatarioResolver destinatarioResolver) {
+                             BrokerLogistica brokerLogistica, DestinatarioResolver destinatarioResolver) {
         this.donacionesRepository = donacionesRepository;
         this.donacionesCompletasRepository = donacionesCompletasRepository;
         this.donantesService = donantesService;
@@ -46,7 +46,7 @@ public class DonacionesService {
         this.bienesService = bienesService;
         this.notificacionesClient = notificacionesClient;
         this.incentivosClient = incentivosClient;
-        this.logisticaClient = logisticaClient;
+        this.brokerLogistica = brokerLogistica;
         this.destinatarioResolver = destinatarioResolver;
     }
 
@@ -161,7 +161,7 @@ public class DonacionesService {
     private void enviarEntregaALogistica(Donacion donacion, EntidadBeneficiaria entidad) {
         // Donaciones deja disponible la info de la entrega; Logística nunca llama a donaciones.
         EntregaRequest entrega = new EntregaRequest(String.valueOf(donacion.getId()), entidad.getDireccion());
-        logisticaClient.registrarEntregas(new DepositoRequest(List.of(entrega)));
+        brokerLogistica.registrarEntregas(new DepositoRequest(List.of(entrega)));
     }
 
     private RegistrarDonacionRequest construirRegistroIncentivos(Donacion donacion) {

@@ -15,5 +15,6 @@
         <module>servicio-incentivos</module>
         <module>servicio-notificaciones</module>
         <module>servicio-logistica</module>
+        <module>servicio-logistica-mock</module>
     </modules>
 </project>

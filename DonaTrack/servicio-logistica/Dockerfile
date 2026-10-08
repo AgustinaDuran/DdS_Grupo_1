@@ -6,6 +6,7 @@ COPY mensajeria ./mensajeria
 COPY servicio-donaciones/pom.xml ./servicio-donaciones/pom.xml
 COPY servicio-incentivos/pom.xml ./servicio-incentivos/pom.xml
 COPY servicio-notificaciones/pom.xml ./servicio-notificaciones/pom.xml
+COPY servicio-logistica-mock/pom.xml ./servicio-logistica-mock/pom.xml
 COPY servicio-logistica/pom.xml ./servicio-logistica/pom.xml
 COPY servicio-logistica/src ./servicio-logistica/src
 RUN mvn -pl servicio-logistica -am clean package -DskipTests

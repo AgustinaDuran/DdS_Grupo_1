@@ -50,6 +50,7 @@ services:
       SERVICES_NOTIFICACIONES_URL: http://servicio-notificaciones:8081
       SERVICES_INCENTIVOS_URL: http://servicio-incentivos:8082
       SERVICES_LOGISTICA_URL: http://servicio-logistica:8083
+      SERVICES_LOGISTICA_MOCK_URL: http://servicio-logistica-mock:8088
     depends_on:
       db:
         condition: service_healthy
@@ -60,6 +61,8 @@ services:
       servicio-incentivos:
         condition: service_started
       servicio-logistica:
+        condition: service_started
+      servicio-logistica-mock:
         condition: service_started
 
   # Servicio de Notificaciones
@@ -120,3 +123,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  # Proveedor de logística externo simulado (respaldo del broker de Donaciones)
+  servicio-logistica-mock:
+    build:
+      context: .
+      dockerfile: ./servicio-logistica-mock/Dockerfile
+    container_name: api-logistica-mock
+    ports:
+      - "8088:8088"
