@@ -1,0 +1,69 @@
+# Despliegue del Servicio de Logística (y del proveedor externo simulado) en el hosting.
+#
+# En tu máquina (construir y subir las imágenes a Docker Hub):
+#   docker login
+#   docker compose -f docker-compose.deploy.yml build
+#   docker compose -f docker-compose.deploy.yml push
+#
+# En el servidor (sólo hacen falta este archivo y el .env, no el código):
+#   cp .env.deploy.example .env      # y completar los valores
+#   docker compose -f docker-compose.deploy.yml pull
+#   docker compose -f docker-compose.deploy.yml up -d --no-build
+#
+# Para pausarlo hasta la defensa: docker compose -f docker-compose.deploy.yml stop
+
+services:
+  # Base de datos propia de Logística. No publica el 3306: sólo la ve Logística por la red interna.
+  db-logistica:
+    image: mysql:8.0
+    container_name: logistica-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: logistica
+      MYSQL_USER: logistica
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - logistica-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      start_period: 90s
+      retries: 20
+
+  # Servicio de Logística
+  servicio-logistica:
+    build:
+      context: .
+      dockerfile: ./servicio-logistica/Dockerfile
+    image: frantilve/logistica-propio:latest
+    platform: linux/amd64
+    container_name: api-logistica
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db-logistica:3306/logistica?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: logistica
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      # URL pública a la que el planificador externo devuelve las rutas.
+      LOGISTICA_CALLBACK_URL: ${PUBLIC_URL}/api/logistica/callback-planificador
+    depends_on:
+      db-logistica:
+        condition: service_healthy
+
+  # Proveedor de logística externo simulado (respaldo del broker de Donaciones)
+  servicio-logistica-mock:
+    build:
+      context: .
+      dockerfile: ./servicio-logistica-mock/Dockerfile
+    image: frantilve/logistica-externo-mock:latest
+    platform: linux/amd64
+    container_name: api-logistica-mock
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+
+volumes:
+  logistica-data:
