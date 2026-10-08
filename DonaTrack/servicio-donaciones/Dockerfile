@@ -2,11 +2,16 @@
 FROM maven:3.9-eclipse-temurin-23 AS build
 WORKDIR /app
 COPY pom.xml .
-COPY src ./src
-RUN mvn clean package -DskipTests
+COPY mensajeria ./mensajeria
+COPY servicio-incentivos/pom.xml ./servicio-incentivos/pom.xml
+COPY servicio-notificaciones/pom.xml ./servicio-notificaciones/pom.xml
+COPY servicio-logistica/pom.xml ./servicio-logistica/pom.xml
+COPY servicio-donaciones/pom.xml ./servicio-donaciones/pom.xml
+COPY servicio-donaciones/src ./servicio-donaciones/src
+RUN mvn -pl servicio-donaciones -am clean package -DskipTests
 
 FROM eclipse-temurin:23-jre
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/servicio-donaciones/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

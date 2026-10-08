@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>mensajeria</module>
         <module>servicio-donaciones</module>
         <module>servicio-incentivos</module>
         <module>servicio-notificaciones</module>
