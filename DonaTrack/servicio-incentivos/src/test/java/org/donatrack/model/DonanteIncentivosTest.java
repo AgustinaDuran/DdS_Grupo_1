@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.donatrack.controller.dto.DonacionDTO;
 import org.junit.jupiter.api.Test;
 
 class DonanteIncentivosTest {
@@ -50,9 +49,9 @@ class DonanteIncentivosTest {
         assertThat(donante.GetInsigniasGanadas()).hasSize(3);
     }
 
-    private DonacionDTO donacion(String usuario, String subcategoria, int cantidad,
+    private DonacionRegistrada donacion(String usuario, String subcategoria, int cantidad,
             String organizacion, LocalDate fecha) {
-        return new DonacionDTO(usuario, subcategoria,
+        return new DonacionRegistrada(usuario, subcategoria,
                 java.util.stream.IntStream.range(0, cantidad)
                         .mapToObj(indice -> "bien-" + indice).toList(),
                 organizacion, fecha);

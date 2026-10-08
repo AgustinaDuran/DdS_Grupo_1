@@ -44,7 +44,7 @@ public class AnaliticaService {
         // acá para que quede persistido y aparezca en el perfil.
         donacionDto.setNombreUsuario(nombreUsuario);
 
-        ResultadoActividad resultado = donante.RegistrarActividad(donacionDto);
+        ResultadoActividad resultado = donante.RegistrarActividad(donacionDto.toDominio());
 
         donanteRepository.save(donante);
 
@@ -82,7 +82,7 @@ public class AnaliticaService {
         return new PerfilAnaliticoDTO(
                 donante.GetNombreUsuario(),
                 donante.GetNombreCategoriaActual(),
-                donante.GetDonaciones(),
+                donante.GetDonaciones().stream().map(DonacionDTO::desde).toList(),
                 donante.ObtenerEvolucionDonacionesPorPeriodo(donante.GetMesPrimeraDonacion(), YearMonth.now()),
                 donante.ObtenerComparacionMensual(YearMonth.now(), YearMonth.now().minusMonths(1)), 
                 donante.CalcularOrganizacionesAyudadas(),

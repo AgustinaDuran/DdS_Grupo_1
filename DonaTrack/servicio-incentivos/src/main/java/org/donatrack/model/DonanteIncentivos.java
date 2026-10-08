@@ -1,7 +1,5 @@
 package org.donatrack.model;
 
-import org.donatrack.controller.dto.*;
-
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
@@ -15,7 +13,7 @@ public class DonanteIncentivos {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "donante_id")
-    private List<DonacionDTO> donaciones = new ArrayList<>();
+    private List<DonacionRegistrada> donaciones = new ArrayList<>();
 
     @Transient // no guardar
     private CategoriaDonante categoriaActual;
@@ -33,7 +31,7 @@ public class DonanteIncentivos {
         this.nombreCategoriaActual = this.categoriaActual.GetNombre();
     }
 
-    public ResultadoActividad RegistrarActividad(DonacionDTO nuevaDonacion) {
+    public ResultadoActividad RegistrarActividad(DonacionRegistrada nuevaDonacion) {
         this.donaciones.add(nuevaDonacion);
 
         CategoriaDonante categoria = this.GetCategoriaActual();
@@ -66,7 +64,7 @@ public class DonanteIncentivos {
     public Integer CalcularDonacionesDistintas(){
         List<String> categorias = new ArrayList<>();
 
-        for (DonacionDTO d : donaciones) {
+        for (DonacionRegistrada d : donaciones) {
             if (!categorias.contains(d.GetSubcategoria())) {
                 categorias.add(d.GetSubcategoria());
             }
@@ -77,7 +75,7 @@ public class DonanteIncentivos {
     public Integer CalcularOrganizacionesAyudadas(){
         List<String> organizaciones = new ArrayList<>();
 
-        for (DonacionDTO d : donaciones) {
+        for (DonacionRegistrada d : donaciones) {
             if (!organizaciones.contains(d.GetOrganizacion())) {
                 organizaciones.add(d.GetOrganizacion());
             }
@@ -91,8 +89,8 @@ public class DonanteIncentivos {
             return 0;
         }
 
-        List<DonacionDTO> ordenadas = new ArrayList<>(donaciones);
-        ordenadas.sort(Comparator.comparing(DonacionDTO::GetFechaIngreso));
+        List<DonacionRegistrada> ordenadas = new ArrayList<>(donaciones);
+        ordenadas.sort(Comparator.comparing(DonacionRegistrada::GetFechaIngreso));
 
         Integer racha = 1;
         YearMonth mesAnterior = YearMonth.from(ordenadas.get(0).GetFechaIngreso());
@@ -117,7 +115,7 @@ public class DonanteIncentivos {
 
     public Integer GetCantidadBienesDonados(){
         Integer total = 0;
-        for (DonacionDTO d : donaciones) {
+        for (DonacionRegistrada d : donaciones) {
             total += d.GetCantidadBienes();
         }
         return total;
@@ -131,7 +129,7 @@ public class DonanteIncentivos {
     public Integer CalcularTotalDonadoEntre(LocalDate fechaInicio, LocalDate fechaFin) {
         Integer total = 0;
 
-        for (DonacionDTO d : donaciones) {
+        for (DonacionRegistrada d : donaciones) {
             LocalDate fecha = d.GetFechaIngreso();
 
             if (!fecha.isBefore(fechaInicio) && !fecha.isAfter(fechaFin)) {
@@ -146,7 +144,7 @@ public class DonanteIncentivos {
         Double totalActual = 0.0;
         Double totalAnterior = 0.0;
 
-        for (DonacionDTO d : donaciones) {
+        for (DonacionRegistrada d : donaciones) {
             YearMonth periodo = YearMonth.from(d.GetFechaIngreso());
 
             if (periodo.equals(mesActual)) {
@@ -171,7 +169,7 @@ public class DonanteIncentivos {
         while (!mesActual.isAfter(mesFinal)) {
             int totalMes = 0;
 
-            for (DonacionDTO d : donaciones) {
+            for (DonacionRegistrada d : donaciones) {
                 if (YearMonth.from(d.GetFechaIngreso()).equals(mesActual)) {
                     totalMes += d.GetCantidadBienes();
                 }
@@ -252,8 +250,8 @@ public class DonanteIncentivos {
     }
 
     private DonanteIncentivos CrearSnapshotHasta(LocalDate fechaLimite) {
-        List<DonacionDTO> filtradas = new ArrayList<>();
-        for (DonacionDTO d : this.donaciones) {
+        List<DonacionRegistrada> filtradas = new ArrayList<>();
+        for (DonacionRegistrada d : this.donaciones) {
             if (!d.GetFechaIngreso().isAfter(fechaLimite)) {
                 filtradas.add(d);
             }
@@ -270,7 +268,7 @@ public class DonanteIncentivos {
         }
  
         LocalDate fechaMasAntigua = donaciones.get(0).GetFechaIngreso();
-        for (DonacionDTO d : donaciones) {
+        for (DonacionRegistrada d : donaciones) {
             if (d.GetFechaIngreso().isBefore(fechaMasAntigua)) {
                 fechaMasAntigua = d.GetFechaIngreso();
             }
@@ -283,7 +281,7 @@ public class DonanteIncentivos {
 
     public String GetNombreUsuario() { return nombreUsuario; }
 
-    public List<DonacionDTO> GetDonaciones() { return donaciones; }
+    public List<DonacionRegistrada> GetDonaciones() { return donaciones; }
 
     public List<Insignia> GetInsigniasGanadas() { return insigniasGanadas; }
 }

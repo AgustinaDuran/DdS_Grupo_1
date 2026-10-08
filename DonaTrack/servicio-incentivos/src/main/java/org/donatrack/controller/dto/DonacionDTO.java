@@ -1,78 +1,53 @@
 package org.donatrack.controller.dto;
 
-import jakarta.persistence.*;
-
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+
 import org.donatrack.integracion.dto.ContactoNotificacion;
+import org.donatrack.model.DonacionRegistrada;
 
-@Entity
+/**
+ * Contrato HTTP de una donación. No se persiste: se convierte a {@link DonacionRegistrada}
+ * para el dominio. Los contactos sólo se usan para notificar al donante.
+ */
 public class DonacionDTO {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    String nombreUsuario;
-    String subcategoria;
-    @ElementCollection
-    List<String> bienes;
-    String organizacion;
-    LocalDate fechaIngreso;
-    @Transient
-    List<ContactoNotificacion> contactos;
+    private String nombreUsuario;
+    private String subcategoria;
+    private List<String> bienes;
+    private String organizacion;
+    private LocalDate fechaIngreso;
+    private List<ContactoNotificacion> contactos;
 
-    public DonacionDTO() {
+    public DonacionDTO() { }
+
+    public DonacionRegistrada toDominio() {
+        return new DonacionRegistrada(nombreUsuario, subcategoria, bienes, organizacion, fechaIngreso);
     }
 
-    public DonacionDTO(String nombreUsuario, String subcategoria, List<String> bienes, String organizacion, LocalDate fechaIngreso) {
-        this.nombreUsuario = nombreUsuario;
-        this.subcategoria = subcategoria;
-        this.bienes = bienes;
-        this.organizacion = organizacion;
-        this.fechaIngreso = fechaIngreso;
+    public static DonacionDTO desde(DonacionRegistrada d) {
+        DonacionDTO dto = new DonacionDTO();
+        dto.nombreUsuario = d.GetNombreUsuario();
+        dto.subcategoria = d.GetSubcategoria();
+        dto.bienes = d.GetBienes() == null ? new ArrayList<>() : new ArrayList<>(d.GetBienes());
+        dto.organizacion = d.GetOrganizacion();
+        dto.fechaIngreso = d.GetFechaIngreso();
+        return dto;
     }
 
-    public List<ContactoNotificacion> getContactos() { return contactos; }
-
-    public void setContactos(List<ContactoNotificacion> contactos) { this.contactos = contactos; }
-
-    public String GetNombreUsuario() { return nombreUsuario; }
-
-    public String GetSubcategoria(){ return subcategoria; }
-
-    public List<String> GetBienes(){ return bienes; }
-
-    public String GetOrganizacion(){ return organizacion; }
-
-    public LocalDate GetFechaIngreso() { return fechaIngreso; }
-
-    public Integer GetCantidadBienes() {
-        return bienes == null ? 0 : bienes.size();
-    }
-
-    // Accessors JavaBean: Jackson sólo reconoce el prefijo 'get' en minúscula y campos públicos,
-    // así que sin estos métodos el JSON entrante llegaba con todos los campos en null y el DTO
-    // no se podía serializar en la respuesta del perfil.
+    // Accessors JavaBean: Jackson sólo reconoce el prefijo 'get'/'set' en minúscula.
 
     public String getNombreUsuario() { return nombreUsuario; }
-
     public void setNombreUsuario(String nombreUsuario) { this.nombreUsuario = nombreUsuario; }
-
     public String getSubcategoria() { return subcategoria; }
-
     public void setSubcategoria(String subcategoria) { this.subcategoria = subcategoria; }
-
     public List<String> getBienes() { return bienes; }
-
     public void setBienes(List<String> bienes) { this.bienes = bienes; }
-
     public String getOrganizacion() { return organizacion; }
-
     public void setOrganizacion(String organizacion) { this.organizacion = organizacion; }
-
     public LocalDate getFechaIngreso() { return fechaIngreso; }
-
     public void setFechaIngreso(LocalDate fechaIngreso) { this.fechaIngreso = fechaIngreso; }
-
+    public List<ContactoNotificacion> getContactos() { return contactos; }
+    public void setContactos(List<ContactoNotificacion> contactos) { this.contactos = contactos; }
 }
