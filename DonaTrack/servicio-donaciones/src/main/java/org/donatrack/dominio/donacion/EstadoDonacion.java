@@ -20,6 +20,7 @@ public abstract class EstadoDonacion {
     @Enumerated(EnumType.STRING)
     protected TipoEstado estado;
 
+    @Transient 
     protected List<TipoEstado> estadosValidos;
 
     public EstadoDonacion(){
