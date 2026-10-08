@@ -53,8 +53,14 @@ public class CategoriasService {
         if (datosActualizacion.getNombre() != null) {
             subcategoria.setNombre(datosActualizacion.getNombre());
         }
-        // datosActualizacion.getCategoriaACambiar() no se resuelve aún:
-        // falta definir si identifica a la categoría por id o por nombre.
+        if (datosActualizacion.getCategoriaId() != null) {
+            Categoria categoria = categoriasRepository.findById(datosActualizacion.getCategoriaId()).orElse(null);
+            if (categoria == null) {
+                throw new IllegalArgumentException("No se encontró la categoría con el ID proporcionado");
+            }
+            subcategoria.setCategoria(categoria);
+        }
+        subcategoriaRepository.save(subcategoria);
     }
 
     public void eliminarSubCategoriaPorId(Long id) {
@@ -83,6 +89,7 @@ public class CategoriasService {
         if (datosActualizacion.getNombre() != null) {
             categoria.setNombre(datosActualizacion.getNombre());
         }
+        categoriasRepository.saveCategoria(categoria);
     }
 
     public void eliminarCategoriaPorId(Long id) {

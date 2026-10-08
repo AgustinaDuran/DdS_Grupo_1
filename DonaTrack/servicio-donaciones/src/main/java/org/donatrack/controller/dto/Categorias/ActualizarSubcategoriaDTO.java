@@ -2,7 +2,7 @@ package org.donatrack.controller.dto.Categorias;
 
 public class ActualizarSubcategoriaDTO {
     private String nombre;
-    private String categoriaACambiar;
+    private Long categoriaId;
 
     public ActualizarSubcategoriaDTO() {
     }
@@ -15,11 +15,11 @@ public class ActualizarSubcategoriaDTO {
         this.nombre = nombre;
     }
 
-    public String getCategoriaACambiar() {
-        return categoriaACambiar;
+    public Long getCategoriaId() {
+        return categoriaId;
     }
 
-    public void setCategoriaACambiar(String categoriaACambiar) {
-        this.categoriaACambiar = categoriaACambiar;
+    public void setCategoriaId(Long categoriaId) {
+        this.categoriaId = categoriaId;
     }
 }

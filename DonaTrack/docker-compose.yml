@@ -49,8 +49,9 @@ services:
       SPRING_RABBITMQ_PASSWORD: donatrack
       SERVICES_NOTIFICACIONES_URL: http://servicio-notificaciones:8081
       SERVICES_INCENTIVOS_URL: http://servicio-incentivos:8082
-      SERVICES_LOGISTICA_URL: http://servicio-logistica:8083
-      SERVICES_LOGISTICA_MOCK_URL: http://servicio-logistica-mock:8088
+      SERVICES_LOGISTICA_URL: http://157.245.143.170:8083
+      SERVICES_LOGISTICA_MOCK_URL: http://157.245.143.170:8088
+      LOGISTICA_POLLING_INTERVALO_MS: 10000
     depends_on:
       db:
         condition: service_healthy
