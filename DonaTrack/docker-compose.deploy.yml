@@ -18,6 +18,15 @@ services:
     image: mysql:8.0
     container_name: logistica-db
     restart: unless-stopped
+    # El droplet tiene 512 MB: con la configuración por defecto MySQL usa ~400 MB y el kernel lo
+    # mata por falta de memoria. Sin performance_schema y con buffers chicos ronda los 150 MB.
+    command:
+      - --performance-schema=OFF
+      - --innodb-buffer-pool-size=32M
+      - --innodb-log-buffer-size=4M
+      - --key-buffer-size=4M
+      - --table-open-cache=64
+      - --max-connections=20
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: logistica
@@ -47,6 +56,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db-logistica:3306/logistica?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: logistica
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 5
+      # Límite de memoria de la JVM para que entre junto con MySQL en el droplet de 512 MB.
+      JAVA_TOOL_OPTIONS: -Xmx160m -XX:MaxMetaspaceSize=128m -Xss512k -XX:+UseSerialGC -XX:TieredStopAtLevel=1
       # URL pública a la que el planificador externo devuelve las rutas.
       LOGISTICA_CALLBACK_URL: ${PUBLIC_URL}/api/logistica/callback-planificador
     depends_on:
@@ -64,6 +76,8 @@ services:
     restart: unless-stopped
     ports:
       - "8088:8088"
+    environment:
+      JAVA_TOOL_OPTIONS: -Xmx64m -XX:MaxMetaspaceSize=96m -Xss512k -XX:+UseSerialGC -XX:TieredStopAtLevel=1
 
 volumes:
   logistica-data:
