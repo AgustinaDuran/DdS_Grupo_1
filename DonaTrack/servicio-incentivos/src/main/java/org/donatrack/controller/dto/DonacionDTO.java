@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.donatrack.integracion.dto.ContactoNotificacion;
 
 @Entity
 public class DonacionDTO {
@@ -18,6 +19,8 @@ public class DonacionDTO {
     List<String> bienes;
     String organizacion;
     LocalDate fechaIngreso;
+    @Transient
+    List<ContactoNotificacion> contactos;
 
     public DonacionDTO() {
     }
@@ -29,6 +32,10 @@ public class DonacionDTO {
         this.organizacion = organizacion;
         this.fechaIngreso = fechaIngreso;
     }
+
+    public List<ContactoNotificacion> getContactos() { return contactos; }
+
+    public void setContactos(List<ContactoNotificacion> contactos) { this.contactos = contactos; }
 
     public String GetNombreUsuario() { return nombreUsuario; }
 

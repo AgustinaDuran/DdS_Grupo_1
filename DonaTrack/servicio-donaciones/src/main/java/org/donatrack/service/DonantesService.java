@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.donatrack.controller.dto.Usuarios.CrearUsuarioDTO;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.context.annotation.Lazy;
+import org.donatrack.integracion.DestinatarioResolver;
+import org.donatrack.integracion.NotificacionesClient;
 
 @Service
 public class DonantesService {
@@ -26,11 +28,18 @@ public class DonantesService {
     private UsuariosService usuariosService;
 
     private final ImportacionDonantesService importacionDonantesService;
+    private final NotificacionesClient notificacionesClient;
+    private final DestinatarioResolver destinatarioResolver;
 
-    public DonantesService(DonantesRepository donantesRepository, UsuariosService usuariosService, @Lazy ImportacionDonantesService importacionDonantesService) {
+    public DonantesService(DonantesRepository donantesRepository, UsuariosService usuariosService,
+                           @Lazy ImportacionDonantesService importacionDonantesService,
+                           NotificacionesClient notificacionesClient,
+                           DestinatarioResolver destinatarioResolver) {
         this.donantesRepository = donantesRepository;
         this.usuariosService = usuariosService;
         this.importacionDonantesService = importacionDonantesService;
+        this.notificacionesClient = notificacionesClient;
+        this.destinatarioResolver = destinatarioResolver;
     }
 
     public List<Donante> obtenerDonantes() {
@@ -43,6 +52,7 @@ public class DonantesService {
 
     public Donante registrarDonante(CrearDonanteDTO nuevoDonante) {
         System.out.println("Hola2");
+        boolean usuarioNuevo = nuevoDonante.getUsuarioId() == null;
         DatosUsuario datosUsuario;
         Long id = nuevoDonante.getUsuarioId();
         if (id != null) {
@@ -69,7 +79,14 @@ public class DonantesService {
             default:
                 throw new IllegalArgumentException("Tipo de donante no válido");
         }
-        return donantesRepository.save(donante);
+        Donante guardado = donantesRepository.save(donante);
+
+        if (usuarioNuevo) {
+            notificacionesClient.enviar(destinatarioResolver.paraDonante(
+                    guardado,
+                    "Bienvenido a DonaTrack. Tu usuario fue registrado correctamente."));
+        }
+        return guardado;
     }
 
     // por ahora es simple pero guardarDonante implicará varios chequeos y demás

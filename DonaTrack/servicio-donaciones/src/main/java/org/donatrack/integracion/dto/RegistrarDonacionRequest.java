@@ -3,25 +3,28 @@ package org.donatrack.integracion.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Payload que consume el Servicio de Incentivos en
- * POST /api/incentivos/registrar-donacion?nombreUsuario=... (cuerpo = esta clase).
- */
 public class RegistrarDonacionRequest {
     private String subcategoria;
     private List<String> bienes;
     private String organizacion;
     private LocalDate fechaIngreso;
+    private List<ContactoNotificacion> contactos;
 
     public RegistrarDonacionRequest() {
     }
 
     public RegistrarDonacionRequest(String subcategoria, List<String> bienes, String organizacion,
                                     LocalDate fechaIngreso) {
+        this(subcategoria, bienes, organizacion, fechaIngreso, null);
+    }
+
+    public RegistrarDonacionRequest(String subcategoria, List<String> bienes, String organizacion,
+                                    LocalDate fechaIngreso, List<ContactoNotificacion> contactos) {
         this.subcategoria = subcategoria;
         this.bienes = bienes;
         this.organizacion = organizacion;
         this.fechaIngreso = fechaIngreso;
+        this.contactos = contactos;
     }
 
     public String getSubcategoria() {
@@ -54,5 +57,13 @@ public class RegistrarDonacionRequest {
 
     public void setFechaIngreso(LocalDate fechaIngreso) {
         this.fechaIngreso = fechaIngreso;
+    }
+
+    public List<ContactoNotificacion> getContactos() {
+        return contactos;
+    }
+
+    public void setContactos(List<ContactoNotificacion> contactos) {
+        this.contactos = contactos;
     }
 }

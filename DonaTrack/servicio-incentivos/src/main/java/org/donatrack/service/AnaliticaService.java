@@ -2,6 +2,9 @@ package org.donatrack.service;
 
 import org.donatrack.controller.dto.*;
 import org.donatrack.controller.exception.*;
+import org.donatrack.integracion.NotificacionesClient;
+import org.donatrack.integracion.dto.NotificacionRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.donatrack.model.*;
 import org.donatrack.repository.DonanteRepository;
 import org.donatrack.repository.RankingRepository;
@@ -17,11 +20,19 @@ public class AnaliticaService {
     private final DonanteRepository donanteRepository;
     private final RankingRepository rankingRepository;
     private final AutomatizacionService automatizacionService;
+    private final NotificacionesClient notificacionesClient;
 
     public AnaliticaService(DonanteRepository donanteRepository, RankingRepository rankingRepository, AutomatizacionService automatizacionService) {
+        this(donanteRepository, rankingRepository, automatizacionService, null);
+    }
+
+    @Autowired
+    public AnaliticaService(DonanteRepository donanteRepository, RankingRepository rankingRepository,
+                            AutomatizacionService automatizacionService, NotificacionesClient notificacionesClient) {
         this.donanteRepository = donanteRepository;
         this.rankingRepository = rankingRepository;
         this.automatizacionService = automatizacionService;
+        this.notificacionesClient = notificacionesClient;
     }
 
     @Transactional
@@ -40,11 +51,26 @@ public class AnaliticaService {
         for (Mision mision : resultado.GetMisionesCumplidas()) {
             automatizacionService.NotificarInsigniaGanada(
                 donante.GetNombreUsuario(), mision.GetDescripcion(), mision.GetInsigniaOtorgada().GetImagen());
+            notificarDonante(donacionDto,
+                    "¡Felicitaciones! Cumpliste la misión: " + mision.GetDescripcion() + ".");
         }
 
         if (resultado.GetNuevaCategoria() != null) {
             automatizacionService.NotificarSubidaDeCategoria(donante.GetNombreUsuario(), resultado.GetNuevaCategoria());
+            notificarDonante(donacionDto,
+                    "¡Felicitaciones! Subiste a la categoría " + resultado.GetNuevaCategoria() + ".");
         }
+    }
+
+    private void notificarDonante(DonacionDTO donacionDto, String mensaje) {
+        if (notificacionesClient == null) {
+            return;
+        }
+        notificacionesClient.enviar(new NotificacionRequest(
+                null,
+                donacionDto.getNombreUsuario(),
+                mensaje,
+                donacionDto.getContactos()));
     }
 
     @Transactional(readOnly = true)

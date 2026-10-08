@@ -173,7 +173,8 @@ public class DonacionesService {
                 subcategoria,
                 bienes,
                 null,
-                donacion.getFechaIngreso() != null ? donacion.getFechaIngreso().toLocalDate() : null);
+                donacion.getFechaIngreso() != null ? donacion.getFechaIngreso().toLocalDate() : null,
+                destinatarioResolver.paraDonante(donacion.getDonante(), "").getContactos());
     }
 
     private String descripcionDonacion(Donacion donacion) {

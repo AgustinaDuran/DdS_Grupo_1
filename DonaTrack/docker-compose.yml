@@ -96,8 +96,14 @@ services:
       - "8082:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/donatrack?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: donatrack
+      SPRING_RABBITMQ_PASSWORD: donatrack
     depends_on:
       db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   # Servicio de Logística

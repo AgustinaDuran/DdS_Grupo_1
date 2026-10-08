@@ -19,6 +19,7 @@ public class Notificacion {
     private LocalDateTime fechaEnvio;
     @Enumerated(EnumType.STRING)
     private EnumEstadoNotificacion estado;
+    @Column(length = 2000)
     private String motivoFallo;
 
     protected Notificacion() {
