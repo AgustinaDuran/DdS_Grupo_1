@@ -1,0 +1,144 @@
+package org.donatrack.service;
+
+import org.donatrack.controller.dto.*;
+import org.donatrack.controller.exception.*;
+import org.donatrack.integracion.NotificacionesClient;
+import org.donatrack.integracion.dto.NotificacionRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.donatrack.model.*;
+import org.donatrack.repository.DonanteRepository;
+import org.donatrack.repository.RankingRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.*;
+import java.util.*;
+
+@Service
+public class AnaliticaService {
+
+    private final DonanteRepository donanteRepository;
+    private final RankingRepository rankingRepository;
+    private final AutomatizacionService automatizacionService;
+    private final NotificacionesClient notificacionesClient;
+
+    public AnaliticaService(DonanteRepository donanteRepository, RankingRepository rankingRepository, AutomatizacionService automatizacionService) {
+        this(donanteRepository, rankingRepository, automatizacionService, null);
+    }
+
+    @Autowired
+    public AnaliticaService(DonanteRepository donanteRepository, RankingRepository rankingRepository,
+                            AutomatizacionService automatizacionService, NotificacionesClient notificacionesClient) {
+        this.donanteRepository = donanteRepository;
+        this.rankingRepository = rankingRepository;
+        this.automatizacionService = automatizacionService;
+        this.notificacionesClient = notificacionesClient;
+    }
+
+    @Transactional
+    public void RegistrarDonacionDeUsuario(String nombreUsuario, DonacionDTO donacionDto) {
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario)
+        .orElseGet(() -> new DonanteIncentivos(nombreUsuario));
+
+        // El donante viaja por query param, así que la donación llega sin dueño: se lo asigna
+        // acá para que quede persistido y aparezca en el perfil.
+        donacionDto.setNombreUsuario(nombreUsuario);
+
+        ResultadoActividad resultado = donante.RegistrarActividad(donacionDto.toDominio());
+
+        donanteRepository.save(donante);
+
+        for (Mision mision : resultado.GetMisionesCumplidas()) {
+            automatizacionService.NotificarInsigniaGanada(
+                donante.GetNombreUsuario(), mision.GetDescripcion(), mision.GetInsigniaOtorgada().GetImagen());
+            notificarDonante(donacionDto,
+                    "¡Felicitaciones! Cumpliste la misión: " + mision.GetDescripcion() + ".");
+        }
+
+        if (resultado.GetNuevaCategoria() != null) {
+            automatizacionService.NotificarSubidaDeCategoria(donante.GetNombreUsuario(), resultado.GetNuevaCategoria());
+            notificarDonante(donacionDto,
+                    "¡Felicitaciones! Subiste a la categoría " + resultado.GetNuevaCategoria() + ".");
+        }
+    }
+
+    private void notificarDonante(DonacionDTO donacionDto, String mensaje) {
+        if (notificacionesClient == null) {
+            return;
+        }
+        notificacionesClient.enviar(new NotificacionRequest(
+                null,
+                donacionDto.getNombreUsuario(),
+                mensaje,
+                donacionDto.getContactos()));
+    }
+
+    @Transactional(readOnly = true)
+    public PerfilAnaliticoDTO ObtenerEstadisticasGenerales(String nombreUsuario) {
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new DonanteNoEncontradoException(nombreUsuario));
+
+        Integer posicionRanking = CalcularPosicionRanking(nombreUsuario);
+
+        return new PerfilAnaliticoDTO(
+                donante.GetNombreUsuario(),
+                donante.GetNombreCategoriaActual(),
+                donante.GetDonaciones().stream().map(DonacionDTO::desde).toList(),
+                donante.ObtenerEvolucionDonacionesPorPeriodo(donante.GetMesPrimeraDonacion(), YearMonth.now()),
+                donante.ObtenerComparacionMensual(YearMonth.now(), YearMonth.now().minusMonths(1)), 
+                donante.CalcularOrganizacionesAyudadas(),
+                donante.CalcularImpactoAcumulado(),
+                posicionRanking
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<MisionProgresoDTO> ObtenerProgresoMisiones(String nombreUsuario) {
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new DonanteNoEncontradoException(nombreUsuario));
+
+        List<MisionProgresoDTO> progresoList = new ArrayList<>();
+        
+        for (Mision mision : donante.GetCategoriaActual().GetMisionesDelNivel()) {
+            progresoList.add(new MisionProgresoDTO(
+                    mision.GetDescripcion(),
+                    mision.GetProgresoActual(donante),
+                    mision.GetObjetivoAsignado(),
+                    mision.GetDistanciaRestante(donante),
+                    mision.GetInsigniaOtorgada().GetNombre()
+            ));
+        }
+        return progresoList;
+    }
+
+    @Transactional(readOnly = true)
+    public List<InsigniaDTO> ObtenerInsignias(String nombreUsuario) {
+        DonanteIncentivos donante = donanteRepository.findById(nombreUsuario).orElseThrow(() -> new DonanteNoEncontradoException(nombreUsuario));
+
+        List<InsigniaDTO> dtos = new ArrayList<>();
+        for (Insignia insignia : donante.GetInsigniasGanadas()) {
+            dtos.add(new InsigniaDTO(insignia.GetNombre(),insignia.GetImagen()));
+        }
+        return dtos;
+    }
+
+    private Integer CalcularPosicionRanking(String nombreUsuario) {
+        if (!donanteRepository.existsById(nombreUsuario)) {
+            return 0;
+        }
+    
+        Long personasAdelante = donanteRepository.countDonantesConMasDonaciones(nombreUsuario);
+        return personasAdelante.intValue() + 1;
+    }
+
+    @Transactional(readOnly = true)
+    public PodioMensualDTO ObtenerPodioDestacadoDelMes(YearMonth mesAConsultar) {
+        RankingMensual ranking = rankingRepository.findById(mesAConsultar.toString())
+            .orElseThrow(() -> new RankingNoProcesadoException(mesAConsultar.toString()));
+
+        List<PodioMensualDTO.PuestoGanador> destacadosDTO = new ArrayList<>();
+        for (PuestoRanking puesto : ranking.GetPodio()) {
+            destacadosDTO.add(new PodioMensualDTO.PuestoGanador(puesto.GetPosicion(), puesto.GetNombreUsuario(), puesto.GetMisionesCumplidasEnElMes()));
+        }
+
+        return new PodioMensualDTO(ranking.GetIdPeriodo(), destacadosDTO);
+    }
+}

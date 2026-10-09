@@ -1,0 +1,135 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: donatrack-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: donatrack
+      RABBITMQ_DEFAULT_PASS: donatrack
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Base de Datos Unificada
+  db:
+    image: mysql:8.0
+    container_name: donatrack-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: donatrack
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      # En el primer arranque MySQL inicializa su directorio de datos y tarda mas de un minuto:
+      # start_period no cuenta los fallos de ese periodo, asi que el contenedor no se marca
+      # unhealthy y logistica no se cae por "dependency failed to start".
+      start_period: 90s
+      retries: 20
+
+  # Servicio de Donaciones
+  servicio-donaciones:
+    build:
+      context: .
+      dockerfile: ./servicio-donaciones/Dockerfile
+    container_name: api-donaciones
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/donatrack?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: donatrack
+      SPRING_RABBITMQ_PASSWORD: donatrack
+      SERVICES_NOTIFICACIONES_URL: http://servicio-notificaciones:8081
+      SERVICES_INCENTIVOS_URL: http://servicio-incentivos:8082
+      SERVICES_LOGISTICA_URL: http://157.245.143.170:8083
+      SERVICES_LOGISTICA_MOCK_URL: http://157.245.143.170:8088
+      LOGISTICA_POLLING_INTERVALO_MS: 10000
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      servicio-notificaciones:
+        condition: service_started
+      servicio-incentivos:
+        condition: service_started
+      servicio-logistica:
+        condition: service_started
+      servicio-logistica-mock:
+        condition: service_started
+
+  # Servicio de Notificaciones
+  servicio-notificaciones:
+    build:
+      context: .
+      dockerfile: ./servicio-notificaciones/Dockerfile
+    container_name: api-notificaciones
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/donatrack?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: donatrack
+      SPRING_RABBITMQ_PASSWORD: donatrack
+      # Se toman de DonaTrack/.env (ver .env.example). Nunca commitear la API key.
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      BREVO_REMITENTE: ${BREVO_REMITENTE:-}
+      BREVO_REMITENTE_NOMBRE: ${BREVO_REMITENTE_NOMBRE:-DonaTrack}
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Servicio de Incentivos
+  servicio-incentivos:
+    build:
+      context: .
+      dockerfile: ./servicio-incentivos/Dockerfile
+    container_name: api-incentivos
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/donatrack?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: donatrack
+      SPRING_RABBITMQ_PASSWORD: donatrack
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Servicio de Logística
+  servicio-logistica:
+    build:
+      context: .
+      dockerfile: ./servicio-logistica/Dockerfile
+    container_name: api-logistica
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/donatrack?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Proveedor de logística externo simulado (respaldo del broker de Donaciones)
+  servicio-logistica-mock:
+    build:
+      context: .
+      dockerfile: ./servicio-logistica-mock/Dockerfile
+    container_name: api-logistica-mock
+    ports:
+      - "8088:8088"

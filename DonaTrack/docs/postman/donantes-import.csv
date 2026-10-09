@@ -1,0 +1,5 @@
+TipoPersona,TipoDoc,Documento,Nombre/Razon Social,Email,Telefono
+HUMANA,DNI,44555666,Carla Importada,carla.importada@mail.com,1133334444
+HUMANA,DNI,55666777,Diego Importado,diego.importado@mail.com,1144445555
+JURIDICA,CUIT,30-55555555-9,Fundacion Importada,fundacion.importada@mail.com,1155556666
+OTRO,DNI,00000000,Fila Invalida,invalida@mail.com,1100000000

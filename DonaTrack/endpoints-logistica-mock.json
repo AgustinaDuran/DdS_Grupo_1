@@ -1,0 +1,805 @@
+{
+  "info": {
+    "name": "DonaTrack - Logística externa (mock)",
+    "_postman_id": "donatrack-logistica-mock-2026",
+    "description": "Peticiones al proveedor de logística externo simulado (servicio-logistica-mock) y prueba del failover del broker de Donaciones. Las carpetas 01 a 03 sólo necesitan el mock levantado y se pueden correr en cualquier orden; la 04 necesita además Donaciones y los datos de la colección principal.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "mockUrl",
+      "value": "http://157.245.143.170:8088"
+    },
+    {
+      "key": "donacionesUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "patente",
+      "value": "AB123CD"
+    },
+    {
+      "key": "esperaPollingMs",
+      "value": "65000"
+    },
+    {
+      "key": "donanteId",
+      "value": ""
+    },
+    {
+      "key": "subcategoriaId",
+      "value": ""
+    },
+    {
+      "key": "entidadId",
+      "value": ""
+    },
+    {
+      "key": "donacionId",
+      "value": ""
+    },
+    {
+      "key": "externalRef",
+      "value": ""
+    },
+    {
+      "key": "shipmentId",
+      "value": ""
+    },
+    {
+      "key": "externalRefReintento",
+      "value": ""
+    },
+    {
+      "key": "shipmentIdReintento",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Mock - flujo feliz de un envío",
+      "description": "Crea un envío nuevo y lo lleva por CREATED -> IN_TRANSIT -> DELIVERED.",
+      "item": [
+        {
+          "name": "Crear envío",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"externalRef\": \"{{externalRef}}\",\n  \"destinationAddress\": \"Av. Medrano 951, CABA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set('externalRef', 'mock-' + Date.now());"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "const s = pm.response.json();",
+                  "pm.test('estado inicial CREATED', () => pm.expect(s.status).to.eql('CREATED'));",
+                  "pm.test('conserva la externalRef', () => pm.expect(s.externalRef).to.eql(pm.collectionVariables.get('externalRef')));",
+                  "pm.collectionVariables.set('shipmentId', String(s.shipmentId));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar envíos",
+          "request": {
+            "method": "GET",
+            "url": "{{mockUrl}}/v1/shipments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const id = Number(pm.collectionVariables.get('shipmentId'));",
+                  "pm.test('incluye el envío creado', () => pm.expect(pm.response.json().map(s => s.shipmentId)).to.include(id));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener envío",
+          "request": {
+            "method": "GET",
+            "url": "{{mockUrl}}/v1/shipments/{{shipmentId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('sigue en CREATED', () => pm.expect(pm.response.json().status).to.eql('CREATED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar en tránsito (sale el camión)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_TRANSIT\",\n  \"truckPlate\": \"{{patente}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments/{{shipmentId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const s = pm.response.json();",
+                  "pm.test('estado IN_TRANSIT', () => pm.expect(s.status).to.eql('IN_TRANSIT'));",
+                  "pm.test('registra la patente', () => pm.expect(s.truckPlate).to.eql(pm.collectionVariables.get('patente')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar entregado",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELIVERED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments/{{shipmentId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const s = pm.response.json();",
+                  "pm.test('estado DELIVERED', () => pm.expect(s.status).to.eql('DELIVERED'));",
+                  "pm.test('registra la fecha de entrega', () => pm.expect(s.deliveredAt).to.exist);",
+                  "pm.test('conserva la patente', () => pm.expect(s.truckPlate).to.eql(pm.collectionVariables.get('patente')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Mock - reintentos e idempotencia",
+      "description": "Un reintento del broker con la misma externalRef no duplica el envío; un envío FAILED sí permite crear otro (replanificación).",
+      "item": [
+        {
+          "name": "Crear envío",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"externalRef\": \"{{externalRefReintento}}\",\n  \"destinationAddress\": \"Escuela Rural N°10\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.collectionVariables.set('externalRefReintento', 'reintento-' + Date.now());"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('shipmentIdReintento', String(pm.response.json().shipmentId));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reintentar con la misma externalRef (no duplica)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"externalRef\": \"{{externalRefReintento}}\",\n  \"destinationAddress\": \"Escuela Rural N°10\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('devuelve el mismo envío', () => pm.expect(String(pm.response.json().shipmentId)).to.eql(pm.collectionVariables.get('shipmentIdReintento')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Marcar fallido",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"FAILED\",\n  \"failureReason\": \"Tocamos timbre pero nadie respondió\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments/{{shipmentIdReintento}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));",
+                  "const s = pm.response.json();",
+                  "pm.test('estado FAILED', () => pm.expect(s.status).to.eql('FAILED'));",
+                  "pm.test('registra el motivo', () => pm.expect(s.failureReason).to.eql('Tocamos timbre pero nadie respondió'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear de nuevo tras el fallo (envío nuevo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"externalRef\": \"{{externalRefReintento}}\",\n  \"destinationAddress\": \"Escuela Rural N°10\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 Created', () => pm.response.to.have.status(201));",
+                  "const s = pm.response.json();",
+                  "pm.test('es un envío distinto', () => pm.expect(String(s.shipmentId)).to.not.eql(pm.collectionVariables.get('shipmentIdReintento')));",
+                  "pm.test('arranca en CREATED', () => pm.expect(s.status).to.eql('CREATED'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Mock - casos negativos",
+      "item": [
+        {
+          "name": "Crear sin externalRef",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"destinationAddress\": \"Av. Medrano 951, CABA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear sin destinationAddress",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"externalRef\": \"sin-direccion\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener envío inexistente",
+          "request": {
+            "method": "GET",
+            "url": "{{mockUrl}}/v1/shipments/999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar estado sin status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"truckPlate\": \"{{patente}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments/{{shipmentId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar estado con un status inválido",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PERDIDO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments/{{shipmentId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('400 Bad Request', () => pm.response.to.have.status(400));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar estado de un envío inexistente",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELIVERED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments/999999/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('404 Not Found', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 - Failover end-to-end (Donaciones -> broker -> mock)",
+      "description": "Prueba el broker de logística. Antes de correr esta carpeta:\n1. Correr las carpetas 01 a 03 de la colección principal (endpoints.json) y copiar acá los valores de donanteId, subcategoriaId y entidadId.\n2. Apagar la logística propia: en el droplet `docker compose -f docker-compose.deploy.yml stop servicio-logistica` (o `docker stop api-logistica` si se prueba en local).\n3. Ajustar esperaPollingMs al intervalo del polling de Donaciones + 5 s (65000 por defecto).\nAl terminar, volver a prender la logística propia con `start`.",
+      "item": [
+        {
+          "name": "Crear donación",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"donanteId\": {{donanteId}},\n  \"descripcion\": \"Donacion para probar el failover\",\n  \"items\": [\n    {\n      \"nombre\": \"Fideos secos\",\n      \"descripcion\": \"paquete de 500 g\",\n      \"subcategoriaId\": {{subcategoriaId}},\n      \"cantidad\": 100,\n      \"unidad\": \"GRAMO\",\n      \"cantidadBien\": 500,\n      \"fechaVencimiento\": \"2027-01-01\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{donacionesUrl}}/api/donaciones"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar donaciones y guardar donacionId",
+          "request": {
+            "method": "GET",
+            "url": "{{donacionesUrl}}/api/donaciones"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const a=pm.response.json(); const x=a[a.length-1]; pm.test('donacionId',()=>pm.expect(x&&x.id).to.exist); if(x) pm.collectionVariables.set('donacionId',String(x.id));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Asignar donación (el broker la manda al mock)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoEstado\": \"ASIGNACION_REALIZADA\",\n  \"entidadId\": {{entidadId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{donacionesUrl}}/api/donaciones/{{donacionId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('2xx', () => pm.expect(pm.response.code).to.be.within(200, 299));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar en el mock el envío de la donación",
+          "request": {
+            "method": "GET",
+            "url": "{{mockUrl}}/v1/shipments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const ref = pm.collectionVariables.get('donacionId');",
+                  "const s = pm.response.json().filter(x => x.externalRef === ref).pop();",
+                  "pm.test('el broker registró la entrega en el mock', () => pm.expect(s).to.exist);",
+                  "if (s) {",
+                  "  pm.collectionVariables.set('shipmentId', String(s.shipmentId));",
+                  "  pm.test('arranca en CREATED', () => pm.expect(s.status).to.eql('CREATED'));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Simular salida del camión (IN_TRANSIT)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_TRANSIT\",\n  \"truckPlate\": \"{{patente}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments/{{shipmentId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Esperar el polling y ver la donación EN_TRASLADO",
+          "request": {
+            "method": "GET",
+            "url": "{{donacionesUrl}}/api/donaciones/{{donacionId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// El polling de Donaciones corre cada logistica.polling.intervalo-ms (60 s por defecto).",
+                  "const ms = Number(pm.collectionVariables.get('esperaPollingMs') || 65000);",
+                  "setTimeout(() => {}, ms);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('la donación pasó a EN_TRASLADO', () => pm.expect(pm.response.json().estado).to.eql('EN_TRASLADO'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Simular entrega (DELIVERED)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELIVERED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{mockUrl}}/v1/shipments/{{shipmentId}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200 OK', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Esperar el polling y ver la donación ENTREGADA",
+          "request": {
+            "method": "GET",
+            "url": "{{donacionesUrl}}/api/donaciones/{{donacionId}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// El polling de Donaciones corre cada logistica.polling.intervalo-ms (60 s por defecto).",
+                  "const ms = Number(pm.collectionVariables.get('esperaPollingMs') || 65000);",
+                  "setTimeout(() => {}, ms);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('la donación pasó a ENTREGADA', () => pm.expect(pm.response.json().estado).to.eql('ENTREGADA'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
