@@ -185,7 +185,13 @@ public class LogisticaPollingScheduler {
         EntidadBeneficiaria entidad = donacion.getEntidadAEntregar();
         switch (estado) {
             case EN_TRASLADO -> donacion.setEstadoDonacion(new EstadoEnTraslado());
-            case ENTREGADA -> donacion.setEstadoDonacion(new EstadoEntregada(entidad));
+            case ENTREGADA -> {
+                donacion.setEstadoDonacion(new EstadoEntregada(entidad));
+                // La foto la carga la entidad al confirmar la recepción en Logística.
+                if (entrega.getFotoComprobanteUrl() != null) {
+                    donacion.setFotoEntrega(entrega.getFotoComprobanteUrl());
+                }
+            }
             case ENTREGA_FALLIDA -> donacion.setEstadoDonacion(new EstadoEntregaFallida(entidad, entrega.getMotivoNoRecibida()));
             default -> { }
         }
