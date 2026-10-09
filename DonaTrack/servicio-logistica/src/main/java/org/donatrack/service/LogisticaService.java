@@ -191,7 +191,20 @@ public class LogisticaService {
 
     //admin camiones
     public List<Camion> listarCamiones() {
-        return camionRepository.findByActivoTrue();
+        List<Camion> camiones = camionRepository.findByActivoTrue();
+        camiones.forEach(this::inicializarRutaActiva);
+        return camiones;
+    }
+
+    /**
+     * Con open-in-view=false la sesión de Hibernate se cierra al salir del service. Las entregas
+     * de la ruta activa son lazy: si no se cargan acá, Jackson falla al serializar el camión
+     * (LazyInitializationException) mientras el camión tiene una ruta asignada.
+     */
+    private void inicializarRutaActiva(Camion camion) {
+        if (camion.getRutaActiva() != null) {
+            camion.getRutaActiva().getEntregas().size();
+        }
     }
  
     public Camion crearCamion(CamionDTO dto) {
@@ -208,7 +221,9 @@ public class LogisticaService {
         camion.setCapacidadVolumen(dto.getCapacidadVolumen());
         camion.setAltura(dto.getAltura());
         camion.setCapacidadCarga(dto.getCapacidadCarga());
-        return camionRepository.save(camion);
+        Camion guardado = camionRepository.save(camion);
+        inicializarRutaActiva(guardado);
+        return guardado;
     }
  
     public void darDeBajaCamion(String patente) {

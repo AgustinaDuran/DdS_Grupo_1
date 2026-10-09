@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -39,6 +40,7 @@ public class LogisticaPollingScheduler {
     private final DonacionesRepository donacionesRepository;
     private final NotificacionesClient notificacionesClient;
     private final DestinatarioResolver destinatarioResolver;
+    private final TransactionTemplate transactionTemplate;
 
     @Value("${logistica.mapa.url:http://localhost:8080/mapa}")
     private String mapaUrl;
@@ -50,11 +52,13 @@ public class LogisticaPollingScheduler {
     private String adminValor;
 
     public LogisticaPollingScheduler(BrokerLogistica brokerLogistica, DonacionesRepository donacionesRepository,
-                                     NotificacionesClient notificacionesClient, DestinatarioResolver destinatarioResolver) {
+                                     NotificacionesClient notificacionesClient, DestinatarioResolver destinatarioResolver,
+                                     TransactionTemplate transactionTemplate) {
         this.brokerLogistica = brokerLogistica;
         this.donacionesRepository = donacionesRepository;
         this.notificacionesClient = notificacionesClient;
         this.destinatarioResolver = destinatarioResolver;
+        this.transactionTemplate = transactionTemplate;
     }
 
     @Scheduled(fixedDelayString = "${logistica.polling.intervalo-ms:60000}")
@@ -63,7 +67,10 @@ public class LogisticaPollingScheduler {
 
         for (EntregaResponse entrega : entregas) {
             try {
-                procesarEntrega(entrega);
+                // El polling corre fuera de un request, sin sesión de Hibernate: sin una transacción
+                // por entrega, leer las relaciones lazy de la donación (los representantes de la
+                // entidad, el historial de estados) falla con LazyInitializationException.
+                transactionTemplate.executeWithoutResult(status -> procesarEntrega(entrega));
             } catch (Exception e) {
                 log.warn("Error procesando la entrega {} de Logística: {}", entrega.getId(), e.getMessage());
             }
@@ -131,6 +138,7 @@ public class LogisticaPollingScheduler {
         }
 
         sincronizarEstadoLocal(donacion, estadoLogistica, entrega);
+        donacionesRepository.save(donacion);
     }
 
     private void notificarInicioRuta(Donacion donacion, EntregaResponse entrega) {

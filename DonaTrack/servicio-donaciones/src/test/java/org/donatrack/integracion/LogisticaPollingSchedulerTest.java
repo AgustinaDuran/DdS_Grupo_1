@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 class LogisticaPollingSchedulerTest {
 
     private final LogisticaPollingScheduler scheduler =
-            new LogisticaPollingScheduler(null, null, null, null);
+            new LogisticaPollingScheduler(null, null, null, null, null);
 
     @Test
     void seQuedaConLaEntregaMasRecienteDeCadaDonacion() {
