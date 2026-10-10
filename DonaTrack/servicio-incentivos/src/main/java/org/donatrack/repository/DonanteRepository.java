@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface DonanteRepository extends CrudRepository<DonanteIncentivos, String> {
 
     //cant usuario cn mas donaciones
-    @Query("SELECT COUNT(d) FROM DonanteIncentivos d WHERE SIZE(d.donaciones) > " + "(SELECT SIZE(du.donaciones) FROM DonanteIncentivos du WHERE du.nombreUsuario = :nombreUsuario)")
+        @Query("SELECT COUNT(d) FROM DonanteIncentivos d WHERE d.totalDonaciones > " + "(SELECT du.totalDonaciones FROM DonanteIncentivos du WHERE du.nombreUsuario = :nombreUsuario)")
     Long countDonantesConMasDonaciones(@Param("nombreUsuario") String nombreUsuario);
 }

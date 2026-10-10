@@ -50,7 +50,7 @@ public class AnaliticaService {
 
         for (Mision mision : resultado.GetMisionesCumplidas()) {
             automatizacionService.NotificarInsigniaGanada(
-                donante.GetNombreUsuario(), mision.GetDescripcion(), mision.GetInsigniaOtorgada().GetImagen());
+                donante.GetNombreUsuario(), mision.GetDescripcion(), mision.GetInsigniaOtorgada());
             notificarDonante(donacionDto,
                     "¡Felicitaciones! Cumpliste la misión: " + mision.GetDescripcion() + ".");
         }

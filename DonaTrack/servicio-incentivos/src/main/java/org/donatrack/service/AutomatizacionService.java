@@ -1,5 +1,6 @@
 package org.donatrack.service;
 
+import org.donatrack.model.Insignia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,28 +30,42 @@ public class AutomatizacionService {
     @Value("${make.webhook.url}")
     private String makeWebhookUrl;
 
-    public void NotificarInsigniaGanada(String nombre, String descripcionMision, String urlImagenInsignia) { 
-        Map<String, Object> datos = new HashMap<>(); //pal make
-        datos.put("usuario", nombre);
-        datos.put("texto", "¡Felicitaciones a @" + nombre + " por cumplir la misión: " + descripcionMision + "!");
-        datos.put("imagenUrl", urlImagenInsignia);
-
-        try {
-            restTemplate.postForObject(makeWebhookUrl, datos, String.class);
-        } catch (Exception e) {
-            log.warn("No se pudo publicar el hito en make: {}", e.getMessage());
-        }
+    public void NotificarInsigniaGanada(String nombre, String descripcionMision, Insignia insignia) {
+        enviarAMake(ArmarDatosInsignia(nombre, descripcionMision, insignia), "el hito");
     }
 
     public void NotificarSubidaDeCategoria(String nombre, String nuevaCategoria) {
-    Map<String, Object> datos = new HashMap<>();
-    datos.put("usuario", nombre);
-    datos.put("texto", "¡Felicitaciones a @" + nombre + " por ascender a la categoría " + nuevaCategoria + "!");
-
-    try {
-        restTemplate.postForObject(makeWebhookUrl, datos, String.class);
-    } catch (Exception e) {
-        log.warn("No se pudo publicar el ascenso en make: {}", e.getMessage());
+        enviarAMake(ArmarDatosAscenso(nombre, nuevaCategoria), "el ascenso");
     }
-}
+
+    // Campos que recibe el escenario de make. 'texto' ya viene armado; 'insignia', 'nivel' y
+    // 'tipo' están sueltos para que el escenario pueda armar su propio mensaje o ramificar.
+    static Map<String, Object> ArmarDatosInsignia(String nombre, String descripcionMision, Insignia insignia) {
+        Map<String, Object> datos = new HashMap<>();
+        datos.put("tipo", "INSIGNIA");
+        datos.put("usuario", nombre);
+        datos.put("insignia", insignia.GetNombre());
+        datos.put("nivel", String.valueOf(insignia.GetNivel()));
+        datos.put("mision", descripcionMision);
+        datos.put("texto", "¡Felicitaciones a @" + nombre + "! Obtuvo la insignia " + insignia.GetNombre() + ".");
+        datos.put("imagenUrl", insignia.GetImagen());
+        return datos;
+    }
+
+    static Map<String, Object> ArmarDatosAscenso(String nombre, String nuevaCategoria) {
+        Map<String, Object> datos = new HashMap<>();
+        datos.put("tipo", "ASCENSO");
+        datos.put("usuario", nombre);
+        datos.put("categoria", nuevaCategoria);
+        datos.put("texto", "¡Felicitaciones a @" + nombre + " por ascender a la categoría " + nuevaCategoria + "!");
+        return datos;
+    }
+
+    private void enviarAMake(Map<String, Object> datos, String queEs) {
+        try {
+            restTemplate.postForObject(makeWebhookUrl, datos, String.class);
+        } catch (Exception e) {
+            log.warn("No se pudo publicar {} en make: {}", queEs, e.getMessage());
+        }
+    }
 }
