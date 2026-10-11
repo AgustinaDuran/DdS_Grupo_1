@@ -8,8 +8,10 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.Normalizer;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -38,18 +40,29 @@ public class AutomatizacionService {
         enviarAMake(ArmarDatosAscenso(nombre, nuevaCategoria), "el ascenso");
     }
 
-    // Campos que recibe el escenario de make. 'texto' ya viene armado; 'insignia', 'nivel' y
-    // 'tipo' están sueltos para que el escenario pueda armar su propio mensaje o ramificar.
+    // Campos que recibe el escenario de make. 'clave' (ej. habil_donador_bronce) es la clave del
+    // data store de insignias de make; 'mision' y 'nivel' son sus dos partes, en minúscula.
     static Map<String, Object> ArmarDatosInsignia(String nombre, String descripcionMision, Insignia insignia) {
+        String clave = ClaveDe(insignia);
+        int corte = clave.lastIndexOf('_');
+
         Map<String, Object> datos = new HashMap<>();
         datos.put("tipo", "INSIGNIA");
         datos.put("usuario", nombre);
         datos.put("insignia", insignia.GetNombre());
-        datos.put("nivel", String.valueOf(insignia.GetNivel()));
-        datos.put("mision", descripcionMision);
+        datos.put("clave", clave);
+        datos.put("mision", corte < 0 ? clave : clave.substring(0, corte));
+        datos.put("nivel", corte < 0 ? "" : clave.substring(corte + 1));
+        datos.put("descripcion", descripcionMision);
         datos.put("texto", "¡Felicitaciones a @" + nombre + "! Obtuvo la insignia " + insignia.GetNombre() + ".");
         datos.put("imagenUrl", insignia.GetImagen());
         return datos;
+    }
+
+    // "Hábil Donador - BRONCE" -> "habil_donador_bronce"
+    static String ClaveDe(Insignia insignia) {
+        String sinAcentos = Normalizer.normalize(insignia.GetNombre(), Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return sinAcentos.toLowerCase(Locale.ROOT).replace(" - ", "_").replace(' ', '_');
     }
 
     static Map<String, Object> ArmarDatosAscenso(String nombre, String nuevaCategoria) {
