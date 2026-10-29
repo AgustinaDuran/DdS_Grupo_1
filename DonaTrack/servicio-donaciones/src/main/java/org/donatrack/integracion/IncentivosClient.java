@@ -10,7 +10,7 @@ import org.springframework.web.client.RestClient;
 
 /**
  * Cliente HTTP hacia el Servicio de Incentivos
- * (POST /api/incentivos/registrar-donacion?nombreUsuario=...).
+ * (POST /api/incentivos/donantes/{nombreUsuario}/donaciones).
  */
 @Component
 public class IncentivosClient {
@@ -30,10 +30,7 @@ public class IncentivosClient {
     public void registrarDonacion(String nombreUsuario, RegistrarDonacionRequest request) {
         try {
             restClient.post()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/api/incentivos/registrar-donacion")
-                            .queryParam("nombreUsuario", nombreUsuario)
-                            .build())
+                    .uri("/api/incentivos/donantes/{nombreUsuario}/donaciones", nombreUsuario)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(request)
                     .retrieve()

@@ -18,6 +18,8 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class IncentivosController {
 
+    private static final String PERIODO_ULTIMO = "ultimo";
+
     private final AnaliticaService analiticaService;
     private final RankingProgramadoService rankingProgramadoService;
 
@@ -33,14 +35,15 @@ public class IncentivosController {
         return ResponseEntity.ok(this.analiticaService.ObtenerEstadisticasGenerales(nombreUsuario));
     }
 
-    @PostMapping("/registrar-donacion")
+    //http://localhost:8080/api/incentivos/donantes/{nombreUsuario}/donaciones
+    @PostMapping("/donantes/{nombreUsuario}/donaciones")
     public ResponseEntity<String> RecibirNuevaDonacion(
-        @RequestParam String nombreUsuario, 
+        @PathVariable String nombreUsuario,
         @RequestBody DonacionDTO nuevaDonacion) {
-        
+
         analiticaService.RegistrarDonacionDeUsuario(nombreUsuario, nuevaDonacion);
-        
-        return ResponseEntity.ok("Donación procesada en Incentivos con éxito");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Donación procesada en Incentivos con éxito");
     }
 
     //http://localhost:8080/api/incentivos/donantes/{nombreUsuario}/misiones-progreso
@@ -54,23 +57,22 @@ public class IncentivosController {
     public ResponseEntity<List<InsigniaDTO>> ObtenerVitrina(@PathVariable String nombreUsuario) {
         return ResponseEntity.ok(this.analiticaService.ObtenerInsignias(nombreUsuario));
     }
-    //http://localhost:8080/api/incentivos/ranking/destacados
-    @GetMapping("/ranking/destacados")
-    public ResponseEntity<PodioMensualDTO> ObtenerPodioDestacado(
-            @RequestParam(required = false) String periodo) {
+    //http://localhost:8080/api/incentivos/rankings/{periodo}/destacados  (periodo = yyyy-MM o "ultimo" para el mes anterior)
+    @GetMapping("/rankings/{periodo}/destacados")
+    public ResponseEntity<PodioMensualDTO> ObtenerPodioDestacado(@PathVariable String periodo) {
         return ResponseEntity.ok(this.analiticaService.ObtenerPodioDestacadoDelMes(parsearPeriodo(periodo)));
     }
 
-    @PostMapping("/ranking/generar")
-    public ResponseEntity<PodioMensualDTO> GenerarRankingManual(
-            @RequestParam(required = false) String periodo) {
+    // PUT idempotente: genera (o regenera) el ranking del período indicado
+    @PutMapping("/rankings/{periodo}")
+    public ResponseEntity<PodioMensualDTO> GenerarRankingManual(@PathVariable String periodo) {
         YearMonth mes = parsearPeriodo(periodo);
         rankingProgramadoService.GenerarRankingDe(mes);
         return ResponseEntity.ok(this.analiticaService.ObtenerPodioDestacadoDelMes(mes));
     }
 
     private YearMonth parsearPeriodo(String periodo) {
-        return (periodo == null || periodo.isBlank())
+        return (periodo == null || periodo.isBlank() || periodo.trim().equalsIgnoreCase(PERIODO_ULTIMO))
                 ? YearMonth.now().minusMonths(1)
                 : YearMonth.parse(periodo.trim());
     }

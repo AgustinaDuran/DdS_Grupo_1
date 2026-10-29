@@ -106,8 +106,8 @@ Carpeta `04 - Incentivos`:
 30. Perfil analítico de Ana.
 31. Progreso de misiones de Ana.
 32. Vitrina de Ana.
-33. Generar ranking con `periodo=2026-08`.
-34. Consultar ranking con `periodo=2026-08`.
+33. Generar ranking del período `2026-08` (`PUT /rankings/2026-08`).
+34. Consultar destacados del período `2026-08` (`GET /rankings/2026-08/destacados`).
 
 ### 5. Notificaciones
 
@@ -134,12 +134,12 @@ Carpeta `06 - Logística - ruta completa`:
 39. Modificar camión.
 40. Actualizar ubicación.
 41. Listar entregas pendientes. Guarda `entregaId`.
-42. Planificar rutas.
-43. Ejecutar callback del planificador.
+42. Planificar rutas (`POST /planificaciones`).
+43. Ejecutar callback del planificador (`POST /rutas`).
 44. Consultar ruta activa y verificar que exista.
-45. Iniciar ruta.
+45. Iniciar ruta (`PATCH /camiones/{patente}/ruta-activa` con `{"estado":"EN_CURSO"}`).
 46. Consultar entrega en traslado.
-47. Marcar entrega como entregada.
+47. Marcar entrega como entregada (`PATCH /entregas/{entregaId}` con el estado en el body).
 48. Listar rutas activas.
 
 No ejecutar `Iniciar ruta` antes del callback. El callback necesita el `entregaId` real guardado en el paso 41.

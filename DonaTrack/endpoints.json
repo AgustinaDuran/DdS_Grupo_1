@@ -342,7 +342,7 @@
                 }
               ]
             },
-            "url": "{{donacionesUrl}}/api/donantes/importar"
+            "url": "{{donacionesUrl}}/api/donantes/importaciones"
           },
           "description": "Si Postman no encuentra el archivo, seleccionar manualmente docs/postman/donantes-import.csv en el campo file. El endpoint hace upsert por email."
         },
@@ -608,7 +608,7 @@
                 }
               }
             },
-            "url": "{{incentivosUrl}}/api/incentivos/registrar-donacion?nombreUsuario=ana"
+            "url": "{{incentivosUrl}}/api/incentivos/donantes/ana/donaciones"
           }
         },
         {
@@ -630,7 +630,7 @@
                 }
               }
             },
-            "url": "{{incentivosUrl}}/api/incentivos/registrar-donacion?nombreUsuario=ana"
+            "url": "{{incentivosUrl}}/api/incentivos/donantes/ana/donaciones"
           }
         },
         {
@@ -652,7 +652,7 @@
                 }
               }
             },
-            "url": "{{incentivosUrl}}/api/incentivos/registrar-donacion?nombreUsuario=ana"
+            "url": "{{incentivosUrl}}/api/incentivos/donantes/ana/donaciones"
           }
         },
         {
@@ -679,15 +679,15 @@
         {
           "name": "Generar ranking",
           "request": {
-            "method": "POST",
-            "url": "{{incentivosUrl}}/api/incentivos/ranking/generar?periodo={{periodoRanking}}"
+            "method": "PUT",
+            "url": "{{incentivosUrl}}/api/incentivos/rankings/{{periodoRanking}}"
           }
         },
         {
           "name": "Consultar ranking",
           "request": {
             "method": "GET",
-            "url": "{{incentivosUrl}}/api/incentivos/ranking/destacados?periodo={{periodoRanking}}"
+            "url": "{{incentivosUrl}}/api/incentivos/rankings/{{periodoRanking}}/destacados"
           }
         }
       ]
@@ -824,7 +824,7 @@
           "name": "Planificar rutas",
           "request": {
             "method": "POST",
-            "url": "{{logisticaUrl}}/api/logistica/planificar"
+            "url": "{{logisticaUrl}}/api/logistica/planificaciones"
           }
         },
         {
@@ -846,7 +846,7 @@
                 }
               }
             },
-            "url": "{{logisticaUrl}}/api/logistica/callback-planificador"
+            "url": "{{logisticaUrl}}/api/logistica/rutas"
           }
         },
         {
@@ -859,8 +859,23 @@
         {
           "name": "Iniciar ruta",
           "request": {
-            "method": "PUT",
-            "url": "{{logisticaUrl}}/api/logistica/camiones/{{patente}}/iniciar-ruta"
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"EN_CURSO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{logisticaUrl}}/api/logistica/camiones/{{patente}}/ruta-activa"
           }
         },
         {
@@ -873,8 +888,23 @@
         {
           "name": "Marcar entrega como entregada",
           "request": {
-            "method": "PUT",
-            "url": "{{logisticaUrl}}/api/logistica/entregas/{{entregaId}}/estado?nuevoEstado=ENTREGADA&fotoUrl=http://example.com/foto.jpg"
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"ENTREGADA\",\n  \"fotoUrl\": \"http://example.com/foto.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{logisticaUrl}}/api/logistica/entregas/{{entregaId}}"
           }
         },
         {
@@ -1047,8 +1077,8 @@
         {
           "name": "Periodo de ranking inválido - espera 400",
           "request": {
-            "method": "POST",
-            "url": "{{incentivosUrl}}/api/incentivos/ranking/generar?periodo=2026-99"
+            "method": "PUT",
+            "url": "{{incentivosUrl}}/api/incentivos/rankings/2026-99"
           },
           "event": [
             {
@@ -1065,8 +1095,23 @@
         {
           "name": "Iniciar ruta sin ruta activa - espera 500 actual",
           "request": {
-            "method": "PUT",
-            "url": "{{logisticaUrl}}/api/logistica/camiones/NOEXISTE/iniciar-ruta"
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"EN_CURSO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{logisticaUrl}}/api/logistica/camiones/NOEXISTE/ruta-activa"
           },
           "event": [
             {
@@ -1083,8 +1128,23 @@
         {
           "name": "Estado inválido de entrega - espera 400",
           "request": {
-            "method": "PUT",
-            "url": "{{logisticaUrl}}/api/logistica/entregas/{{entregaId}}/estado?nuevoEstado=ESTADO_INEXISTENTE"
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"ESTADO_INEXISTENTE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{logisticaUrl}}/api/logistica/entregas/{{entregaId}}"
           },
           "event": [
             {

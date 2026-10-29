@@ -1,5 +1,7 @@
 package org.donatrack.controller;
 
+import org.donatrack.controller.dto.ActualizarEntregaDTO;
+import org.donatrack.controller.dto.ActualizarRutaDTO;
 import org.donatrack.controller.dto.CamionDTO;
 import org.donatrack.controller.dto.DepositoDTO;
 import org.donatrack.controller.dto.UbicacionDTO;
@@ -9,6 +11,7 @@ import org.donatrack.model.EstadoEntrega;
 import org.donatrack.model.RutaReparto;
 import org.donatrack.service.LogisticaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,35 +30,37 @@ public class LogisticaController {
         return ResponseEntity.ok("Entregas registradas correctamente en Logística.");
     }
 
-    //armado lotes
-    @PostMapping("/planificar")
+    //armado lotes: crea una solicitud de planificación; el resultado llega después por callback (POST /rutas)
+    @PostMapping("/planificaciones")
     public ResponseEntity<String> planificarRutas() {
         String resultado = logisticaService.planificarRutasDelDia();
-        return ResponseEntity.ok(resultado);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(resultado);
     }
 
     // Webhook/Callback público para que el servicio externo devuelva el diseño de mapas óptimo
-    @PostMapping("/callback-planificador")
+    @PostMapping("/rutas")
     public ResponseEntity<String> recibirCallbackPlanificador(@RequestBody List<RutaReparto> rutas) {
         logisticaService.procesarCallbackPlanificador(rutas);
-        return ResponseEntity.ok("Rutas procesadas y asignadas exitosamente.");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Rutas procesadas y asignadas exitosamente.");
     }
 
-    @PutMapping("/camiones/{patente}/iniciar-ruta")
-    public ResponseEntity<String> iniciarRuta(@PathVariable String patente) {
+    @PatchMapping("/camiones/{patente}/ruta-activa")
+    public ResponseEntity<String> iniciarRuta(@PathVariable String patente, @RequestBody ActualizarRutaDTO actualizarRutaDTO) {
+        if (!ActualizarRutaDTO.EN_CURSO.equals(actualizarRutaDTO.getEstado())) {
+            return ResponseEntity.badRequest().body("El único estado admitido para la ruta activa es " + ActualizarRutaDTO.EN_CURSO + ".");
+        }
         logisticaService.iniciarRuta(patente);
         return ResponseEntity.ok("Ruta iniciada. Entregas en estado EN_TRASLADO.");
     }
 
-    @PutMapping("/entregas/{id}/estado")
-    public ResponseEntity<String> cambiarEstadoEntrega(
-            @PathVariable Long id, 
-            @RequestParam EstadoEntrega nuevoEstado,
-            @RequestParam(required = false) String fotoUrl,
-            @RequestParam(required = false) String motivo) {
-        
-        logisticaService.actualizarEstadoEntrega(id, nuevoEstado, fotoUrl, motivo);
-        return ResponseEntity.ok("Estado de la entrega " + id + " actualizado a " + nuevoEstado);
+    @PatchMapping("/entregas/{id}")
+    public ResponseEntity<String> cambiarEstadoEntrega(@PathVariable Long id, @RequestBody ActualizarEntregaDTO actualizarEntregaDTO) {
+        if (actualizarEntregaDTO.getEstado() == null) {
+            return ResponseEntity.badRequest().body("El campo 'estado' es obligatorio.");
+        }
+        logisticaService.actualizarEstadoEntrega(id, actualizarEntregaDTO.getEstado(),
+                actualizarEntregaDTO.getFotoUrl(), actualizarEntregaDTO.getMotivo());
+        return ResponseEntity.ok("Estado de la entrega " + id + " actualizado a " + actualizarEntregaDTO.getEstado());
     }
 
     //admin camiones

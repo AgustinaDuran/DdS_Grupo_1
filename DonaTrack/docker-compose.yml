@@ -20,7 +20,9 @@ services:
     container_name: donatrack-db
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: donatrack
+      # MYSQL_DATABASE: donatrack
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d:ro
     ports:
       - "3306:3306"
     healthcheck:

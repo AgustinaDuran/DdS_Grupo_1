@@ -32,7 +32,7 @@ public class LogisticaService {
     @Value("${optimizador.api.url:https://api.optimizador-externo.com/v1/planificar}")
     private String optimizadorUrl;
 
-    @Value("${logistica.callback.url:https://tuservicio.donatrack.org/api/logistica/callback-planificador}")
+    @Value("${logistica.callback.url:https://tuservicio.donatrack.org/api/logistica/rutas}")
     private String urlCallback;
 
     private static final int MAX_ENTREGAS_POR_LOTE = 100;

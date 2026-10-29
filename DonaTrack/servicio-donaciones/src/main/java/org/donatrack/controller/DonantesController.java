@@ -45,7 +45,7 @@ public class DonantesController {
         return ResponseEntity.ok("Donante añadido correctamente");
     }
 
-    @PostMapping(value = "/importar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/importaciones", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ImportacionCsvResultadoDTO> importarDonantes(@RequestParam("file") MultipartFile file) {
         ImportacionCsvResultadoDTO resultado = donantesService.importarDonantesMasivo(file);
         return ResponseEntity.ok(resultado);

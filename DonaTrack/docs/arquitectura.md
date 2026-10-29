@@ -74,7 +74,7 @@ Se usan tres mecanismos, elegidos según lo que necesita cada interacción.
 ### 3.3 Polling y callbacks para integrar sistemas que no pueden llamarnos
 **Polling: Donaciones consulta a Logística.** Por la consigna, Logística no puede invocar a Donaciones ni a Notificaciones. Por lo tanto, Donaciones consulta periódicamente (cada 60 s, configurable) el estado de las entregas, detecta cambios respecto del estado local de cada donación y, si hay uno, sincroniza el estado y dispara la notificación (inicio de recorrido, entrega exitosa o fallida). Se eligió polling porque respeta la restricción de dependencias sin agregar infraestructura. El costo es una demora de hasta un intervalo en enterarse del cambio, aceptable para este dominio. El proceso es **idempotente**: si el estado ya está sincronizado no vuelve a notificar.
 
-**Callback: el optimizador externo responde a Logística.** La planificación de rutas puede tardar, así que Logística envía la solicitud y el optimizador devuelve el resultado a un endpoint público callback-planificador. Esto evita mantener una conexión abierta esperando y es el contrato que propone el proveedor externo.
+**Callback: el optimizador externo responde a Logística.** La planificación de rutas puede tardar, así que Logística envía la solicitud y el optimizador devuelve el resultado a un endpoint público de Logística (`POST /api/logistica/rutas`). Esto evita mantener una conexión abierta esperando y es el contrato que propone el proveedor externo.
 
 **Webhook saliente: Incentivos → Make.** Para publicar logros en redes se usa un webhook de Make, en vez de integrar cada red social. Es accesorio, con timeouts cortos (2 s / 3 s) y errores tolerados, para que nunca frene el flujo principal.
 

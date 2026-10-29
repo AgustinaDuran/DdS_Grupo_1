@@ -60,7 +60,7 @@ services:
       # Límite de memoria de la JVM para que entre junto con MySQL en el droplet de 512 MB.
       JAVA_TOOL_OPTIONS: -Xmx160m -XX:MaxMetaspaceSize=128m -Xss512k -XX:+UseSerialGC -XX:TieredStopAtLevel=1
       # URL pública a la que el planificador externo devuelve las rutas.
-      LOGISTICA_CALLBACK_URL: ${PUBLIC_URL}/api/logistica/callback-planificador
+      LOGISTICA_CALLBACK_URL: ${PUBLIC_URL}/api/logistica/rutas
     depends_on:
       db-logistica:
         condition: service_healthy

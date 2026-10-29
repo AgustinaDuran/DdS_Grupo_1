@@ -24,7 +24,7 @@ class IncentivosClientTest {
     @BeforeEach
     void iniciarServidor() throws IOException {
         servidor = HttpServer.create(new InetSocketAddress(0), 0);
-        servidor.createContext("/api/incentivos/registrar-donacion", this::recibir);
+        servidor.createContext("/api/incentivos/donantes/ana/donaciones", this::recibir);
         servidor.setExecutor(Executors.newSingleThreadExecutor());
         servidor.start();
     }
@@ -41,8 +41,7 @@ class IncentivosClientTest {
         cliente.registrarDonacion("ana", new RegistrarDonacionRequest(
                 "Arroz", List.of("Paquete"), null, java.time.LocalDate.of(2026, 8, 27)));
 
-        assertThat(ruta).contains("/api/incentivos/registrar-donacion");
-        assertThat(ruta).contains("nombreUsuario=ana");
+        assertThat(ruta).isEqualTo("/api/incentivos/donantes/ana/donaciones");
         assertThat(cuerpo).contains("Arroz").contains("Paquete").contains("2026").contains("8").contains("27");
     }
 
