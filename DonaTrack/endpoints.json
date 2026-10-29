@@ -839,7 +839,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "[\n  {\n    \"patenteCamion\": \"{{patente}}\",\n    \"entregas\": [\n      {\n        \"id\": {{entregaId}},\n        \"donacionId\": \"{{donacionId}}\",\n        \"direccionDestino\": \"Av. Siempreviva 742\",\n        \"ordenVisita\": 1\n      }\n    ]\n  }\n]",
+              "raw": "[\n  {\n    \"patenteCamion\": \"{{patente}}\",\n    \"entregas\": [\n      {\n        \"id\": \"{{entregaId}}\",\n        \"donacionId\": \"{{donacionId}}\",\n        \"direccionDestino\": \"Av. Siempreviva 742\",\n        \"ordenVisita\": 1\n      }\n    ]\n  }\n]",
               "options": {
                 "raw": {
                   "language": "json"
@@ -888,23 +888,8 @@
         {
           "name": "Marcar entrega como entregada",
           "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"estado\": \"ENTREGADA\",\n  \"fotoUrl\": \"http://example.com/foto.jpg\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": "{{logisticaUrl}}/api/logistica/entregas/{{entregaId}}"
+            "method": "PUT",
+            "url": "{{logisticaUrl}}/api/logistica/entregas/{{entregaId}}/estado?nuevoEstado=ENTREGADA&fotoUrl=http://example.com/foto.jpg"
           }
         },
         {
@@ -1128,23 +1113,8 @@
         {
           "name": "Estado inválido de entrega - espera 400",
           "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"estado\": \"ESTADO_INEXISTENTE\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": "{{logisticaUrl}}/api/logistica/entregas/{{entregaId}}"
+            "method": "PUT",
+            "url": "{{logisticaUrl}}/api/logistica/entregas/{{entregaId}}/estado?nuevoEstado=ESTADO_INEXISTENTE"
           },
           "event": [
             {
