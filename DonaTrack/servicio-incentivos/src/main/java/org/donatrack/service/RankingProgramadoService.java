@@ -24,6 +24,7 @@ public class RankingProgramadoService {
     }
 
     @Scheduled(cron = "0 0 0 1 * ?") // 0 segs - 0 mins - 0 hs - dia 1 - cada mes - cualquier dia
+    @Transactional
     public void ejecutarProcesamientoMensual() {
         GenerarRankingDe(YearMonth.now().minusMonths(1));
     }

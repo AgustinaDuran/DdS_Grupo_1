@@ -20,7 +20,10 @@ public class DonanteIncentivos {
     
     private String nombreCategoriaActual;
 
-    @ManyToMany(cascade = CascadeType.ALL) //insignias se repiten en varios donantes
+    private Integer totalDonaciones;
+    private Integer impactoAcumulado; // cantidad total de bienes donados
+
+    @ManyToMany
     private List<Insignia> insigniasGanadas = new ArrayList<>();
 
     public DonanteIncentivos() {}
@@ -29,10 +32,16 @@ public class DonanteIncentivos {
         this.nombreUsuario = nombreUsuario;
         this.categoriaActual = new Colaborador();
         this.nombreCategoriaActual = this.categoriaActual.GetNombre();
+        this.totalDonaciones = 0;
+        this.impactoAcumulado = 0;
     }
 
     public ResultadoActividad RegistrarActividad(DonacionRegistrada nuevaDonacion) {
+        AsegurarContadores(); //para no contar dos veces la donacion nueva
+        
         this.donaciones.add(nuevaDonacion);
+        this.totalDonaciones++;
+        this.impactoAcumulado += nuevaDonacion.GetCantidadBienes();
 
         CategoriaDonante categoria = this.GetCategoriaActual();
         List<Mision> misionesRecienCumplidas = new ArrayList<>();
@@ -53,12 +62,27 @@ public class DonanteIncentivos {
                 nuevaCategoria = siguiente.GetNombre();
             }
         }
-
         return new ResultadoActividad(misionesRecienCumplidas, nuevaCategoria);
     }
 
+    private void AsegurarContadores() {
+        if (totalDonaciones == null || impactoAcumulado == null) {
+            RecalcularContadores();
+        }
+    }
+
+    private void RecalcularContadores() {
+        int impacto = 0;
+        for (DonacionRegistrada d : donaciones) {
+            impacto += d.GetCantidadBienes();
+        }
+        this.totalDonaciones = donaciones.size();
+        this.impactoAcumulado = impacto;
+    }
+
     public Integer CalcularTotalDonaciones(){
-        return donaciones.size();
+        AsegurarContadores();
+        return totalDonaciones;
     }
 
     public Integer CalcularDonacionesDistintas(){
@@ -93,10 +117,10 @@ public class DonanteIncentivos {
         ordenadas.sort(Comparator.comparing(DonacionRegistrada::GetFechaIngreso));
 
         Integer racha = 1;
-        YearMonth mesAnterior = YearMonth.from(ordenadas.get(0).GetFechaIngreso());
+        YearMonth mesAnterior = ordenadas.get(0).GetPeriodo();
 
         for (Integer i = 1; i < donaciones.size(); i++) {
-            YearMonth mesActual = YearMonth.from(ordenadas.get(i).GetFechaIngreso());
+            YearMonth mesActual = ordenadas.get(i).GetPeriodo();
 
             if (mesActual.equals(mesAnterior)) {
                 continue;
@@ -114,16 +138,12 @@ public class DonanteIncentivos {
     }
 
     public Integer GetCantidadBienesDonados(){
-        Integer total = 0;
-        for (DonacionRegistrada d : donaciones) {
-            total += d.GetCantidadBienes();
-        }
-        return total;
+        return CalcularImpactoAcumulado();
     }
 
     public Integer CalcularImpactoAcumulado(){ //cant bienes donados
-        Integer impacto = this.GetCantidadBienesDonados();
-        return impacto;
+        AsegurarContadores();
+        return impactoAcumulado;
     }
 
     public Integer CalcularTotalDonadoEntre(LocalDate fechaInicio, LocalDate fechaFin) {
@@ -136,7 +156,6 @@ public class DonanteIncentivos {
                 total += d.GetCantidadBienes();
             }
         }
-
         return total;
     }
 
@@ -145,7 +164,7 @@ public class DonanteIncentivos {
         Double totalAnterior = 0.0;
 
         for (DonacionRegistrada d : donaciones) {
-            YearMonth periodo = YearMonth.from(d.GetFechaIngreso());
+            YearMonth periodo = d.GetPeriodo();
 
             if (periodo.equals(mesActual)) {
                 totalActual += d.GetCantidadBienes();
@@ -155,6 +174,7 @@ public class DonanteIncentivos {
                 totalAnterior += d.GetCantidadBienes();
             }
         }
+
         if (totalAnterior == 0) {
             return 0.0;
         }
@@ -170,7 +190,7 @@ public class DonanteIncentivos {
             int totalMes = 0;
 
             for (DonacionRegistrada d : donaciones) {
-                if (YearMonth.from(d.GetFechaIngreso()).equals(mesActual)) {
+                if (d.GetPeriodo().equals(mesActual)) {
                     totalMes += d.GetCantidadBienes();
                 }
             }
@@ -178,7 +198,6 @@ public class DonanteIncentivos {
             cantidadBienesPorMes.add(totalMes);
             mesActual = mesActual.plusMonths(1);
         }
-
         return cantidadBienesPorMes;
     }
 
@@ -192,11 +211,6 @@ public class DonanteIncentivos {
         return this.insigniasGanadas.contains(insignia);
     }
 
-    /**
-     * categoriaActual es @Transient: al recuperar el donante de la base viene en null y hay que
-     * reconstruirla a partir del nombre persistido. El default evita que un nombre inesperado
-     * (o nulo) devuelva null y termine en un NPE dentro del cálculo de misiones.
-     */
     public CategoriaDonante GetCategoriaActual() {
         if(categoriaActual == null){
             switch(nombreCategoriaActual == null ? "" : nombreCategoriaActual){
@@ -259,6 +273,7 @@ public class DonanteIncentivos {
  
         DonanteIncentivos snapshot = new DonanteIncentivos(this.nombreUsuario);
         snapshot.donaciones = filtradas;
+        snapshot.RecalcularContadores();
         return snapshot;
     }
 

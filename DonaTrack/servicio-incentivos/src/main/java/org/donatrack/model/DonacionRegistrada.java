@@ -1,8 +1,10 @@
 package org.donatrack.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,21 +21,25 @@ public class DonacionRegistrada {
     private String organizacion;
     private LocalDate fechaIngreso;
 
+    private Integer cantidadBienes;
+    private String periodo; // formato yyyy-MM
+
     @ElementCollection
-    @CollectionTable(name = "donacion_registrada_bienes",
-            joinColumns = @JoinColumn(name = "donacion_id"))
+    @CollectionTable(name = "donacion_registrada_bienes", joinColumns = @JoinColumn(name = "donacion_id"))
     @Column(name = "bien")
+    @BatchSize(size = 50)
     private List<String> bienes = new ArrayList<>();
 
     protected DonacionRegistrada() { } // para JPA
 
-    public DonacionRegistrada(String nombreUsuario, String subcategoria, List<String> bienes,
-                              String organizacion, LocalDate fechaIngreso) {
+    public DonacionRegistrada(String nombreUsuario, String subcategoria, List<String> bienes, String organizacion, LocalDate fechaIngreso) {
         this.nombreUsuario = nombreUsuario;
         this.subcategoria = subcategoria;
         this.bienes = bienes == null ? new ArrayList<>() : new ArrayList<>(bienes);
         this.organizacion = organizacion;
         this.fechaIngreso = fechaIngreso;
+        this.cantidadBienes = this.bienes.size();
+        this.periodo = fechaIngreso == null ? null : YearMonth.from(fechaIngreso).toString();
     }
 
     public Long GetId() { return id; }
@@ -44,6 +50,16 @@ public class DonacionRegistrada {
     public LocalDate GetFechaIngreso() { return fechaIngreso; }
 
     public Integer GetCantidadBienes() {
+        if (cantidadBienes != null) {
+            return cantidadBienes;
+        }
         return bienes == null ? 0 : bienes.size();
+    }
+
+    public YearMonth GetPeriodo() {
+        if (periodo != null) {
+            return YearMonth.parse(periodo);
+        }
+        return fechaIngreso == null ? null : YearMonth.from(fechaIngreso);
     }
 }

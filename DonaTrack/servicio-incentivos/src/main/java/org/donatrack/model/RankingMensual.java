@@ -11,7 +11,8 @@ public class RankingMensual {
 
     @Id
     private String idPeriodo;
-    @OneToMany(cascade = CascadeType.ALL) //muchos puestos -> guarda los 3 primeros juntos
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true) //muchos puestos -> guarda los 3 primeros juntos
     @JoinColumn(name = "ranking_periodo_id")
 
     private List<PuestoRanking> podio = new ArrayList<>();

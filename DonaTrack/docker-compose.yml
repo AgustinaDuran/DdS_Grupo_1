@@ -122,7 +122,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/incentivos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: incentivos
-      SPRING_DATASOURCE_PASSWORD: incentivos      
+      SPRING_DATASOURCE_PASSWORD: incentivos
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: donatrack

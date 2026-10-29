@@ -1,5 +1,6 @@
 package org.donatrack.service;
 
+import org.donatrack.model.Insignia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,8 +8,10 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.Normalizer;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -29,28 +32,53 @@ public class AutomatizacionService {
     @Value("${make.webhook.url}")
     private String makeWebhookUrl;
 
-    public void NotificarInsigniaGanada(String nombre, String descripcionMision, String urlImagenInsignia) { 
-        Map<String, Object> datos = new HashMap<>(); //pal make
-        datos.put("usuario", nombre);
-        datos.put("texto", "¡Felicitaciones a @" + nombre + " por cumplir la misión: " + descripcionMision + "!");
-        datos.put("imagenUrl", urlImagenInsignia);
-
-        try {
-            restTemplate.postForObject(makeWebhookUrl, datos, String.class);
-        } catch (Exception e) {
-            log.warn("No se pudo publicar el hito en make: {}", e.getMessage());
-        }
+    public void NotificarInsigniaGanada(String nombre, String descripcionMision, Insignia insignia) {
+        enviarAMake(ArmarDatosInsignia(nombre, descripcionMision, insignia), "el hito");
     }
 
     public void NotificarSubidaDeCategoria(String nombre, String nuevaCategoria) {
-    Map<String, Object> datos = new HashMap<>();
-    datos.put("usuario", nombre);
-    datos.put("texto", "¡Felicitaciones a @" + nombre + " por ascender a la categoría " + nuevaCategoria + "!");
-
-    try {
-        restTemplate.postForObject(makeWebhookUrl, datos, String.class);
-    } catch (Exception e) {
-        log.warn("No se pudo publicar el ascenso en make: {}", e.getMessage());
+        enviarAMake(ArmarDatosAscenso(nombre, nuevaCategoria), "el ascenso");
     }
-}
+
+    // Campos que recibe el escenario de make. 'clave' (ej. habil_donador_bronce) es la clave del
+    // data store de insignias de make; 'mision' y 'nivel' son sus dos partes, en minúscula.
+    static Map<String, Object> ArmarDatosInsignia(String nombre, String descripcionMision, Insignia insignia) {
+        String clave = ClaveDe(insignia);
+        int corte = clave.lastIndexOf('_');
+
+        Map<String, Object> datos = new HashMap<>();
+        datos.put("tipo", "INSIGNIA");
+        datos.put("usuario", nombre);
+        datos.put("insignia", insignia.GetNombre());
+        datos.put("clave", clave);
+        datos.put("mision", corte < 0 ? clave : clave.substring(0, corte));
+        datos.put("nivel", corte < 0 ? "" : clave.substring(corte + 1));
+        datos.put("descripcion", descripcionMision);
+        datos.put("texto", "¡Felicitaciones a @" + nombre + "! Obtuvo la insignia " + insignia.GetNombre() + ".");
+        datos.put("imagenUrl", insignia.GetImagen());
+        return datos;
+    }
+
+    // "Hábil Donador - BRONCE" -> "habil_donador_bronce"
+    static String ClaveDe(Insignia insignia) {
+        String sinAcentos = Normalizer.normalize(insignia.GetNombre(), Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return sinAcentos.toLowerCase(Locale.ROOT).replace(" - ", "_").replace(' ', '_');
+    }
+
+    static Map<String, Object> ArmarDatosAscenso(String nombre, String nuevaCategoria) {
+        Map<String, Object> datos = new HashMap<>();
+        datos.put("tipo", "ASCENSO");
+        datos.put("usuario", nombre);
+        datos.put("categoria", nuevaCategoria);
+        datos.put("texto", "¡Felicitaciones a @" + nombre + " por ascender a la categoría " + nuevaCategoria + "!");
+        return datos;
+    }
+
+    private void enviarAMake(Map<String, Object> datos, String queEs) {
+        try {
+            restTemplate.postForObject(makeWebhookUrl, datos, String.class);
+        } catch (Exception e) {
+            log.warn("No se pudo publicar {} en make: {}", queEs, e.getMessage());
+        }
+    }
 }
