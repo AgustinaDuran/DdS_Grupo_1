@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EntregaResponse {
-    private Long id;
+    private String id;
     private String donacionId;
     private String direccionDestino;
     private String estado;
@@ -19,14 +19,23 @@ public class EntregaResponse {
     private LocalDateTime fechaHoraEntrega;
     private String motivoNoRecibida;
     private String patenteCamion;
+    private LocalDateTime fechaCreacion;
 
-    
-    public Long getId() {
+
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
+    }
+
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
     }
 
     public String getDonacionId() {

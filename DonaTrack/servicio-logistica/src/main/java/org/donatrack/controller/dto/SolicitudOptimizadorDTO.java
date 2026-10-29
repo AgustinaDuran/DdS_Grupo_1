@@ -38,10 +38,10 @@ public class SolicitudOptimizadorDTO {
     }
 
     public static class EntregaAPlanificarDTO {
-        public Long entregaId;
+        public String entregaId;
         public String direccionDestino;
 
-        public EntregaAPlanificarDTO(Long entregaId, String direccionDestino) {
+        public EntregaAPlanificarDTO(String entregaId, String direccionDestino) {
             this.entregaId = entregaId;
             this.direccionDestino = direccionDestino;
         }

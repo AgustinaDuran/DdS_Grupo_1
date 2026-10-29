@@ -53,14 +53,15 @@ public class LogisticaController {
         return ResponseEntity.ok("Ruta iniciada. Entregas en estado EN_TRASLADO.");
     }
 
-    @PatchMapping("/entregas/{id}")
-    public ResponseEntity<String> cambiarEstadoEntrega(@PathVariable Long id, @RequestBody ActualizarEntregaDTO actualizarEntregaDTO) {
-        if (actualizarEntregaDTO.getEstado() == null) {
-            return ResponseEntity.badRequest().body("El campo 'estado' es obligatorio.");
-        }
-        logisticaService.actualizarEstadoEntrega(id, actualizarEntregaDTO.getEstado(),
-                actualizarEntregaDTO.getFotoUrl(), actualizarEntregaDTO.getMotivo());
-        return ResponseEntity.ok("Estado de la entrega " + id + " actualizado a " + actualizarEntregaDTO.getEstado());
+    @PutMapping("/entregas/{id}/estado")
+    public ResponseEntity<String> cambiarEstadoEntrega(
+            @PathVariable String id,
+            @RequestParam EstadoEntrega nuevoEstado,
+            @RequestParam(required = false) String fotoUrl,
+            @RequestParam(required = false) String motivo) {
+
+        logisticaService.actualizarEstadoEntrega(id, nuevoEstado, fotoUrl, motivo);
+        return ResponseEntity.ok("Estado de la entrega " + id + " actualizado a " + nuevoEstado);
     }
 
     //admin camiones
@@ -94,10 +95,9 @@ public class LogisticaController {
 
     //para otros servicios
     @GetMapping("/entregas/{id}")
-    public ResponseEntity<Entrega> consultarEntrega(@PathVariable Long id) {
+    public ResponseEntity<Entrega> consultarEntrega(@PathVariable String id) {
         return ResponseEntity.ok(logisticaService.ConsultarEntrega(id));
     }
-
     @GetMapping("/entregas")
     public ResponseEntity<List<Entrega>> listarEntregas(@RequestParam(required = false) EstadoEntrega estado) {
         return ResponseEntity.ok(logisticaService.listarEntregas(estado));

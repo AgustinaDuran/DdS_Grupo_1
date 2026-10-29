@@ -101,12 +101,28 @@ public class LogisticaPollingScheduler {
         return new ArrayList<>(ultimas.values());
     }
 
-    /** El id autoincremental de Logística ordena los intentos: el mayor es el más reciente. */
+    /**
+     * La fecha de creación ordena los intentos. Si falta, se usa el id: numérico en el proveedor
+     * mock, ObjectId de Mongo en Logística propia (su prefijo es un timestamp, así que el mayor
+     * en orden lexicográfico es el más reciente).
+     */
     private boolean esPosterior(EntregaResponse candidata, EntregaResponse actual) {
+        if (candidata.getFechaCreacion() != null && actual.getFechaCreacion() != null
+                && !candidata.getFechaCreacion().equals(actual.getFechaCreacion())) {
+            return candidata.getFechaCreacion().isAfter(actual.getFechaCreacion());
+        }
         if (candidata.getId() == null) {
             return false;
         }
-        return actual.getId() == null || candidata.getId() > actual.getId();
+        return actual.getId() == null || compararIds(candidata.getId(), actual.getId()) > 0;
+    }
+
+    private int compararIds(String a, String b) {
+        try {
+            return Long.compare(Long.parseLong(a), Long.parseLong(b));
+        } catch (NumberFormatException e) {
+            return a.compareTo(b);
+        }
     }
 
     private void procesarEntrega(EntregaResponse entrega) {

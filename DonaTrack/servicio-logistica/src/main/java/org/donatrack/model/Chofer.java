@@ -1,27 +1,24 @@
 package org.donatrack.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
-@Entity
-@Table(name = "choferes")
+@Document(collection = "choferes")
 public class Chofer {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @OneToOne
-    @JoinColumn(name = "camion_patente", referencedColumnName = "patente")
+    @DocumentReference
     private Camion camion;
 
     public Chofer() {}
 
-    public Chofer(Camion camion) {
-        this.camion = camion;
-    }
+    public Chofer(Camion camion) { this.camion = camion; }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
     public Camion getCamion() { return camion; }
     public void setCamion(Camion camion) { this.camion = camion; }
 }

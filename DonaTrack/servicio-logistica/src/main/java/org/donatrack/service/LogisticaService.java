@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
@@ -19,8 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-@Service
-@Transactional
+@Service   // MONGO: sin @Transactional (cada save en Mongo es atómico por documento)
 public class LogisticaService {
 
     private static final Logger log = LoggerFactory.getLogger(LogisticaService.class);
@@ -32,7 +30,7 @@ public class LogisticaService {
     @Value("${optimizador.api.url:https://api.optimizador-externo.com/v1/planificar}")
     private String optimizadorUrl;
 
-    @Value("${logistica.callback.url:https://tuservicio.donatrack.org/api/logistica/rutas}")
+    @Value("${logistica.callback.url:https://tuservicio.donatrack.org/api/logistica/callback-planificador}")
     private String urlCallback;
 
     private static final int MAX_ENTREGAS_POR_LOTE = 100;
@@ -47,6 +45,8 @@ public class LogisticaService {
     public void planificarRutasProgramado() {
         planificarRutasDelDia();
     }
+
+    
 
 //    public void registrarNuevasEntregas(List<Entrega> nuevasEntregas) {
 //        entregaRepository.saveAll(nuevasEntregas);
@@ -103,7 +103,8 @@ public class LogisticaService {
                         ruta.getPatenteCamion());
                 continue;
             }
-
+            
+            entregaRepository.saveAll(ruta.getEntregas()); // MONGO: sin cascade, el ordenVisita se guarda explícito
             camion.setRutaActiva(ruta);
             camionRepository.save(camion);
         }
@@ -162,6 +163,7 @@ public class LogisticaService {
             entrega.asignarCamion(patente); //para llevar registro en el comprobante de entrega
             entrega.CambiarEstado(EstadoEntrega.EN_TRASLADO, null, null);
             entregaRepository.save(entrega);
+            camionRepository.save(camion); // MONGO: la fecha de inicio vive en la ruta embebida, hay que guardar el camión
         }
     }
 
@@ -176,14 +178,18 @@ public class LogisticaService {
         }
     }
 
-    private void LiberarCamionSiRutaTerminada(Entrega entrega) {
-        Optional<Camion> camionOpt = camionRepository.findAll().stream()
-                .filter(c -> c.getRutaActiva() != null && c.getRutaActiva().getEntregas().contains(entrega))
-                .findFirst();
- 
-        camionOpt.ifPresent(camion -> {
-            if (camion.getRutaActiva().EstaFinalizada()) {
-                camion.setRutaActiva(null);
+    /**
+     * MONGO: se busca el camión por la patente guardada en la entrega. Antes se recorrían todos
+     * los camiones con contains(), que en Mongo no funciona: cada lectura crea instancias nuevas.
+     */
+    private void liberarCamionSiRutaTerminada(Entrega entrega) {
+        if (entrega.getPatenteCamion() == null) {
+            return;
+        }
+        camionRepository.findById(entrega.getPatenteCamion()).ifPresent(camion -> {
+            RutaReparto ruta = camion.getRutaActiva();
+            if (ruta != null && ruta.EstaFinalizada()) {
+                camion.setRutaActiva(null);   // las entregas siguen en su colección como historial
                 camionRepository.save(camion);
             }
         });
@@ -191,9 +197,7 @@ public class LogisticaService {
 
     //admin camiones
     public List<Camion> listarCamiones() {
-        List<Camion> camiones = camionRepository.findByActivoTrue();
-        camiones.forEach(this::inicializarRutaActiva);
-        return camiones;
+        return camionRepository.findByActivoTrue(); // MONGO: sin lazy loading, no hace falta inicializar nada
     }
 
     /**

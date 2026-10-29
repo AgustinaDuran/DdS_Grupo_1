@@ -128,7 +128,9 @@ Dentro de cada servicio se aplicaron patrones de diseño para resolver problemas
 ## 6. Persistencia
 
 ### Decisiones
-- **Base relacional (MySQL 8)** accedida con JPA/Hibernate a través de Spring Data.
+- **Persistencia políglota:**
+  - Donaciones, Incentivos y Notificaciones usan una **base relacional (MySQL 8)** accedida con JPA/Hibernate (ORM) a través de Spring Data JPA, cada uno con su propio esquema y usuario.
+  - Logística usa una **base documental (MongoDB 7)** accedida con Spring Data MongoDB (ODM).
 - **Cada servicio es dueño de sus propias tablas y no lee las de otro.** Cuando un servicio necesita información de otro, la recibe por la API o por mensajes. Por ejemplo, Incentivos mantiene su propia vista del donante y de sus donaciones, que Donaciones le informa en cada registro, en lugar de consultar las tablas de Donaciones.
 - Las jerarquías del modelo (por ejemplo, los estados de una donación o los tipos de donante) se mapean con herencia de JPA para conservar el polimorfismo del dominio en la base.
 
@@ -137,11 +139,37 @@ Dentro de cada servicio se aplicaron patrones de diseño para resolver problemas
 - JPA permite mapear el modelo de objetos casi sin código de acceso a datos y cambiar de motor si hiciera falta (los tests usan H2 en memoria).
 - Que los servicios no compartan tablas evita el principal acoplamiento oculto entre servicios: si Incentivos leyera las tablas de Donaciones, cualquier cambio de esquema en Donaciones lo rompería.
 
-### Base de datos por entorno
-- **Desarrollo local:** se usa una única instancia de MySQL con un único esquema para todos los servicios. Simplifica levantar el entorno y consume menos recursos. La separación es lógica: cada servicio usa solo sus tablas.
-- **Despliegue de Logística:** tiene su **propia instancia de MySQL**, accesible solo desde la red interna del servicio. Es el modelo al que apunta la arquitectura: una base por servicio.
+### Desnormalización en el modelo relacional
+El modelo relacional parte normalizado, pero en los puntos donde una lectura frecuente obligaba a recorrer historiales, recalcular datos o cruzar servicios, se duplicó información a propósito:
 
-Se reconoce como **deuda técnica** que en local la separación de datos se respete por convención y no por infraestructura. El siguiente paso sería replicar el esquema de Logística (una base por servicio) en el resto.
+| Servicio | Dato duplicado | Lectura que optimiza |
+|---|---|---|
+| Donaciones | `donaciones_segmentadas.estado_actual_id` apunta al estado vigente, que también está en `donacion_historial_estados`. | Conocer el estado vigente de una donación con un solo join, sin buscar el último registro de su historial. Se lee en casi todas las operaciones: armar el depósito para la asignación nocturna (donaciones *En depósito*), filtrar las donaciones del donante por estado, devolver cada donación por la API y comparar contra Logística en el polling. |
+| Incentivos | `donaciones_registradas` guarda una copia de cada donación (usuario, subcategoría, organización, fecha) y sus bienes en `donacion_registrada_bienes`, como texto y sin claves foráneas. | Calcular el progreso de las misiones (racha, completitud, hábil donador) con consultas locales, sin llamar a Donaciones ni leer sus tablas. |
+| Incentivos | `donantes_incentivos.nombre_categoria_actual` guarda la categoría del donante. | Mostrar la categoría junto al nombre de usuario sin volver a evaluar todas las misiones cumplidas. |
+| Incentivos | `rankings_mensuales` / `puestos_ranking` guardan el podio ya calculado de cada mes (posición, usuario, misiones cumplidas). | Mostrar el ranking actual y el historial de rankings como una lectura directa. Además, el resultado de cada mes queda fijo aunque después cambien los datos de los donantes. |
+| Notificaciones | `notificaciones` guarda el destinatario (mail o teléfono), su nombre y el medio usado al momento del envío. | Consultar y auditar qué se envió, a quién y por qué medio, sin depender de los datos actuales del donante en otro servicio. |
+
+**Justificación.** En todos los casos la información duplicada se lee mucho más de lo que cambia, o representa una foto de un momento que *no* debe cambiar (el podio de un mes, el contacto al que se envió un mensaje). Entre servicios, además, la duplicación es la consecuencia directa de que cada servicio sea dueño de sus datos: Incentivos y Notificaciones reciben lo que necesitan por la API o por la cola de mensajes y lo guardan en su propio esquema.
+
+**Cómo se mantiene la consistencia.**
+- *Dentro de un servicio:* el propio modelo de objetos actualiza las dos copias en la misma operación. Por ejemplo, `Donacion.setEstadoDonacion` cambia el estado actual y lo agrega al historial a la vez, y ambos se guardan en la misma transacción de JPA.
+- *Entre servicios:* la copia es de consistencia eventual. Si la integración falla, Incentivos puede tardar en reflejar una donación, pero eso nunca bloquea el registro de la donación en el servicio principal.
+
+**Trade-off:** más espacio y la responsabilidad de mantener las copias sincronizadas, a cambio de lecturas simples y de servicios que no se consultan entre sí para operaciones cotidianas.
+
+### Logística como base documental
+El modelo de Logística se consulta casi siempre "por agregado": el camión con su ruta del día, o la entrega con su historial. Por eso se modeló en documentos y se desnormalizó a propósito para optimizar esas lecturas:
+- **Colección `camiones`:** la **ruta activa está embebida** en el camión. Una ruta no existe sin su camión y siempre se lee junto con él (seguimiento en mapa, inicio de ruta), así que se obtiene en una sola lectura sin joins.
+- **Colección `entregas`:** el **historial de cambios de estado está embebido** en la entrega (trazabilidad sin tabla aparte) y la **patente del camión se duplica** en la entrega, para armar el comprobante y saber qué camión liberar sin recorrer las rutas.
+- **La ruta referencia a sus entregas por id (`@DocumentReference`)** en lugar de embeberlas: las entregas tienen ciclo de vida propio (existen antes de planificarse, vuelven a PENDIENTE si no se reciben) y Donaciones las consulta solas por polling. Embeberlas obligaría a mantener dos copias de su estado.
+- Los ids de entrega pasan a ser ObjectId (String). Donaciones ordena los intentos de una misma donación por `fechaCreacion`.
+
+**Trade-off:** se pierde la transaccionalidad entre documentos (MongoDB standalone no la soporta), así que cada operación guarda explícitamente los documentos que modifica. Es aceptable porque cada operación de Logística toca un solo camión y sus entregas, y el polling de Donaciones tolera estados intermedios.
+
+### Base de datos por entorno
+- **Desarrollo local:** una instancia de MySQL con un esquema y un usuario por servicio relacional (`db/init/esquemas-iniciales.sql`), y una instancia de MongoDB para Logística.
+- **Despliegue de Logística:** tiene su **propia instancia de MongoDB**, accesible solo desde la red interna del servicio.
 
 ---
 
@@ -149,14 +177,14 @@ Se reconoce como **deuda técnica** que en local la separación de datos se resp
 
 ### Decisiones
 - **Contenedores Docker** para cada servicio, con builds multi-stage: una etapa compila con Maven y la imagen final solo contiene el JRE y el .jar, lo que da imágenes más chicas.
-- **Docker Compose** para orquestar el entorno completo en local (servicios, MySQL y RabbitMQ), con healthchecks. Los servicios esperan a que la base y el broker estén realmente listos antes de arrancar.
+- **Docker Compose** para orquestar el entorno completo en local (servicios, MySQL, MongoDB y RabbitMQ), con healthchecks. Los servicios esperan a que la base y el broker estén realmente listos antes de arrancar.
 - **Configuración externa:** URLs, credenciales y claves (por ejemplo, la API key de Brevo) se pasan por variables de entorno o un archivo .env que no se versiona.
 - **Proyecto Maven multimódulo:** un pom.xml padre agrupa los servicios y la librería mensajeria, de modo que mvn test corre los tests de todo el sistema.
 - **Logística desplegado en un servidor público** (VPS de 512 MB), con su propio docker-compose.deploy.ym que usa imágenes publicadas en Docker Hub. En el servidor solo hacen falta ese archivo y el .env, no el código fuente.
 
 ### Justificación
 - Logística necesita una **URL pública** para que el optimizador externo le devuelva las rutas por callback, cosa que no se puede hacer desde una máquina local. Por eso es el servicio que se desplegó.
-- Por los recursos limitados del servidor se ajustaron la memoria de la JVM y la configuración de MySQL para que ambos entren en 512 MB. El hecho de que cada servicio sea independiente permitió desplegar solo el que lo necesitaba, sin pagar un servidor para todo el sistema.
+- Por los recursos limitados del servidor se ajustaron la memoria de la JVM y la caché de MongoDB (WiredTiger) para que ambos entren en 512 MB. El hecho de que cada servicio sea independiente permitió desplegar solo el que lo necesitaba, sin pagar un servidor para todo el sistema.
 - Docker garantiza que el entorno sea igual en las máquinas de todos los integrantes y en el servidor.
 
 ---
@@ -179,7 +207,9 @@ Más allá de cada decisión puntual, se siguieron los mismos criterios en todo 
 
 | Java 23 + Spring Boot 3.5 | Todos los servicios | Lenguaje de la materia. Spring resuelve inyección de dependencias, REST, JPA, schedulers y AMQP con un mismo modelo de programación. |
 | Spring Data JPA / Hibernate | Persistencia | Mapeo objeto-relacional del modelo de dominio con mínimo código. |
-| MySQL 8 | Base de datos | Relacional, conocida por el grupo y con imagen oficial de Docker. H2 para tests. |
+| MySQL 8 | Base de datos relacional | Relacional, conocida por el grupo y con imagen oficial de Docker. H2 para tests. |
+| Spring Data MongoDB | Persistencia de Logística | ODM: mapea camiones y entregas a documentos con subdocumentos embebidos y referencias. |
+| MongoDB 7 | Base de datos documental | Logística se lee por agregados (camión + ruta, entrega + historial). |
 | RabbitMQ | Mensajería | Broker liviano con colas durables y dead-letter listos para usar. Integración nativa con Spring AMQP. |
 | springdoc-openapi | Documentación de APIs | Swagger generado desde el código, siempre sincronizado con los endpoints. |
 | Docker / Docker Compose | Ejecución y despliegue | Entorno reproducible y despliegue por imágenes. |

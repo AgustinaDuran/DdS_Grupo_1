@@ -1,10 +1,10 @@
 package org.donatrack.model;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "camion")
+@Document(collection = "camiones")
 public class Camion {
     @Id
     private String patente;
@@ -19,9 +19,7 @@ public class Camion {
     private Double longitud;
     private LocalDateTime ultimaActualizacionUbicacion;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "ruta_activa_id")
-    private RutaReparto rutaActiva;
+    private RutaReparto rutaActiva;          // subdocumento embebido
 
     public Camion() {}
 

@@ -65,7 +65,7 @@ class LogisticaPollingSincronizacionTest {
 
     private EntregaResponse entrega(String estado, String fotoUrl) {
         EntregaResponse entrega = new EntregaResponse();
-        entrega.setId(1L);
+        entrega.setId("1");
         entrega.setDonacionId("7");
         entrega.setEstado(estado);
         entrega.setFotoComprobanteUrl(fotoUrl);

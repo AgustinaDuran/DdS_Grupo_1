@@ -13,32 +13,24 @@
 # Para pausarlo hasta la defensa: docker compose -f docker-compose.deploy.yml stop
 
 services:
-  # Base de datos propia de Logística. No publica el 3306: sólo la ve Logística por la red interna.
-  db-logistica:
-    image: mysql:8.0
-    container_name: logistica-db
+  # Base documental propia de Logística. No publica el 27017: sólo la ve Logística por la red interna.
+  mongo-logistica:
+    image: mongo:7
+    container_name: logistica-mongo
     restart: unless-stopped
-    # El droplet tiene 512 MB: con la configuración por defecto MySQL usa ~400 MB y el kernel lo
-    # mata por falta de memoria. Sin performance_schema y con buffers chicos ronda los 150 MB.
-    command:
-      - --performance-schema=OFF
-      - --innodb-buffer-pool-size=32M
-      - --innodb-log-buffer-size=4M
-      - --key-buffer-size=4M
-      - --table-open-cache=64
-      - --max-connections=20
+    # El droplet tiene 512 MB: por defecto WiredTiger reserva ~50% de la RAM para su caché.
+    # 0.25 GB es el mínimo que acepta y deja lugar para la JVM.
+    command: ["--wiredTigerCacheSizeGB", "0.25"]
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: logistica
-      MYSQL_USER: logistica
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     volumes:
-      - logistica-data:/var/lib/mysql
+      - logistica-mongo-data:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
       interval: 5s
       timeout: 5s
-      start_period: 90s
+      start_period: 30s
       retries: 20
 
   # Servicio de Logística
@@ -53,16 +45,13 @@ services:
     ports:
       - "8083:8083"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db-logistica:3306/logistica?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: logistica
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
-      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 5
-      # Límite de memoria de la JVM para que entre junto con MySQL en el droplet de 512 MB.
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo-logistica:27017/logistica?authSource=admin&maxPoolSize=5
+      # Límite de memoria de la JVM para que entre junto con MongoDB en el droplet de 512 MB.
       JAVA_TOOL_OPTIONS: -Xmx160m -XX:MaxMetaspaceSize=128m -Xss512k -XX:+UseSerialGC -XX:TieredStopAtLevel=1
       # URL pública a la que el planificador externo devuelve las rutas.
       LOGISTICA_CALLBACK_URL: ${PUBLIC_URL}/api/logistica/rutas
     depends_on:
-      db-logistica:
+      mongo-logistica:
         condition: service_healthy
 
   # Proveedor de logística externo simulado (respaldo del broker de Donaciones)
@@ -80,4 +69,4 @@ services:
       JAVA_TOOL_OPTIONS: -Xmx64m -XX:MaxMetaspaceSize=96m -Xss512k -XX:+UseSerialGC -XX:TieredStopAtLevel=1
 
 volumes:
-  logistica-data:
+  logistica-mongo-data:

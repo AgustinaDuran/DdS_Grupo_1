@@ -1,26 +1,35 @@
 package org.donatrack.model;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "entrega")
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+
+@Document(collection = "entregas")
 public class Entrega {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    private String id;                       // ObjectId generado por Mongo
+    
+    @Indexed
     private String donacionId;       
     private String direccionDestino;  
     
-    @Enumerated(EnumType.STRING)
-    private EstadoEntrega estado= EstadoEntrega.PENDIENTE;
+    @Indexed
+    private EstadoEntrega estado = EstadoEntrega.PENDIENTE;
+
     
     private Integer ordenVisita;
     private String fotoComprobanteUrl;
     private LocalDateTime fechaHoraEntrega; 
     private String motivoNoRecibida;
     private String patenteCamion;
+    private LocalDateTime fechaCreacion = LocalDateTime.now();
+
+    private List<CambioEstado> historial = new ArrayList<>();   // subdocumentos embebidos
 
 
     public Entrega() {}
@@ -29,6 +38,7 @@ public class Entrega {
         this.donacionId = donacionId;
         this.direccionDestino = direccionDestino;
         this.estado = EstadoEntrega.PENDIENTE;
+        this.historial.add(new CambioEstado(EstadoEntrega.PENDIENTE, null));
     }
 
     public void CambiarEstado(EstadoEntrega nuevoEstado, String fotoUrl, String motivo) {
@@ -44,6 +54,7 @@ public class Entrega {
         }
 
         this.estado = nuevoEstado;
+        this.historial.add(new CambioEstado(nuevoEstado, motivo));
 
         if (nuevoEstado == EstadoEntrega.ENTREGADA) {
             this.fechaHoraEntrega = LocalDateTime.now();
@@ -62,16 +73,12 @@ public class Entrega {
         this.patenteCamion = patenteCamion;
     }
 
-    public String getPatenteCamion() { 
-        return patenteCamion;
-    }
-
     public Boolean EsEstadoTerminal() {
         return this.estado == EstadoEntrega.ENTREGADA || this.estado == EstadoEntrega.NO_RECIBIDA;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
     public String getDonacionId() { return donacionId; }
     public void setDonacionId(String donacionId) { this.donacionId = donacionId; }
     public String getDireccionDestino() { return direccionDestino; }
@@ -82,4 +89,8 @@ public class Entrega {
     public String getFotoComprobanteUrl() { return fotoComprobanteUrl; }
     public LocalDateTime getFechaHoraEntrega() { return fechaHoraEntrega; }
     public String getMotivoNoRecibida() { return motivoNoRecibida; }
+    public String getPatenteCamion() { return patenteCamion; }
+    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
+    public List<CambioEstado> getHistorial() { return historial; }
+
 }

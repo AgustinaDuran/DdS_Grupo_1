@@ -75,7 +75,7 @@ public class LogisticaMockAdapter implements ProveedorLogistica {
 
     private EntregaResponse traducir(ShipmentResponse envio) {
         EntregaResponse entrega = new EntregaResponse();
-        entrega.setId(envio.getShipmentId());
+        entrega.setId(envio.getShipmentId() == null ? null : String.valueOf(envio.getShipmentId()));
         entrega.setDonacionId(envio.getExternalRef());
         entrega.setDireccionDestino(envio.getDestinationAddress());
         entrega.setEstado(traducirEstado(envio.getStatus()));
