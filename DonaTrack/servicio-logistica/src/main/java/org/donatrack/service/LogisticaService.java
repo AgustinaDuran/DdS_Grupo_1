@@ -167,14 +167,14 @@ public class LogisticaService {
         }
     }
 
-    public void actualizarEstadoEntrega(Long id, EstadoEntrega nuevoEstado, String fotoUrl, String motivo) {
+    public void actualizarEstadoEntrega(String id, EstadoEntrega nuevoEstado, String fotoUrl, String motivo) {
         Entrega entrega = entregaRepository.findById(id).orElseThrow(() -> new RuntimeException("Entrega no encontrada: " + id));
  
         entrega.CambiarEstado(nuevoEstado, fotoUrl, motivo);
         entregaRepository.save(entrega);
  
         if (entrega.EsEstadoTerminal()) {
-            LiberarCamionSiRutaTerminada(entrega);
+            liberarCamionSiRutaTerminada(entrega);
         }
     }
 
@@ -252,7 +252,7 @@ public class LogisticaService {
     }
 
     //para los otros servicios
-    public Entrega ConsultarEntrega(Long id) {
+    public Entrega ConsultarEntrega(String id) {
         return entregaRepository.findById(id).orElseThrow(() -> new RuntimeException("Entrega no encontrada: " + id));
     }
  
