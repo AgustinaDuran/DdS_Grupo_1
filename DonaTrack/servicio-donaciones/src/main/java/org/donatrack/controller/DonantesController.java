@@ -8,6 +8,7 @@ import org.donatrack.controller.dto.Donantes.DonanteDTO;
 import org.donatrack.controller.dto.Donantes.ImportacionCsvResultadoDTO;
 import org.donatrack.dominio.donante.Donante;
 import org.donatrack.service.DonantesService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,13 +37,9 @@ public class DonantesController {
     }
 
     @PostMapping
-    public ResponseEntity<String> nuevoDonante(@RequestBody CrearDonanteDTO nuevoDonante) {
-        System.out.println("DTO RECIBIDO: " + nuevoDonante);
-        System.out.println("ROL USUARIO: " + nuevoDonante.getTipoUsuario());
-        
-
-        donantesService.registrarDonante(nuevoDonante);
-        return ResponseEntity.ok("Donante añadido correctamente");
+    public ResponseEntity<DonanteDTO> nuevoDonante(@RequestBody CrearDonanteDTO nuevoDonante) {
+        Donante donante = donantesService.registrarDonante(nuevoDonante);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new DonanteDTO(donante));
     }
 
     @PostMapping(value = "/importaciones", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -62,9 +59,9 @@ public class DonantesController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> borrarDonante(@PathVariable Long id) {
+    public ResponseEntity<Void> borrarDonante(@PathVariable Long id) {
         donantesService.eliminarDonante(id);
-        return ResponseEntity.ok("Donante eliminado exitosamente");
+        return ResponseEntity.noContent().build();
     }
 
 }

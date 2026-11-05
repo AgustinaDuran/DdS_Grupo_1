@@ -8,6 +8,7 @@ import org.donatrack.controller.dto.Bienes.CrearBienDTO;
 import org.donatrack.controller.dto.Bienes.ResponseBienDTO;
 import org.donatrack.dominio.bien.Bien;
 import org.donatrack.service.BienesService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,21 +35,21 @@ public class BienesController {
     }
 
     @PostMapping
-    public ResponseEntity<String> crearBien(@RequestBody CrearBienDTO crearBienDTO) {
-        bienesService.crearBien(crearBienDTO);
-        return ResponseEntity.ok("Bien añadido correctamente");
+    public ResponseEntity<ResponseBienDTO> crearBien(@RequestBody CrearBienDTO crearBienDTO) {
+        Bien bien = bienesService.crearBien(crearBienDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseBienDTO(bien));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> actualizarBien(@PathVariable Long id, @RequestBody ActualizarBienDTO datosActualizacion) {
-        bienesService.actualizarBien(id, datosActualizacion);
-        return ResponseEntity.ok("Bien actualizado correctamente");
+    public ResponseEntity<ResponseBienDTO> actualizarBien(@PathVariable Long id, @RequestBody ActualizarBienDTO datosActualizacion) {
+        Bien bien = bienesService.actualizarBien(id, datosActualizacion);
+        return ResponseEntity.ok(new ResponseBienDTO(bien));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminarBien(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarBien(@PathVariable Long id) {
         bienesService.eliminarBienPorId(id);
-        return ResponseEntity.ok("Bien eliminado correctamente");
+        return ResponseEntity.noContent().build();
     }
 
 }

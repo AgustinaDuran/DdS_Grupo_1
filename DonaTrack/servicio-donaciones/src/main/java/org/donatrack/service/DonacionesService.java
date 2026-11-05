@@ -64,7 +64,7 @@ public class DonacionesService {
         return donacionesRepository.findById(id).orElse(null);
     }
 
-    public void registrarDonacion(CrearDonacionDTO nuevaDonacion) {
+    public List<Donacion> registrarDonacion(CrearDonacionDTO nuevaDonacion) {
         Donante donante = this.donantesService.obtenerDonantePorId(nuevaDonacion.getDonanteId()).orElseThrow();
         List<ItemBien> itemBienes = this.bienesService.convertirItemsDTOaItemsBien(nuevaDonacion.getItems());
 
@@ -85,13 +85,14 @@ public class DonacionesService {
         for (Donacion donacion : donacionesSegmentadas) {
             incentivosClient.registrarDonacion(nombreUsuario, construirRegistroIncentivos(donacion));
         }
+        return donacionesSegmentadas;
     }
 
     public void eliminarDonacionPorId(Long id) {
         donacionesRepository.deleteById(id);
     }
 
-    public void actualizarDonacion(Long id, ActualizarDonacionDTO datosActualizacion) {
+    public Donacion actualizarDonacion(Long id, ActualizarDonacionDTO datosActualizacion) {
         Donacion donacion = donacionesRepository.findById(id).orElse(null);
 
         if (donacion == null) {
@@ -104,8 +105,7 @@ public class DonacionesService {
             donacion.setFotoEntrega(datosActualizacion.getFotoEntrega());
         }
 
-        donacionesRepository.save(donacion);
-
+        return donacionesRepository.save(donacion);
     }
 
     private Donacion cambiarEstadoDonacion(Donacion donacion, ActualizarDonacionDTO datosActualizacion) {

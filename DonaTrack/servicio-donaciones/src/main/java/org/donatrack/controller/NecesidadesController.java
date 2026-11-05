@@ -1,15 +1,11 @@
 package org.donatrack.controller;
-import org.donatrack.controller.dto.*;
 import org.donatrack.controller.dto.Necesidad.*;
 import org.donatrack.dominio.necesidades.Necesidad;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.donatrack.service.NecesidadesService;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,15 +34,15 @@ public class NecesidadesController {
             necesidadDTOs.add(necesidadDTO);
         }
         return ResponseEntity.ok(necesidadDTOs);
-    } 
+    }
     //http://localhost:8080/api/necesidades -> POST
     @PostMapping
-    public ResponseEntity<String> recibirNuevaNecesidad(
+    public ResponseEntity<NecesidadDTO> recibirNuevaNecesidad(
         @RequestBody CrearNecesidadDTO nuevaNecesidad) {
-        
-        necesidadesService.registrarNecesidad(nuevaNecesidad);
-        
-        return ResponseEntity.ok("Necesidad aniadida correctamente");
+
+        Necesidad necesidad = necesidadesService.registrarNecesidad(nuevaNecesidad);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new NecesidadDTO(necesidad));
     }
 
     @GetMapping("/{id}")
@@ -61,17 +57,16 @@ public class NecesidadesController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> actualizarNecesidad(@PathVariable Long id, @RequestBody ActualizarNecesidadDTO datosActualizacion) {
-        necesidadesService.actualizarNecesidad(id, datosActualizacion);
-        return ResponseEntity.ok("Necesidad actualizada correctamente");
+    public ResponseEntity<NecesidadDTO> actualizarNecesidad(@PathVariable Long id, @RequestBody ActualizarNecesidadDTO datosActualizacion) {
+        Necesidad necesidad = necesidadesService.actualizarNecesidad(id, datosActualizacion);
+        return ResponseEntity.ok(new NecesidadDTO(necesidad));
     }
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminarNecesidad(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarNecesidad(@PathVariable Long id) {
         necesidadesService.eliminarNecesidadPorId(id);
-        return ResponseEntity.ok("Necesidad eliminada correctamente");
+        return ResponseEntity.noContent().build();
     }
 
 }
-

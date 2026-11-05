@@ -55,7 +55,7 @@ public class BienesService {
         return bien;
     }
 
-    public void actualizarBien(Long id, ActualizarBienDTO datosActualizacion) {
+    public Bien actualizarBien(Long id, ActualizarBienDTO datosActualizacion) {
         Bien bienExistente = bienesRepository.findById(id).orElse(null);
         if (bienExistente == null) {
             throw new IllegalArgumentException("No se encontró el bien con el ID proporcionado");
@@ -69,7 +69,7 @@ public class BienesService {
         if (datosActualizacion.getFoto() != null) {
             bienExistente.setFoto(datosActualizacion.getFoto());
         }
-        bienesRepository.save(bienExistente);
+        return bienesRepository.save(bienExistente);
     }
 
     public void eliminarBienPorId(Long id) {

@@ -20,7 +20,7 @@ public class Notificador {
     private final MedioEnvioFactory medioEnvioFactory;
 
     public Notificador(NotificacionesRepository notificacionesRepository,
-                       MedioEnvioFactory medioEnvioFactory) {
+            MedioEnvioFactory medioEnvioFactory) {
         this.notificacionesRepository = notificacionesRepository;
         this.medioEnvioFactory = medioEnvioFactory;
     }
@@ -30,8 +30,6 @@ public class Notificador {
         List<Contacto> contactos = crearNotificacionDTO.getContactos();
         String nombreDestinatario = crearNotificacionDTO.getNombreDestinatario();
 
-        // Los contactos vienen ordenados por prioridad (el predeterminado primero),
-        // asi que se toma el primero que hoy pueda entregar el mensaje.
         Contacto contactoSeleccionado = contactos.stream()
                 .filter(c -> medioEnvioFactory.soporta(c.getTipo()))
                 .findFirst()

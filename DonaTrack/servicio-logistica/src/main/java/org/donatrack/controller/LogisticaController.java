@@ -19,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/logistica")
+@CrossOrigin(origins = "*")
 public class LogisticaController {
 
     @Autowired

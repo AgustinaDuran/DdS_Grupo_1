@@ -33,7 +33,7 @@ public class CategoriasService {
         return subcategoriaRepository.findById(id).orElse(null);
     }
 
-    public void registrarSubcategoria(CrearSubcategoriaDTO nuevaSubcategoria) {
+    public Subcategoria registrarSubcategoria(CrearSubcategoriaDTO nuevaSubcategoria) {
         Categoria categoria = null;
         if (nuevaSubcategoria.getCategoriaId() != null) {
             categoria = categoriasRepository.findById(nuevaSubcategoria.getCategoriaId()).orElse(null);
@@ -43,9 +43,10 @@ public class CategoriasService {
         if (categoria != null) {
             categoria.agregarSubcategoria(subcategoria);
         }
+        return subcategoria;
     }
 
-    public void actualizarSubcategoria(Long id, ActualizarSubcategoriaDTO datosActualizacion) {
+    public Subcategoria actualizarSubcategoria(Long id, ActualizarSubcategoriaDTO datosActualizacion) {
         Subcategoria subcategoria = subcategoriaRepository.findById(id).orElse(null);
         if (subcategoria == null) {
             throw new IllegalArgumentException("No se encontró la subcategoría con el ID proporcionado");
@@ -61,6 +62,7 @@ public class CategoriasService {
             subcategoria.setCategoria(categoria);
         }
         subcategoriaRepository.save(subcategoria);
+        return subcategoria;
     }
 
     public void eliminarSubCategoriaPorId(Long id) {
@@ -76,12 +78,13 @@ public class CategoriasService {
         return categoriasRepository.findById(id).orElse(null);
     }
 
-    public void registrarCategoria(CrearCategoriaDTO nuevaCategoria) {
+    public Categoria registrarCategoria(CrearCategoriaDTO nuevaCategoria) {
         Categoria categoria = new Categoria(nuevaCategoria.getNombre());
         categoriasRepository.saveCategoria(categoria);
+        return categoria;
     }
 
-    public void actualizarCategoria(Long id, ActualizarCategoriaDTO datosActualizacion) {
+    public Categoria actualizarCategoria(Long id, ActualizarCategoriaDTO datosActualizacion) {
         Categoria categoria = categoriasRepository.findById(id).orElse(null);
         if (categoria == null) {
             throw new IllegalArgumentException("No se encontró la categoría con el ID proporcionado");
@@ -90,6 +93,7 @@ public class CategoriasService {
             categoria.setNombre(datosActualizacion.getNombre());
         }
         categoriasRepository.saveCategoria(categoria);
+        return categoria;
     }
 
     public void eliminarCategoriaPorId(Long id) {

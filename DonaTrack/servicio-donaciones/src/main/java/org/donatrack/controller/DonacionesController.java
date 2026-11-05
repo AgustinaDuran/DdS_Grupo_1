@@ -1,18 +1,14 @@
 package org.donatrack.controller;
-import org.donatrack.controller.dto.*;
 import org.donatrack.controller.dto.Donaciones.ActualizarDonacionDTO;
 import org.donatrack.controller.dto.Donaciones.CrearDonacionDTO;
 import org.donatrack.controller.dto.Donaciones.DonacionDTO;
 import org.donatrack.controller.dto.Donaciones.FiltrosDonacionDTO;
 import org.donatrack.dominio.donacion.Donacion;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.donatrack.service.DonacionesService;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,22 +30,18 @@ public class DonacionesController {
         FiltrosDonacionDTO filtrosDonacionesDTO
     ) {
         List<Donacion> donaciones = donacionesService.obtenerDonaciones(filtrosDonacionesDTO);
-        List<DonacionDTO> donacionDTOs = new ArrayList<>();
+        return ResponseEntity.ok(aDTOs(donaciones));
+    }
 
-        for (Donacion donacion : donaciones) {
-            DonacionDTO donacionDTO = new DonacionDTO(donacion);
-            donacionDTOs.add(donacionDTO);
-        }
-        return ResponseEntity.ok(donacionDTOs);
-    } 
     //http://localhost:8080/api/donaciones -> POST
+    // La donación se segmenta por subcategoría, por eso se devuelve la lista de donaciones creadas.
     @PostMapping
-    public ResponseEntity<String> recibirNuevaDonacion(
+    public ResponseEntity<List<DonacionDTO>> recibirNuevaDonacion(
         @RequestBody CrearDonacionDTO nuevaDonacion) {
-        
-        donacionesService.registrarDonacion(nuevaDonacion);
-        
-        return ResponseEntity.ok("Donación aniadida correctamente");
+
+        List<Donacion> creadas = donacionesService.registrarDonacion(nuevaDonacion);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(aDTOs(creadas));
     }
 
     @GetMapping("/{id}")
@@ -64,17 +56,24 @@ public class DonacionesController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> actualizarDonacion(@PathVariable Long id, @RequestBody ActualizarDonacionDTO datosActualizacion) {
-        donacionesService.actualizarDonacion(id, datosActualizacion);
-        return ResponseEntity.ok("Donación actualizada correctamente");
+    public ResponseEntity<DonacionDTO> actualizarDonacion(@PathVariable Long id, @RequestBody ActualizarDonacionDTO datosActualizacion) {
+        Donacion donacion = donacionesService.actualizarDonacion(id, datosActualizacion);
+        return ResponseEntity.ok(new DonacionDTO(donacion));
     }
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> eliminarDonacion(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarDonacion(@PathVariable Long id) {
         donacionesService.eliminarDonacionPorId(id);
-        return ResponseEntity.ok("Donación eliminada correctamente");
+        return ResponseEntity.noContent().build();
+    }
+
+    private List<DonacionDTO> aDTOs(List<Donacion> donaciones) {
+        List<DonacionDTO> donacionDTOs = new ArrayList<>();
+        for (Donacion donacion : donaciones) {
+            donacionDTOs.add(new DonacionDTO(donacion));
+        }
+        return donacionDTOs;
     }
 
 }
-

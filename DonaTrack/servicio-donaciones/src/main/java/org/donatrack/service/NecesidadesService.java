@@ -42,7 +42,7 @@ public class NecesidadesService {
         return necesidadesRepository.findById(id).orElse(null);
     }
 
-    public void registrarNecesidad(CrearNecesidadDTO nuevaNecesidad) {
+    public Necesidad registrarNecesidad(CrearNecesidadDTO nuevaNecesidad) {
         EntidadBeneficiaria entidad = null;
         if (nuevaNecesidad.getEntidadId() != null) {
             entidad = entidadesBeneficiariasService.obtenerEntidadPorId(nuevaNecesidad.getEntidadId());
@@ -66,9 +66,10 @@ public class NecesidadesService {
         if (entidad != null) {
             entidad.registrarNecesidad(necesidad);
         }
+        return necesidad;
     }
 
-    public void actualizarNecesidad(Long id, ActualizarNecesidadDTO datosActualizacion) {
+    public Necesidad actualizarNecesidad(Long id, ActualizarNecesidadDTO datosActualizacion) {
         Necesidad necesidad = necesidadesRepository.findById(id).orElse(null);
         if (necesidad == null) {
             throw new IllegalArgumentException("No se encontró la necesidad con el ID proporcionado");
@@ -90,6 +91,7 @@ public class NecesidadesService {
         }
 
         necesidadesRepository.save(necesidad);
+        return necesidad;
     }
 
     public void eliminarNecesidadPorId(Long id) {

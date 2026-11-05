@@ -2,6 +2,7 @@ package org.donatrack.controller;
 
 import org.donatrack.controller.dto.Categorias.*;
 import org.donatrack.dominio.categoria.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.donatrack.service.CategoriasService;
@@ -35,9 +36,9 @@ public class CategoriasController {
     }
 
     @PostMapping ("/subcategorias")
-    public ResponseEntity<String> crearSubcategoria(@RequestBody CrearSubcategoriaDTO nuevaSubcategoria) {
-        categoriasService.registrarSubcategoria(nuevaSubcategoria);
-        return ResponseEntity.ok("Subcategoría añadida correctamente");
+    public ResponseEntity<SubcategoriaDTO> crearSubcategoria(@RequestBody CrearSubcategoriaDTO nuevaSubcategoria) {
+        Subcategoria subcategoria = categoriasService.registrarSubcategoria(nuevaSubcategoria);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new SubcategoriaDTO(subcategoria));
     }
 
     @GetMapping("/subcategorias/{id}")
@@ -50,15 +51,15 @@ public class CategoriasController {
     }
 
     @DeleteMapping("/subcategorias/{id}")
-    public ResponseEntity<String> eliminarSubcategoria(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarSubcategoria(@PathVariable Long id) {
         categoriasService.eliminarSubCategoriaPorId(id);
-        return ResponseEntity.ok("Subcategoría eliminada correctamente");
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/subcategorias/{id}")
-    public ResponseEntity<String> actualizarSubcategoria(@PathVariable Long id, @RequestBody ActualizarSubcategoriaDTO datosActualizacion) {
-        categoriasService.actualizarSubcategoria(id, datosActualizacion);
-        return ResponseEntity.ok("Subcategoría actualizada correctamente");
+    public ResponseEntity<SubcategoriaDTO> actualizarSubcategoria(@PathVariable Long id, @RequestBody ActualizarSubcategoriaDTO datosActualizacion) {
+        Subcategoria subcategoria = categoriasService.actualizarSubcategoria(id, datosActualizacion);
+        return ResponseEntity.ok(new SubcategoriaDTO(subcategoria));
     }
 
     // CATEGORIAS
@@ -84,22 +85,22 @@ public class CategoriasController {
     }
 
     @PostMapping("/categorias")
-    public ResponseEntity<String> crearCategoria(@RequestBody CrearCategoriaDTO nuevaCategoria) {
-        categoriasService.registrarCategoria(nuevaCategoria);
-        return ResponseEntity.ok("Categoría añadida correctamente");
+    public ResponseEntity<CategoriaDTO> crearCategoria(@RequestBody CrearCategoriaDTO nuevaCategoria) {
+        Categoria categoria = categoriasService.registrarCategoria(nuevaCategoria);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new CategoriaDTO(categoria));
     }
 
 
     @DeleteMapping("/categorias/{id}")
-    public ResponseEntity<String> eliminarCategoria(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarCategoria(@PathVariable Long id) {
         categoriasService.eliminarCategoriaPorId(id);
-        return ResponseEntity.ok("Categoría eliminada correctamente");
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/categorias/{id}")
-    public ResponseEntity<String> actualizarCategoria(@PathVariable Long id, @RequestBody ActualizarCategoriaDTO datosActualizacion) {
-        categoriasService.actualizarCategoria(id, datosActualizacion);
-        return ResponseEntity.ok("Categoría actualizada correctamente");
+    public ResponseEntity<CategoriaDTO> actualizarCategoria(@PathVariable Long id, @RequestBody ActualizarCategoriaDTO datosActualizacion) {
+        Categoria categoria = categoriasService.actualizarCategoria(id, datosActualizacion);
+        return ResponseEntity.ok(new CategoriaDTO(categoria));
     }
 
 

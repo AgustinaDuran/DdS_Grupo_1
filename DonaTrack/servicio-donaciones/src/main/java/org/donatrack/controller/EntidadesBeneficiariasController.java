@@ -7,6 +7,7 @@ import org.donatrack.controller.dto.EntidadBeneficiaria.CrearEntidadBeneficiaria
 import org.donatrack.controller.dto.EntidadBeneficiaria.EntidadBeneficiariaDTO;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 import org.donatrack.service.EntidadesBeneficiariasService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,15 +44,15 @@ public class EntidadesBeneficiariasController {
     }
 
     @PostMapping
-    public ResponseEntity<String> nuevaEntidad(@RequestBody CrearEntidadBeneficiariaDTO nuevaEntidad) {
-        entidadesBeneficiariasService.registrarEntidad(nuevaEntidad);
-        return ResponseEntity.ok("Entidad beneficiaria añadida correctamente");
+    public ResponseEntity<EntidadBeneficiariaDTO> nuevaEntidad(@RequestBody CrearEntidadBeneficiariaDTO nuevaEntidad) {
+        EntidadBeneficiaria entidad = entidadesBeneficiariasService.registrarEntidad(nuevaEntidad);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new EntidadBeneficiariaDTO(entidad));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> borrarEntidad(@PathVariable Long id) {
+    public ResponseEntity<Void> borrarEntidad(@PathVariable Long id) {
         entidadesBeneficiariasService.eliminarEntidad(id);
-        return ResponseEntity.ok("Entidad beneficiaria eliminada exitosamente");
+        return ResponseEntity.noContent().build();
     }
 
 }

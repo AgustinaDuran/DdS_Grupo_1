@@ -5,6 +5,9 @@ import org.donatrack.dominio.usuario.RolUsuario;
 import org.donatrack.dominio.contacto.Contacto;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CrearDonanteDTO {
 
     private TipoDonante tipo;
@@ -106,6 +109,10 @@ public class CrearDonanteDTO {
     public ContactoDTO getContactoDTOPredeterminado() {
         return contactoPredeterminado;
     }
+    // En el JSON se llama "contactoPredeterminado"; se sigue aceptando el nombre viejo
+    // "contactoDTOPredeterminado" para no romper clientes existentes (colección de Postman).
+    @JsonProperty("contactoPredeterminado")
+    @JsonAlias("contactoDTOPredeterminado")
     public void setContactoDTOPredeterminado(ContactoDTO contactoPredeterminado) {
         this.contactoPredeterminado = contactoPredeterminado;
     }
