@@ -20,7 +20,7 @@ public class BrevoClienteEmail implements ClienteEmail {
         private static final Logger log = LoggerFactory.getLogger(BrevoClienteEmail.class);
 
         private final EmailProperties propiedades;
-        private final Res       tClient restClient;
+        private final RestClient restClient;
 
         public BrevoClienteEmail(EmailProperties propiedades, RestClient restClient) {
                 this.propiedades = propiedades;
