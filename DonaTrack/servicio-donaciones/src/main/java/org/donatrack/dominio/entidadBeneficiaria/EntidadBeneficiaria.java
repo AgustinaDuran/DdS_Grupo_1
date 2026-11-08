@@ -82,4 +82,17 @@ public class EntidadBeneficiaria {
         this.id = id;
     }
 
+    //para el hashset de los algoritmos de asignacion
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EntidadBeneficiaria otra)) return false;
+        return id != null && id.equals(otra.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return EntidadBeneficiaria.class.hashCode();
+    }
+
 }

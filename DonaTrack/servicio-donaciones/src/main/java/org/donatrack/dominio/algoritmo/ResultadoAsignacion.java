@@ -1,73 +1,141 @@
 package org.donatrack.dominio.algoritmo;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
+
 import org.donatrack.dominio.donacion.Donacion;
+import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 
-public class ResultadoAsignacion{
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
+
+
+@Entity
+@Table(name = "resultados_asignacion")
+public class ResultadoAsignacion {
+
+    public static final String LISTA_COINCIDENCIAS = "COINCIDENCIAS";
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne
+    @JoinColumn(name = "donacion_id", nullable = false, unique = true)
     private Donacion donacion;
-    private List<EntidadBeneficiaria> rankingPorCoincidencias = new ArrayList<>();
-    private List<List<EntidadBeneficiaria>> rankingsPorAlgoritmo = new ArrayList<>();
 
-     public ResultadoAsignacion(Donacion donacion, List<List<EntidadBeneficiaria>> rankingsPorAlgoritmo, List<EntidadBeneficiaria> rankingPorCoincidencias) {
+    @Column(name = "tiene_coincidencias", nullable = false)
+    private boolean tieneCoincidencias;
+
+    @Column(name = "fecha_calculo", nullable = false)
+    private LocalDateTime fechaCalculo;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "resultado_id", nullable = false)
+    @OrderBy("lista ASC, posicion ASC")
+    private List<ItemRankingAsignacion> items = new ArrayList<>();
+
+    protected ResultadoAsignacion() {
+    }
+
+    // rankingsPorAlgoritmo: nombre del algoritmo -> su ranking, en orden.
+    public ResultadoAsignacion(Donacion donacion,
+                               Map<String, List<EntidadBeneficiaria>> rankingsPorAlgoritmo,
+                               List<EntidadBeneficiaria> coincidencias) {
         this.donacion = donacion;
-        this.rankingsPorAlgoritmo = rankingsPorAlgoritmo;
-        this.rankingPorCoincidencias = rankingPorCoincidencias;
+        recalcular(rankingsPorAlgoritmo, coincidencias);
+    }
+
+    // Reemplaza el ranking por uno nuevo, conservando la misma fila.
+    public void recalcular(Map<String, List<EntidadBeneficiaria>> rankingsPorAlgoritmo,
+                           List<EntidadBeneficiaria> coincidencias) {
+        items.clear();
+
+        if (rankingsPorAlgoritmo != null) {
+            rankingsPorAlgoritmo.forEach(this::agregarLista);
+        }
+        if (coincidencias != null) {
+            agregarLista(LISTA_COINCIDENCIAS, coincidencias);
+        }
+
+        this.tieneCoincidencias = coincidencias != null && !coincidencias.isEmpty();
+        this.fechaCalculo = LocalDateTime.now();
+    }
+
+    private void agregarLista(String lista, List<EntidadBeneficiaria> entidades) {
+        for (int i = 0; i < entidades.size(); i++) {
+            items.add(new ItemRankingAsignacion(entidades.get(i), lista, i + 1));
+        }
     }
 
     public boolean tieneCoincidencias() {
-        return !rankingPorCoincidencias.isEmpty();
+        return tieneCoincidencias;
     }
 
     public List<EntidadBeneficiaria> getCoincidencias() {
-        return rankingPorCoincidencias;
+        return entidadesDeLista(LISTA_COINCIDENCIAS);
     }
 
-    public List<List<EntidadBeneficiaria>> getRankingsPorAlgoritmo() {
-        return rankingsPorAlgoritmo;
+    // Nombre del algoritmo -> su ranking, en orden. No incluye la lista de coincidencias.
+    public Map<String, List<EntidadBeneficiaria>> getRankingsPorAlgoritmo() {
+        Map<String, List<EntidadBeneficiaria>> rankings = new LinkedHashMap<>();
+        items.stream()
+                .filter(item -> !LISTA_COINCIDENCIAS.equals(item.getLista()))
+                .sorted(Comparator.comparing(ItemRankingAsignacion::getLista)
+                        .thenComparingInt(ItemRankingAsignacion::getPosicion))
+                .forEach(item -> rankings
+                        .computeIfAbsent(item.getLista(), k -> new ArrayList<>())
+                        .add(item.getEntidad()));
+        return rankings;
+    }
+
+    private List<EntidadBeneficiaria> entidadesDeLista(String lista) {
+        return items.stream()
+                .filter(item -> lista.equals(item.getLista()))
+                .sorted(Comparator.comparingInt(ItemRankingAsignacion::getPosicion))
+                .map(ItemRankingAsignacion::getEntidad)
+                .toList();
+    }
+
+    public List<ItemRankingAsignacion> getItems() {
+        return List.copyOf(items);
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public Donacion getDonacion() {
         return donacion;
     }
 
-    public void setSinCoincidencias(Donacion donacion, List<List<EntidadBeneficiaria>> rankings) {
-        this.donacion = donacion;
-        this.rankingsPorAlgoritmo = rankings;
+    public LocalDateTime getFechaCalculo() {
+        return fechaCalculo;
     }
 
-    public void setCoincidencias(Donacion donacion, List<EntidadBeneficiaria> coincidencias) {
-        this.donacion = donacion;
-        this.rankingPorCoincidencias = coincidencias;
-    }
+    // Si hay coincidencias, solo se puede elegir entre ellas; si no, entre cualquiera de las listas.
+    public void confirmarDestinoFinal(EntidadBeneficiaria entidad) {
+        List<EntidadBeneficiaria> elegibles = tieneCoincidencias
+                ? getCoincidencias()
+                : getRankingsPorAlgoritmo().values().stream().flatMap(List::stream).toList();
 
-    public void confirmarDestinoFinal(EntidadBeneficiaria entidad ){
-        if(this.tieneCoincidencias()){
-            this.getCoincidencias().stream()
-                                        .filter(e -> e.equals(entidad))
-                                        .findFirst()
-                                        .orElseThrow(() ->
-                                        new IllegalArgumentException("La entidad no pertenece al ranking"));
+        if (!elegibles.contains(entidad)) {
+            throw new IllegalArgumentException("La entidad no pertenece al ranking");
         }
 
-        else{
-
-            this.getRankingsPorAlgoritmo()
-                     .stream()
-                     .flatMap(List::stream)
-                     .filter(e -> e.equals(entidad))
-                     .findFirst()
-                     .orElseThrow(() -> new IllegalArgumentException("La entidad no pertenece al ranking"));
-        }
-
-        this.getDonacion().siguiente(entidad);
+        donacion.siguiente(entidad);
     }
-
-    /*public void marcarComoVencida(Donacion d){
-        d.marcarComoVencida();
-    }*/
-    
 }

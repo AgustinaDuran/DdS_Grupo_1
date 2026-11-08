@@ -8,10 +8,17 @@ import org.donatrack.dominio.donacion.Donacion;
 import org.donatrack.dominio.donacion.EstadoDonacion;
 import org.donatrack.dominio.donacion.EstadoEntregada;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PrioridadSubatendidos implements AlgoritmoAsignacion {
 
     private static final int MESES_TRIMESTRE = 3;
+
+    @Override
+    public String nombre(){
+        return "PRIORIDAD_SUBATENDIDOS";
+    }
 
     @Override
     public List<EntidadBeneficiaria> generarRanking(Donacion donacion, List<EntidadBeneficiaria> entidades) {

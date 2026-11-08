@@ -18,6 +18,11 @@ public class CompatibilidadSemantica implements AlgoritmoAsignacion {
     private static final int MAX_ENTIDADES = 10;
  
     @Override
+    public String nombre() {
+        return "COMPATIBILIDAD_SEMANTICA";
+    }
+
+    @Override
     public List<EntidadBeneficiaria> generarRanking(Donacion donacion, List<EntidadBeneficiaria> entidades) {
         Subcategoria subcategoriaDonacion = donacion.getSubcategoria();
  

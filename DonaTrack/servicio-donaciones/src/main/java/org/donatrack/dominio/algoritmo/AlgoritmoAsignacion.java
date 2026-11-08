@@ -8,5 +8,7 @@ import java.util.List;
 public interface AlgoritmoAsignacion {
 
     List<EntidadBeneficiaria> generarRanking(Donacion donacion, List<EntidadBeneficiaria> entidades);
+
+    String nombre();
 }
 
