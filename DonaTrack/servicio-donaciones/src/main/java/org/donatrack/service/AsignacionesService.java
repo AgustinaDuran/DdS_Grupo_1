@@ -52,7 +52,6 @@ public class AsignacionesService {
     }
 
     // Donaciones en depósito con el resumen de su ranking. Lo que entró primero va primero.
-    // TODO fase 6: ordenar por fecha de vencimiento (las que no vencen, al final) y después por ingreso.
     @Transactional(readOnly = true)
     public PaginaDTO<DonacionPendienteDTO> obtenerPendientes(int pagina, int tamanio, Long subcategoriaId) {
         Pageable pageable = paginar(pagina, tamanio, Sort.by("fechaIngreso").ascending().and(Sort.by("id")));
@@ -78,9 +77,7 @@ public class AsignacionesService {
                         resultadosRepository.findByDonacionId(donacionId).orElse(null)));
     }
 
-    // Donaciones asignadas a una entidad, opcionalmente filtradas por estado.
-    // Las que cambiaron de estado más recientemente van primero. Vacío si la entidad no existe.
-    // TODO flujo 1: validar que el entidadId del token coincida con el de la ruta.
+
     @Transactional(readOnly = true)
     public Optional<PaginaDTO<DonacionDTO>> obtenerDonacionesDeEntidad(Long entidadId, List<TipoEstado> estados,
                                                                      int pagina, int tamanio) {

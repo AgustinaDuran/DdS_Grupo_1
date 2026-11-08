@@ -133,7 +133,7 @@ public class ResultadoAsignacion {
                 : getRankingsPorAlgoritmo().values().stream().flatMap(List::stream).toList();
 
         if (!elegibles.contains(entidad)) {
-            throw new IllegalArgumentException("La entidad no pertenece al ranking");
+            throw new EntidadFueraDelRankingException("La entidad elegida no está entre las sugeridas.");
         }
 
         donacion.siguiente(entidad);

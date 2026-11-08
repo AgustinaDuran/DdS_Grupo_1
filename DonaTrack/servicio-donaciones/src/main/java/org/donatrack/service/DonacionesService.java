@@ -17,6 +17,12 @@ import org.donatrack.integracion.NotificacionesClient;
 import org.donatrack.integracion.dto.DepositoRequest;
 import org.donatrack.integracion.dto.EntregaRequest;
 import org.donatrack.integracion.dto.RegistrarDonacionRequest;
+import org.donatrack.repository.ResultadoAsignacionRepository;
+import org.donatrack.dominio.algoritmo.ResultadoAsignacion;
+import org.donatrack.service.excepciones.DonacionNoEncontradaException;
+import org.donatrack.service.excepciones.RankingNoCalculadoException;
+import org.donatrack.service.excepciones.TransicionEstadoInvalidaException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,6 +33,7 @@ public class DonacionesService {
     private DonantesService donantesService;
     private EntidadesBeneficiariasService entidadesBeneficiariasService;
     private BienesService bienesService;
+    private ResultadoAsignacionRepository resultadosRepository;
 
     private final NotificacionesClient notificacionesClient;
     private final IncentivosClient incentivosClient;
@@ -38,7 +45,8 @@ public class DonacionesService {
                              DonantesService donantesService,
                              EntidadesBeneficiariasService entidadesBeneficiariasService, BienesService bienesService,
                              NotificacionesClient notificacionesClient, IncentivosClient incentivosClient,
-                             BrokerLogistica brokerLogistica, DestinatarioResolver destinatarioResolver) {
+                             BrokerLogistica brokerLogistica, DestinatarioResolver destinatarioResolver,
+                             ResultadoAsignacionRepository resultadosRepository) {
         this.donacionesRepository = donacionesRepository;
         this.donacionesCompletasRepository = donacionesCompletasRepository;
         this.donantesService = donantesService;
@@ -48,6 +56,7 @@ public class DonacionesService {
         this.incentivosClient = incentivosClient;
         this.brokerLogistica = brokerLogistica;
         this.destinatarioResolver = destinatarioResolver;
+        this.resultadosRepository = resultadosRepository;
     }
 
     public List<Donacion> obtenerDonaciones(FiltrosDonacionDTO filtrosDonacionDTO) {
@@ -91,13 +100,12 @@ public class DonacionesService {
     public void eliminarDonacionPorId(Long id) {
         donacionesRepository.deleteById(id);
     }
-
+    
+    @Transactional
     public Donacion actualizarDonacion(Long id, ActualizarDonacionDTO datosActualizacion) {
-        Donacion donacion = donacionesRepository.findById(id).orElse(null);
+        Donacion donacion = donacionesRepository.findById(id)
+                .orElseThrow(() -> new DonacionNoEncontradaException("La donación no existe o fue eliminada."));
 
-        if (donacion == null) {
-            throw new IllegalArgumentException("No se encontró la donación con el ID proporcionado");
-        }
         if (datosActualizacion.getTipoEstado() != null) {
             donacion = this.cambiarEstadoDonacion(donacion, datosActualizacion);
         }
@@ -111,7 +119,7 @@ public class DonacionesService {
     private Donacion cambiarEstadoDonacion(Donacion donacion, ActualizarDonacionDTO datosActualizacion) {
         TipoEstado nuevoEstado = datosActualizacion.getTipoEstado();
         if (!donacion.esEstadoValido(nuevoEstado)) {
-            throw new Error("La donación no puede ser pasada a este estado desde el que está");
+            throw new TransicionEstadoInvalidaException("Otra persona ya actualizó esta donación.");
         }
 
         switch (nuevoEstado) {
@@ -119,8 +127,18 @@ public class DonacionesService {
                 donacion.siguiente();
                 break;
             case ASIGNACION_REALIZADA:
+                if (datosActualizacion.getEntidadId() == null) {
+                    throw new IllegalArgumentException("Falta elegir la entidad.");
+                }
                 EntidadBeneficiaria entidad = entidadesBeneficiariasService.obtenerEntidadPorId(datosActualizacion.getEntidadId());
-                donacion.siguiente(entidad);
+                if(entidad==null) {
+                    throw new IllegalArgumentException("La entidad elegida no existe.");
+                }
+                ResultadoAsignacion resultado = resultadosRepository.findByDonacionId(donacion.getId())
+                .orElseThrow(() -> new RankingNoCalculadoException("Esta donación todavía no tiene ranking."));
+
+                resultado.confirmarDestinoFinal(entidad);
+                resultadosRepository.delete(resultado);
                 notificarAsignacion(donacion, entidad);
                 enviarEntregaALogistica(donacion, entidad);
                 break;
@@ -140,6 +158,7 @@ public class DonacionesService {
                 break;
             case VENCIDA:
                 donacion.falloEnEstado();
+                resultadosRepository.deleteByDonacionId(donacion.getId());
                 break;
             default:
                 throw new IllegalArgumentException("Tipo de estado no válido");

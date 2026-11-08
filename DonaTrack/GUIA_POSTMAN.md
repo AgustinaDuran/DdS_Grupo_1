@@ -73,7 +73,12 @@ Carpeta `03 - Necesidades, bienes y donación`:
 23. Crear donación.
 24. Listar donaciones. Guarda `donacionId`.
 25. Obtener donación.
-26. Asignar donación a entidad.
+26. Asignación de la donación:
+    - 26a. Calcular rankings de asignación (a demanda). En producción corre de noche; acá se fuerza para no esperar.
+    - 26b. Listar donaciones pendientes de asignación. La donación aparece con `ranking.estado = CALCULADO`.
+    - 26c. Ver ranking de la donación. La entidad creada en el paso 12 tiene que estar en el ranking.
+    - 26d. Asignar donación a entidad. Solo se puede elegir una entidad del ranking.
+    - 26e. Ver donaciones asignadas a la entidad.
 
 La creación de donación debe incluir `subcategoriaId` dentro de `items`:
 
@@ -94,7 +99,7 @@ La creación de donación debe incluir `subcategoriaId` dentro de `items`:
 }
 ```
 
-El paso 26 envía automáticamente la entrega a Logística.
+El paso 26d envía automáticamente la entrega a Logística. Si se salta el 26a, la asignación responde `409` (`RANKING_NO_CALCULADO`) porque la donación todavía no tiene ranking.
 
 ### 4. Incentivos
 
@@ -149,13 +154,15 @@ No ejecutes `Iniciar ruta` antes del callback. El callback necesita el `entregaI
 Ejecutar al final la carpeta `07 - Casos negativos`:
 
 49. Donante sin `tipoUsuario`.
-50. Donación inexistente.
+50. Donación inexistente (`404`).
+    - 50a. Asignar otra vez una donación ya asignada (`409`).
+    - 50b. Ranking de una donación inexistente (`404`).
 51. Donante de Incentivos inexistente.
 52. Período de ranking inválido.
 53. Inicio de ruta sin ruta activa.
 54. Estado de entrega inexistente.
 
-Los casos de negocio de Donaciones y Logística pueden responder `500` porque el backend todavía no tiene un manejador global de excepciones. La colección contempla esos códigos actuales.
+Donaciones tiene un manejador global de excepciones: los errores responden con su código HTTP (`400`, `404`, `409`, `422`) y el cuerpo `{ status, codigo, mensaje }`. Los casos de Logística todavía pueden responder `500`.
 
 ### 8. Limpieza opcional
 

@@ -9,10 +9,16 @@ import org.donatrack.dominio.donacion.EstadoDonacion;
 import org.donatrack.dominio.donacion.TipoEstado;
 import org.donatrack.dominio.bien.ItemBien;
 import org.donatrack.controller.dto.Bienes.ResponseBienDTO;
+import org.donatrack.controller.dto.Nombres;
+import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 
 public class DonacionDTO {
     private Long id;
     private Long donanteId;
+    private String donanteNombre;
+    private Long entidadId;
+    private String entidadNombre;
+    private int cantidadTotal;
     private String descripcion;
     private Long subcategoriaId;
     private String subcategoriaNombre;
@@ -25,6 +31,16 @@ public class DonacionDTO {
         this.id = donacion.getId();
         if (donacion.getDonante() != null) {
             this.donanteId = donacion.getDonante().getId();
+            this.donanteNombre = Nombres.deDonante(donacion.getDonante());
+        }
+        // Entidad a la que se asignó la donación (null mientras está en depósito).
+        EntidadBeneficiaria entidad = donacion.getEntidadAEntregar();
+        if (entidad != null) {
+            this.entidadId = entidad.getId();
+            this.entidadNombre = Nombres.deEntidad(entidad);
+        }
+        if (donacion.getItemBienes() != null) {
+            this.cantidadTotal = donacion.getCantidadTotal();
         }
         this.descripcion = donacion.getDescripcion();
 
@@ -56,6 +72,22 @@ public class DonacionDTO {
 
     public Long getDonanteId() {
         return donanteId;
+    }
+
+    public String getDonanteNombre() {
+        return donanteNombre;
+    }
+
+    public Long getEntidadId() {
+        return entidadId;
+    }
+
+    public String getEntidadNombre() {
+        return entidadNombre;
+    }
+
+    public int getCantidadTotal() {
+        return cantidadTotal;
     }
 
     public String getDescripcion() {

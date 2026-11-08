@@ -13,8 +13,9 @@ import java.util.List;
 @Entity
 @Table(name = "donaciones_segmentadas")
 public class Donacion {
-
-    
+    //para concurrencia
+    @Version 
+    private Long version;
 
     private String descripcion;
     @ManyToOne(cascade = CascadeType.ALL)

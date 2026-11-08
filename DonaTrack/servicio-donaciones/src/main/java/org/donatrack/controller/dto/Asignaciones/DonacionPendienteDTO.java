@@ -1,9 +1,9 @@
 package org.donatrack.controller.dto.Asignaciones;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.donatrack.controller.dto.Nombres;
 import org.donatrack.dominio.algoritmo.ResultadoAsignacion;
 import org.donatrack.dominio.donacion.Donacion;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
@@ -15,7 +15,6 @@ public record DonacionPendienteDTO(
         String subcategoriaNombre,
         int cantidadTotal,
         LocalDateTime fechaIngreso,
-        LocalDate fechaVencimiento,
         String donanteNombre,
         ResumenRanking ranking) {
 
@@ -37,7 +36,6 @@ public record DonacionPendienteDTO(
                 donacion.getSubcategoria() != null ? donacion.getSubcategoria().getNombre() : null,
                 donacion.getCantidadTotal(),
                 donacion.getFechaIngreso(),
-                null, // TODO fase 6: fechaVencimiento cuando Donacion la tenga
                 Nombres.deDonante(donacion.getDonante()),
                 resumen(resultado));
     }

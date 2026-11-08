@@ -7,6 +7,11 @@ import org.donatrack.controller.dto.Donaciones.DonacionDTO;
 import org.donatrack.dominio.donacion.TipoEstado;
 import org.donatrack.service.AsignacionesService;
 import org.springframework.http.ResponseEntity;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 // Donaciones asignadas a una entidad beneficiaria. Está separado de EntidadesBeneficiariasController
 // para que el flujo de asignación no edite el controller de otro flujo.
 // TODO flujo 1: una entidad solo puede ver sus propias donaciones (403 si el id no es el del token).
+@Tag(name = "Entidades beneficiarias")
 @RestController
 @CrossOrigin(origins = "*")
 public class DonacionesEntidadController {
@@ -28,10 +34,14 @@ public class DonacionesEntidadController {
 
     // http://localhost:8080/api/entidades-beneficiarias/4/donaciones?estado=ASIGNACION_REALIZADA&estado=EN_TRASLADO&page=0&size=20 -> GET
     // 404 si la entidad no existe.
+    @Operation(summary = "Listar las donaciones asignadas a una entidad",
+            description = "Paginadas; las que cambiaron de estado más recientemente van primero.")
+    @ApiResponse(responseCode = "200", description = "Página de donaciones")
+    @ApiResponse(responseCode = "404", description = "La entidad no existe")
     @GetMapping("/api/entidades-beneficiarias/{id}/donaciones")
     public ResponseEntity<PaginaDTO<DonacionDTO>> obtenerDonaciones(
             @PathVariable Long id,
-            @RequestParam(name = "estado", required = false) List<TipoEstado> estados,
+            @Parameter(description = "Filtra por estado; se puede repetir") @RequestParam(name = "estado", required = false) List<TipoEstado> estados,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return asignacionesService.obtenerDonacionesDeEntidad(id, estados, page, size)

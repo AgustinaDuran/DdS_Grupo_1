@@ -151,8 +151,47 @@ class AsignacionesServiceTest {
                 .obtenerDonacionesDeEntidad(a.getId(), List.of(TipoEstado.EN_TRASLADO), 0, 20).orElseThrow();
 
         assertThat(todas.contenido()).extracting(DonacionDTO::getId).containsExactly(asignada.getId());
+        assertThat(todas.contenido().get(0).getEntidadNombre()).isEqualTo("Hogar A");
+        assertThat(todas.contenido().get(0).getDonanteNombre()).isEqualTo("Ana Perez");
+        assertThat(todas.contenido().get(0).getCantidadTotal()).isEqualTo(6);
         assertThat(enTraslado.totalElementos()).isZero();
         assertThat(service.obtenerDonacionesDeEntidad(9999L, List.of(), 0, 20)).isEmpty();
+    }
+
+    @Test
+    void sinCoincidenciasGuardaUnaListaPorAlgoritmo() {
+        CoordinadorAsignacion sinCoincidencias = new CoordinadorAsignacion(
+                List.of(algoritmoFijo("ALGO_1", a), algoritmoFijo("ALGO_2", c)),
+                entidadesRepository, donacionesRepository, resultadosRepository);
+        Donacion donacion = donacion();
+        sinCoincidencias.generarRecomendaciones();
+        reiniciarContexto();
+
+        RankingDonacionDTO ranking = service.obtenerRanking(donacion.getId()).orElseThrow();
+
+        assertThat(ranking.ranking().tieneCoincidencias()).isFalse();
+        assertThat(ranking.ranking().listas()).extracting(RankingDonacionDTO.ListaRanking::tipo)
+                .containsExactlyInAnyOrder("ALGO_1", "ALGO_2");
+        assertThat(service.obtenerPendientes(0, 20, null).contenido().get(0).ranking().sugerenciaPrincipal()).isNull();
+    }
+
+    @Test
+    void pendientesFiltraPorSubcategoriaYPagina() {
+        Subcategoria mesas = new Subcategoria("Mesas", subcategoria.getCategoria());
+        em.persist(mesas);
+        Donacion primera = donacion();
+        Donacion segunda = donacion();
+        donacion(mesas);
+        reiniciarContexto();
+
+        PaginaDTO<DonacionPendienteDTO> sillas = service.obtenerPendientes(0, 20, subcategoria.getId());
+        PaginaDTO<DonacionPendienteDTO> paginaDeUna = service.obtenerPendientes(0, 1, null);
+
+        assertThat(sillas.contenido()).extracting(DonacionPendienteDTO::donacionId)
+                .containsExactly(primera.getId(), segunda.getId()); // por fecha de ingreso, la más antigua primero
+        assertThat(paginaDeUna.contenido()).hasSize(1);
+        assertThat(paginaDeUna.totalElementos()).isEqualTo(3);
+        assertThat(paginaDeUna.totalPaginas()).isEqualTo(3);
     }
 
     private EntidadBeneficiaria entidad(String razonSocial) {
@@ -163,9 +202,13 @@ class AsignacionesServiceTest {
     }
 
     private Donacion donacion() {
-        BienEstado bien = new BienEstado("Silla", "Silla de madera", subcategoria, true);
+        return donacion(subcategoria);
+    }
+
+    private Donacion donacion(Subcategoria sub) {
+        BienEstado bien = new BienEstado("Silla", "Silla de madera", sub, true);
         em.persist(bien);
-        Donacion donacion = new Donacion(donante, new ItemBien(bien, 6), subcategoria);
+        Donacion donacion = new Donacion(donante, new ItemBien(bien, 6), sub);
         em.persist(donacion);
         return donacion;
     }

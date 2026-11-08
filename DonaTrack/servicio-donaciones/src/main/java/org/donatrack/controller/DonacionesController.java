@@ -55,6 +55,7 @@ public class DonacionesController {
         }
     }
 
+    // TODO flujo 1: pasar a ASIGNACION_REALIZADA o a VENCIDA es solo para el rol ADMIN.
     @PatchMapping("/{id}")
     public ResponseEntity<DonacionDTO> actualizarDonacion(@PathVariable Long id, @RequestBody ActualizarDonacionDTO datosActualizacion) {
         Donacion donacion = donacionesService.actualizarDonacion(id, datosActualizacion);

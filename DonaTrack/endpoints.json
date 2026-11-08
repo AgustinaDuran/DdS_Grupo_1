@@ -563,6 +563,62 @@
           }
         },
         {
+          "name": "Calcular rankings de asignación (a demanda)",
+          "request": {
+            "method": "POST",
+            "url": "{{donacionesUrl}}/api/asignaciones/ejecuciones"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200',()=>pm.response.to.have.status(200)); pm.test('procesó al menos una donación',()=>pm.expect(pm.response.json().donacionesProcesadas).to.be.at.least(1));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar donaciones pendientes de asignación",
+          "request": {
+            "method": "GET",
+            "url": "{{donacionesUrl}}/api/asignaciones/pendientes?page=0&size=20"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200',()=>pm.response.to.have.status(200));",
+                  "const fila=pm.response.json().contenido.find(x=>String(x.donacionId)===pm.collectionVariables.get('donacionId')); pm.test('la donación está pendiente y con ranking',()=>{pm.expect(fila).to.exist; pm.expect(fila.ranking.estado).to.eql('CALCULADO');});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver ranking de la donación",
+          "request": {
+            "method": "GET",
+            "url": "{{donacionesUrl}}/api/asignaciones/pendientes/{{donacionId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200',()=>pm.response.to.have.status(200));",
+                  "const ids=pm.response.json().ranking.listas.flatMap(l=>l.entidades).map(e=>String(e.entidadId)); pm.test('la entidad está en el ranking',()=>pm.expect(ids).to.include(pm.collectionVariables.get('entidadId')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
           "name": "Asignar donación a entidad",
           "request": {
             "method": "PATCH",
@@ -582,7 +638,38 @@
               }
             },
             "url": "{{donacionesUrl}}/api/donaciones/{{donacionId}}"
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('asignada (200)',()=>pm.response.to.have.status(200));",
+                  "const d=pm.response.json(); pm.test('estado ASIGNACION_REALIZADA',()=>pm.expect(d.estado).to.eql('ASIGNACION_REALIZADA')); pm.test('entidad asignada',()=>pm.expect(String(d.entidadId)).to.eql(pm.collectionVariables.get('entidadId')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ver donaciones asignadas a la entidad",
+          "request": {
+            "method": "GET",
+            "url": "{{donacionesUrl}}/api/entidades-beneficiarias/{{entidadId}}/donaciones?page=0&size=20"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200',()=>pm.response.to.have.status(200));",
+                  "const ids=pm.response.json().contenido.map(d=>String(d.id)); pm.test('incluye la donación asignada',()=>pm.expect(ids).to.include(pm.collectionVariables.get('donacionId')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1009,7 +1096,7 @@
           ]
         },
         {
-          "name": "Donación inexistente - espera 500 actual",
+          "name": "Donación inexistente - espera 404",
           "request": {
             "method": "PATCH",
             "header": [
@@ -1034,7 +1121,58 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test('recurso inexistente',()=>pm.expect(pm.response.code).to.be.oneOf([404,500]));"
+                  "pm.test('404',()=>pm.response.to.have.status(404)); pm.test('codigo',()=>pm.expect(pm.response.json().codigo).to.eql('DONACION_NO_ENCONTRADA'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Asignar otra vez una donación ya asignada - espera 409",
+          "request": {
+            "method": "PATCH",
+            "url": "{{donacionesUrl}}/api/donaciones/{{donacionId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoEstado\": \"ASIGNACION_REALIZADA\",\n  \"entidadId\": {{entidadId}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('409',()=>pm.response.to.have.status(409)); pm.test('codigo',()=>pm.expect(pm.response.json().codigo).to.eql('TRANSICION_INVALIDA'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ranking de una donación inexistente - espera 404",
+          "request": {
+            "method": "GET",
+            "url": "{{donacionesUrl}}/api/asignaciones/pendientes/999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('404',()=>pm.response.to.have.status(404));"
                 ],
                 "type": "text/javascript"
               }
