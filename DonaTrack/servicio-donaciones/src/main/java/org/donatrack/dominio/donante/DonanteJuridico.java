@@ -36,4 +36,8 @@ public class DonanteJuridico extends Donante {
         return this.rubro;
     }
 
+    public void setRubro(String rubro) {
+        this.rubro = rubro;
+    }
+
 }

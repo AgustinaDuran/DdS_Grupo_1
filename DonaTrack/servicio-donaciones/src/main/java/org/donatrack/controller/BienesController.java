@@ -34,6 +34,15 @@ public class BienesController {
         return ResponseEntity.ok(bienesDTOs);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseBienDTO> obtenerBienPorId(@PathVariable Long id) {
+        Bien bien = bienesService.obtenerBienPorId(id);
+        if (bien == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(new ResponseBienDTO(bien));
+    }
+
     @PostMapping
     public ResponseEntity<ResponseBienDTO> crearBien(@RequestBody CrearBienDTO crearBienDTO) {
         Bien bien = bienesService.crearBien(crearBienDTO);

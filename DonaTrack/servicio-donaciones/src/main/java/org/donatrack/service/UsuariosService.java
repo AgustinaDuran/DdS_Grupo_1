@@ -72,6 +72,10 @@ public class UsuariosService {
         return usuariosRepository.findById(id).orElse(null);
     }
 
+    public DatosUsuario guardarUsuario(DatosUsuario usuario) {
+        return usuariosRepository.save(usuario);
+    }
+
     public DatosUsuario actualizarUsuario(Long id, CrearUsuarioDTO crearUsuarioDTO) {
         DatosUsuario usuarioExistente = usuariosRepository.findById(id).orElse(null);
         if (usuarioExistente == null) {

@@ -32,6 +32,10 @@ public class BienesService {
         return bienesRepository.findAll();
     }
 
+    public Bien obtenerBienPorId(Long id) {
+        return bienesRepository.findById(id).orElse(null);
+    }
+
     public Bien crearBien(CrearBienDTO nuevoBien) {
         
         Subcategoria subcategoria = this.categoriasService.obtenerSubcategoriaPorId(nuevoBien.getSubcategoriaId());

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.donatrack.controller.dto.EntidadBeneficiaria.CrearEntidadBeneficiariaDTO;
+import org.donatrack.controller.dto.EntidadBeneficiaria.ActualizarEntidadBeneficiariaDTO;
 import org.donatrack.controller.dto.EntidadBeneficiaria.EntidadBeneficiariaDTO;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 import org.donatrack.service.EntidadesBeneficiariasService;
@@ -47,6 +48,16 @@ public class EntidadesBeneficiariasController {
     public ResponseEntity<EntidadBeneficiariaDTO> nuevaEntidad(@RequestBody CrearEntidadBeneficiariaDTO nuevaEntidad) {
         EntidadBeneficiaria entidad = entidadesBeneficiariasService.registrarEntidad(nuevaEntidad);
         return ResponseEntity.status(HttpStatus.CREATED).body(new EntidadBeneficiariaDTO(entidad));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<EntidadBeneficiariaDTO> actualizarEntidad(
+            @PathVariable Long id, @RequestBody ActualizarEntidadBeneficiariaDTO datosActualizacion) {
+        EntidadBeneficiaria entidad = entidadesBeneficiariasService.actualizarEntidad(id, datosActualizacion);
+        if (entidad == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(new EntidadBeneficiariaDTO(entidad));
     }
 
     @DeleteMapping("/{id}")
