@@ -27,8 +27,8 @@ public class DonantesController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DonanteDTO>> obtenerDonantes() {
-        List<Donante> donantes = donantesService.obtenerDonantes();
+    public ResponseEntity<List<DonanteDTO>> obtenerDonantes(@RequestParam(value = "q", required = false) String q) {
+        List<Donante> donantes = donantesService.buscarDonantes(q);
         List<DonanteDTO> donantesDTOs = new ArrayList<>();
         for (Donante donante : donantes) {
             donantesDTOs.add(new DonanteDTO(donante));

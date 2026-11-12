@@ -8,10 +8,14 @@ public class SubcategoriaDTO {
     private String nombre;
     private Long categoriaId;
     private String categoriaNombre;
+    private boolean perecedero;
+    private boolean requiereEstadoUso;
 
     public SubcategoriaDTO(Subcategoria subcategoria) {
         this.id = subcategoria.getId();
         this.nombre = subcategoria.getNombre();
+        this.perecedero = subcategoria.isPerecedero();
+        this.requiereEstadoUso = subcategoria.isRequiereEstadoUso();
         if (subcategoria.getCategoria() != null) {
             this.categoriaId = subcategoria.getCategoria().getId();
             this.categoriaNombre = subcategoria.getCategoria().getNombre();
@@ -33,4 +37,13 @@ public class SubcategoriaDTO {
     public String getCategoriaNombre() {
         return categoriaNombre;
     }
+
+    public boolean isPerecedero() {
+        return perecedero;
+    }
+
+    public boolean isRequiereEstadoUso() {
+        return requiereEstadoUso;
+    }
+
 }

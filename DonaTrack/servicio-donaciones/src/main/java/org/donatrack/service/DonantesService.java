@@ -1,5 +1,7 @@
 package org.donatrack.service;
 
+import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +14,9 @@ import org.donatrack.dominio.donante.Donante;
 import org.donatrack.dominio.donante.DonanteJuridico;
 import org.donatrack.dominio.donante.DonantePersona;
 import org.donatrack.dominio.usuario.DatosUsuario;
+import org.donatrack.dominio.usuario.organizacion.Organizacion;
 import org.donatrack.dominio.usuario.persona.Persona;
+import org.donatrack.dominio.usuario.organizacion.Organizacion;
 import org.donatrack.repository.DonantesRepository;
 import org.springframework.stereotype.Service;
 import org.donatrack.controller.dto.Usuarios.CrearUsuarioDTO;
@@ -154,6 +158,39 @@ public class DonantesService {
         return contacto != null
                 && contacto.getValor() != null
                 && "MAIL".equalsIgnoreCase(contacto.getMedio());
+    }
+
+    public List<Donante> buscarDonantes(String q) {
+        if (q == null || q.isBlank()) {
+            return obtenerDonantes();
+        }
+        String termino = q.trim().toLowerCase();
+        List<Donante> encontrados = new ArrayList<>();
+        for (Donante donante : donantesRepository.findAll()) {
+            if (coincide(donante.getDatosUsuario(), termino)) {
+                encontrados.add(donante);
+                if (encontrados.size() == 20) {
+                    break;
+                }
+            }
+        }
+        return encontrados;
+    }
+
+    private static boolean coincide(DatosUsuario datos, String termino) {
+        List<String> campos = new ArrayList<>();
+        if (datos instanceof Persona persona) {
+            campos.add(persona.getNombre());
+            campos.add(persona.getApellido());
+            campos.add(persona.getDni());
+            campos.add(((persona.getNombre() == null ? "" : persona.getNombre()) + " "
+                    + (persona.getApellido() == null ? "" : persona.getApellido())).trim());
+        } else if (datos instanceof Organizacion organizacion) {
+            campos.add(organizacion.getRazonSocial());
+            campos.add(organizacion.getCuit());
+        }
+        campos.add(emailDe(datos));
+        return campos.stream().anyMatch(c -> c != null && c.toLowerCase().contains(termino));
     }
 
     public void eliminarDonante(Long id) {

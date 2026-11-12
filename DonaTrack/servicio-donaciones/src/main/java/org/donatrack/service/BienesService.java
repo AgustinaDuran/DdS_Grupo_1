@@ -80,6 +80,12 @@ public class BienesService {
         List<ItemBien> ItemBienes = new ArrayList<>();
         System.out.println("ItemsDTO: " + itemsDTO);
         for (ItemBienDTO itemBien : itemsDTO) {
+            if (itemBien.getCantidad() == null || itemBien.getCantidad() <= 0) {
+                throw new IllegalArgumentException("La cantidad de cada bien debe ser mayor a 0.");
+            }
+            if (itemBien.getSubcategoriaId() == null) {
+                throw new IllegalArgumentException("Cada bien debe tener una subcategoría.");
+            }
             System.out.println("Subcategoria id: " + itemBien.getSubcategoriaId());
 
             Subcategoria subcategoria = this.categoriasService.obtenerSubcategoriaPorId(itemBien.getSubcategoriaId());

@@ -9,6 +9,8 @@ public class Subcategoria{
     @ManyToOne
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
+    private Boolean perecedero;
+    private Boolean requiereEstadoUso;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +46,22 @@ public class Subcategoria{
 
     public void setNombre(String nombre){
         this.nombre = nombre;
+    }
+
+    public boolean isPerecedero() {
+        return Boolean.TRUE.equals(perecedero);
+    }
+
+    public void setPerecedero(Boolean perecedero) {
+        this.perecedero = perecedero;
+    }
+
+    public boolean isRequiereEstadoUso() {
+        return Boolean.TRUE.equals(requiereEstadoUso);
+    }
+
+    public void setRequiereEstadoUso(Boolean requiereEstadoUso) {
+        this.requiereEstadoUso = requiereEstadoUso;
     }
 
 }

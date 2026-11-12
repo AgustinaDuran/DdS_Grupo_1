@@ -1,6 +1,10 @@
 package org.donatrack.controller.dto.Donantes;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.util.ArrayList;
+
+import org.donatrack.dominio.contacto.Contacto;
 import org.donatrack.dominio.donante.Donante;
 import org.donatrack.dominio.donante.DonanteJuridico;
 import org.donatrack.dominio.donante.DonantePersona;
@@ -8,6 +12,7 @@ import org.donatrack.dominio.usuario.organizacion.Organizacion;
 import org.donatrack.dominio.usuario.DatosUsuario;
 import org.donatrack.dominio.donante.TipoPersonaJuridica;
 import org.donatrack.dominio.usuario.persona.Persona;
+import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DonanteDTO {
@@ -28,6 +33,7 @@ public class DonanteDTO {
     private String rubro;
     private String razonSocial;
     private String cuit;
+    private List<ContactoDTO> contactos = new ArrayList<>();
 
     public DonanteDTO(Donante donante) {
         this.id = donante.getId();
@@ -55,6 +61,13 @@ public class DonanteDTO {
             }
         } else{
             throw new IllegalArgumentException("Tipo de donante desconocido: " + donante.getClass().getName());
+        }
+
+    DatosUsuario datos = donante.getDatosUsuario();
+        if (datos != null && datos.getContactos() != null) {
+            for (Contacto contacto : datos.getContactos()) {
+                this.contactos.add(new ContactoDTO(contacto.getMedio(), contacto.getValor()));
+            }
         }
     }
 
@@ -104,5 +117,9 @@ public class DonanteDTO {
 
     public String getCuit() {
         return cuit;
+    }
+
+    public List<ContactoDTO> getContactos() {
+        return contactos;
     }
 }

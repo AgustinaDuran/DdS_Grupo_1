@@ -39,6 +39,8 @@ public class CategoriasService {
             categoria = categoriasRepository.findById(nuevaSubcategoria.getCategoriaId()).orElse(null);
         }
         Subcategoria subcategoria = new Subcategoria(nuevaSubcategoria.getNombre(), categoria);
+        subcategoria.setPerecedero(nuevaSubcategoria.getPerecedero());
+        subcategoria.setRequiereEstadoUso(nuevaSubcategoria.getRequiereEstadoUso());
         subcategoriaRepository.save(subcategoria);
         if (categoria != null) {
             categoria.agregarSubcategoria(subcategoria);
@@ -60,6 +62,12 @@ public class CategoriasService {
                 throw new IllegalArgumentException("No se encontró la categoría con el ID proporcionado");
             }
             subcategoria.setCategoria(categoria);
+        }
+        if (datosActualizacion.getPerecedero() != null) {
+            subcategoria.setPerecedero(datosActualizacion.getPerecedero());
+        }
+        if (datosActualizacion.getRequiereEstadoUso() != null) {
+            subcategoria.setRequiereEstadoUso(datosActualizacion.getRequiereEstadoUso());
         }
         subcategoriaRepository.save(subcategoria);
         return subcategoria;

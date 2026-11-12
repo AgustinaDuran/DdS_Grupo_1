@@ -74,7 +74,14 @@ public class DonacionesService {
     }
 
     public List<Donacion> registrarDonacion(CrearDonacionDTO nuevaDonacion) {
-        Donante donante = this.donantesService.obtenerDonantePorId(nuevaDonacion.getDonanteId()).orElseThrow();
+                if (nuevaDonacion.getDonanteId() == null) {
+            throw new IllegalArgumentException("Falta indicar el donante.");
+        }
+        Donante donante = this.donantesService.obtenerDonantePorId(nuevaDonacion.getDonanteId())
+                .orElseThrow(() -> new IllegalArgumentException("El donante indicado no existe."));
+        if (nuevaDonacion.getItems() == null || nuevaDonacion.getItems().isEmpty()) {
+            throw new IllegalArgumentException("La donación debe tener al menos un bien.");
+        }
         List<ItemBien> itemBienes = this.bienesService.convertirItemsDTOaItemsBien(nuevaDonacion.getItems());
 
 
