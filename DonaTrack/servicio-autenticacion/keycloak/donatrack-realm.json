@@ -1,0 +1,61 @@
+{
+  "realm": "donatrack",
+  "displayName": "DonaTrack",
+  "enabled": true,
+  "passwordPolicy": "length(8)",
+  "roles": {
+    "realm": [
+      { "name": "ADMIN" },
+      { "name": "DONANTE" },
+      { "name": "ENTIDAD" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "donatrack-frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:3000/auth/callback"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "protocolMappers": [
+        {
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "multivalued": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "donatrack-registration",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "${KEYCLOAK_REGISTRATION_CLIENT_SECRET}",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "username": "service-account-donatrack-registration",
+      "enabled": true,
+      "serviceAccountClientId": "donatrack-registration",
+      "clientRoles": {
+        "realm-management": ["manage-users", "view-users", "query-users"]
+      }
+    }
+  ]
+}

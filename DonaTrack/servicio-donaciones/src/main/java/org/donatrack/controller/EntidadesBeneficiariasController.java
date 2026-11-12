@@ -43,6 +43,14 @@ public class EntidadesBeneficiariasController {
         }
     }
 
+    @GetMapping("/por-identidad/{keycloakUserId}")
+    public ResponseEntity<EntidadBeneficiariaDTO> obtenerPorIdentidad(@PathVariable String keycloakUserId) {
+        EntidadBeneficiaria entidad = entidadesBeneficiariasService.obtenerPorIdentidad(keycloakUserId);
+        return entidad == null
+                ? ResponseEntity.notFound().build()
+                : ResponseEntity.ok(new EntidadBeneficiariaDTO(entidad));
+    }
+
     @PostMapping
     public ResponseEntity<EntidadBeneficiariaDTO> nuevaEntidad(@RequestBody CrearEntidadBeneficiariaDTO nuevaEntidad) {
         EntidadBeneficiaria entidad = entidadesBeneficiariasService.registrarEntidad(nuevaEntidad);

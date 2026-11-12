@@ -29,8 +29,13 @@ public class EntidadesBeneficiariasService {
         EntidadBeneficiaria entidad = new EntidadBeneficiaria(
                 nuevaEntidad.getTipoEntidad(),
                 nuevaEntidad.getDireccion(),
-                organizacion);
+                organizacion,
+                nuevaEntidad.getKeycloakUserId());
         return entidadesBeneficiariasRepository.save(entidad);
+    }
+
+    public EntidadBeneficiaria obtenerPorIdentidad(String keycloakUserId) {
+        return entidadesBeneficiariasRepository.findByKeycloakUserId(keycloakUserId).orElse(null);
     }
 
     public void eliminarEntidad(Long id) {

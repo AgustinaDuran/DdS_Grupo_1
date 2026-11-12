@@ -18,6 +18,9 @@ public class EntidadBeneficiaria {
     private TipoEntidadBeneficiaria tipoEntidad;
     private String direccion;
 
+    @Column(name = "keycloak_user_id", unique = true)
+    private String keycloakUserId;
+
     @OneToMany(mappedBy = "entidad")
     private List<Necesidad> necesidades;
 
@@ -38,12 +41,17 @@ public class EntidadBeneficiaria {
     }
 
 
-    public EntidadBeneficiaria(TipoEntidadBeneficiaria tipoEntidad, String direccion, Organizacion organizacion) {
+    public EntidadBeneficiaria(TipoEntidadBeneficiaria tipoEntidad, String direccion, Organizacion organizacion, String keycloakUserId) {
         this.tipoEntidad = tipoEntidad;
         this.direccion = direccion;
         this.necesidades = new ArrayList<>();
         this.donacionesRecibidas = new ArrayList<>();
         this.organizacion = organizacion;
+        this.keycloakUserId = keycloakUserId;
+    }
+
+    public EntidadBeneficiaria(TipoEntidadBeneficiaria tipoEntidad, String direccion, Organizacion organizacion) {
+        this(tipoEntidad, direccion, organizacion, null);
     }
     
     public TipoEntidadBeneficiaria getTipoEntidad() { 
@@ -93,6 +101,10 @@ public class EntidadBeneficiaria {
     @Override
     public int hashCode() {
         return EntidadBeneficiaria.class.hashCode();
+    }
+
+    public String getKeycloakUserId() {
+        return keycloakUserId;
     }
 
 }

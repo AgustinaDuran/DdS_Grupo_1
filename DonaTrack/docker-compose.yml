@@ -35,6 +35,20 @@ services:
       start_period: 90s
       retries: 20
 
+  # Proveedor de identidad OpenID Connect
+  keycloak:
+    build:
+      context: ./servicio-autenticacion
+    container_name: donatrack-keycloak
+    command: ["start-dev", "--import-realm"]
+    ports:
+      - "8084:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:?Definir KEYCLOAK_ADMIN_USERNAME en .env}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Definir KEYCLOAK_ADMIN_PASSWORD en .env}
+      KC_HOSTNAME: http://localhost:8084
+      KEYCLOAK_REGISTRATION_CLIENT_SECRET: ${KEYCLOAK_REGISTRATION_CLIENT_SECRET:?Definir KEYCLOAK_REGISTRATION_CLIENT_SECRET en .env}
+
   # Base documental del Servicio de Logística
   mongo:
     image: mongo:7
@@ -69,8 +83,10 @@ services:
       SERVICES_NOTIFICACIONES_URL: http://servicio-notificaciones:8081
       SERVICES_INCENTIVOS_URL: http://servicio-incentivos:8082
       SERVICES_LOGISTICA_URL: http://68.211.177.89:8083
-      SERVICES_LOGISTICA_MOCK_URL: http://68.211.177.89:8083
+      SERVICES_LOGISTICA_MOCK_URL: http://servicio-logistica-mock:8088
       LOGISTICA_POLLING_INTERVALO_MS: 10000
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8084/realms/donatrack
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/donatrack/protocol/openid-connect/certs
     depends_on:
       db:
         condition: service_healthy
@@ -105,6 +121,8 @@ services:
       BREVO_API_KEY: ${BREVO_API_KEY:-}
       BREVO_REMITENTE: ${BREVO_REMITENTE:-}
       BREVO_REMITENTE_NOMBRE: ${BREVO_REMITENTE_NOMBRE:-DonaTrack}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8084/realms/donatrack
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/donatrack/protocol/openid-connect/certs
     depends_on:
       db:
         condition: service_healthy
@@ -127,6 +145,8 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: donatrack
       SPRING_RABBITMQ_PASSWORD: donatrack
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8084/realms/donatrack
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/donatrack/protocol/openid-connect/certs
     depends_on:
       db:
         condition: service_healthy
@@ -143,6 +163,8 @@ services:
       - "8083:8083"
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/logistica
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8084/realms/donatrack
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/donatrack/protocol/openid-connect/certs
     depends_on:
       mongo:
         condition: service_healthy

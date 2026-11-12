@@ -7,6 +7,7 @@ public class CrearEntidadBeneficiariaDTO {
     private TipoEntidadBeneficiaria tipoEntidad;
     private String direccion;
     private OrganizacionDTO organizacion;
+    private String keycloakUserId;
 
     public CrearEntidadBeneficiariaDTO() {
     }
@@ -33,5 +34,13 @@ public class CrearEntidadBeneficiariaDTO {
 
     public void setOrganizacion(OrganizacionDTO org){
         this.organizacion = org;
+    }
+
+    public String getKeycloakUserId() {
+        return keycloakUserId;
+    }
+
+    public void setKeycloakUserId(String keycloakUserId) {
+        this.keycloakUserId = keycloakUserId;
     }
 }
