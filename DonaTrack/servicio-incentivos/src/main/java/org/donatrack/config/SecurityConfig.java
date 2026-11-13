@@ -20,6 +20,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/incentivos/rankings/*/destacados").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/incentivos/rankings").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/incentivos/donantes/*/donaciones").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/incentivos/donantes/**")
                             .hasAnyRole("DONANTE", "ADMIN")

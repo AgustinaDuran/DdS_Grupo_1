@@ -84,6 +84,9 @@ services:
       SERVICES_INCENTIVOS_URL: http://servicio-incentivos:8082
       SERVICES_LOGISTICA_URL: http://68.211.177.89:8083
       SERVICES_LOGISTICA_MOCK_URL: http://servicio-logistica-mock:8088
+      SERVICES_KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REGISTRATION_CLIENT_ID: donatrack-registration
+      KEYCLOAK_REGISTRATION_CLIENT_SECRET: ${KEYCLOAK_REGISTRATION_CLIENT_SECRET:?Definir KEYCLOAK_REGISTRATION_CLIENT_SECRET en .env}
       LOGISTICA_POLLING_INTERVALO_MS: 10000
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8084/realms/donatrack
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/donatrack/protocol/openid-connect/certs

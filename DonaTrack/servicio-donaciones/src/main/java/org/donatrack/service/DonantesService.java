@@ -1,7 +1,6 @@
 package org.donatrack.service;
 
 import java.util.ArrayList;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,6 @@ import org.donatrack.dominio.donante.Donante;
 import org.donatrack.dominio.donante.DonanteJuridico;
 import org.donatrack.dominio.donante.DonantePersona;
 import org.donatrack.dominio.usuario.DatosUsuario;
-import org.donatrack.dominio.usuario.organizacion.Organizacion;
 import org.donatrack.dominio.usuario.persona.Persona;
 import org.donatrack.dominio.usuario.organizacion.Organizacion;
 import org.donatrack.repository.DonantesRepository;
@@ -22,8 +20,8 @@ import org.springframework.stereotype.Service;
 import org.donatrack.controller.dto.Usuarios.CrearUsuarioDTO;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.context.annotation.Lazy;
-import org.donatrack.integracion.DestinatarioResolver;
-import org.donatrack.integracion.NotificacionesClient;
+import org.donatrack.integracion.KeycloakUserClient;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DonantesService {
@@ -32,18 +30,15 @@ public class DonantesService {
     private UsuariosService usuariosService;
 
     private final ImportacionDonantesService importacionDonantesService;
-    private final NotificacionesClient notificacionesClient;
-    private final DestinatarioResolver destinatarioResolver;
+    private final KeycloakUserClient keycloakUserClient;
 
     public DonantesService(DonantesRepository donantesRepository, UsuariosService usuariosService,
                            @Lazy ImportacionDonantesService importacionDonantesService,
-                           NotificacionesClient notificacionesClient,
-                           DestinatarioResolver destinatarioResolver) {
+                           KeycloakUserClient keycloakUserClient) {
         this.donantesRepository = donantesRepository;
         this.usuariosService = usuariosService;
         this.importacionDonantesService = importacionDonantesService;
-        this.notificacionesClient = notificacionesClient;
-        this.destinatarioResolver = destinatarioResolver;
+        this.keycloakUserClient = keycloakUserClient;
     }
 
     public List<Donante> obtenerDonantes() {
@@ -54,43 +49,38 @@ public class DonantesService {
         return donantesRepository.findById(id);
     }
 
+    @Transactional
     public Donante registrarDonante(CrearDonanteDTO nuevoDonante) {
-        System.out.println("Hola2");
         boolean usuarioNuevo = nuevoDonante.getUsuarioId() == null;
-        DatosUsuario datosUsuario;
-        Long id = nuevoDonante.getUsuarioId();
-        if (id != null) {
-            DatosUsuario usuarioExistente = usuariosService.obtenerUsuarioPorId(id);
-            if (usuarioExistente != null) {
-                datosUsuario = usuarioExistente;
-            } else {
-                throw new IllegalArgumentException("El usuario con ID " + id + " no existe.");
-            }
-        } else{
-            System.out.println("Hola3");
-            datosUsuario = registrarNuevoUsuarioParaDonante(nuevoDonante);
-        }
-
-        Donante donante;
-        System.out.println("Hola4");
-        switch (nuevoDonante.getTipo()) {
-            case JURIDICA:
-                donante = new DonanteJuridico(datosUsuario, nuevoDonante.getTipoPersonaJuridica(), nuevoDonante.getRubro());
-                break;
-            case HUMANA:
-                donante = new DonantePersona(datosUsuario);
-                break;
-            default:
-                throw new IllegalArgumentException("Tipo de donante no válido");
-        }
-        Donante guardado = donantesRepository.save(donante);
-
+        String keycloakUserId = null;
         if (usuarioNuevo) {
-            notificacionesClient.enviar(destinatarioResolver.paraDonante(
-                    guardado,
-                    "Bienvenido a DonaTrack. Tu usuario fue registrado correctamente."));
+            String email = emailDe(nuevoDonante);
+            validarCuentaNueva(email, nuevoDonante.getContrasenaTemporal());
+            if (buscarPorEmail(email).isPresent()) {
+                throw new IllegalArgumentException("Ya existe un donante registrado con ese correo.");
+            }
+            keycloakUserId = keycloakUserClient.crearDonante(email,
+                    nuevoDonante.getNombre() == null ? nuevoDonante.getRazonSocial() : nuevoDonante.getNombre(),
+                    nuevoDonante.getApellido(), nuevoDonante.getContrasenaTemporal());
         }
-        return guardado;
+        try {
+            DatosUsuario datosUsuario;
+            Long id = nuevoDonante.getUsuarioId();
+            if (id != null) {
+                datosUsuario = usuariosService.obtenerUsuarioPorId(id);
+                if (datosUsuario == null) throw new IllegalArgumentException("El usuario con ID " + id + " no existe.");
+            } else {
+                datosUsuario = registrarNuevoUsuarioParaDonante(nuevoDonante);
+            }
+            Donante donante = switch (nuevoDonante.getTipo()) {
+                case JURIDICA -> new DonanteJuridico(datosUsuario, nuevoDonante.getTipoPersonaJuridica(), nuevoDonante.getRubro());
+                case HUMANA -> new DonantePersona(datosUsuario);
+            };
+            return donantesRepository.save(donante);
+        } catch (RuntimeException exception) {
+            if (usuarioNuevo) keycloakUserClient.eliminarCuenta(keycloakUserId);
+            throw exception;
+        }
     }
 
     // por ahora es simple pero guardarDonante implicará varios chequeos y demás
@@ -205,6 +195,21 @@ public class DonantesService {
     private DatosUsuario registrarNuevoUsuarioParaDonante(CrearDonanteDTO nuevoDonante) {
         CrearUsuarioDTO crearUsuarioDTO = new CrearUsuarioDTO(nuevoDonante);
         return usuariosService.registrarUsuario(crearUsuarioDTO);        
+    }
+
+    private static String emailDe(CrearDonanteDTO donante) {
+        return donante.getContactoDTOPredeterminado() == null
+                ? null
+                : donante.getContactoDTOPredeterminado().getValor();
+    }
+
+    private static void validarCuentaNueva(String email, String contrasenaTemporal) {
+        if (email == null || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new IllegalArgumentException("El correo de contacto no es válido.");
+        }
+        if (contrasenaTemporal == null || contrasenaTemporal.length() < 8) {
+            throw new IllegalArgumentException("La contraseña temporal debe tener al menos 8 caracteres.");
+        }
     }
 
 }

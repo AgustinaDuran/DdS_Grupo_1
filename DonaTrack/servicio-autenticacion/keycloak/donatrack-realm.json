@@ -54,7 +54,7 @@
       "enabled": true,
       "serviceAccountClientId": "donatrack-registration",
       "clientRoles": {
-        "realm-management": ["manage-users", "view-users", "query-users"]
+        "realm-management": ["manage-users", "view-users", "query-users", "view-realm"]
       }
     }
   ]
