@@ -36,6 +36,18 @@ Keycloak queda en `http://localhost:8084`; la consola administrativa usa `KEYCLO
 
 El realm no persiste entre `docker compose down`/`up` (igual que MySQL): se reimporta limpio.
 
+## Keycloak del servidor (junto a Logística)
+
+La Logística desplegada (`docker-compose.deploy.yml`) valida los tokens contra un Keycloak que corre en el
+mismo servidor, publicado por HTTPS en `https://<KEYCLOAK_DOMAIN>` (Caddy saca el certificado solo). Un token
+del Keycloak local no le sirve: lo firma otra clave. Para usar la Logística del servidor desde el front:
+
+1. En `DonaTrack/.env`: `KEYCLOAK_PUBLIC_URL` y `KEYCLOAK_INTERNAL_URL` con `https://<KEYCLOAK_DOMAIN>` y el
+   mismo `KEYCLOAK_REGISTRATION_CLIENT_SECRET` que en el servidor. Recrear los servicios (`docker compose up -d`).
+2. En el `.env` del front: `KEYCLOAK_ISSUER=https://<KEYCLOAK_DOMAIN>/realms/donatrack` y el mismo secreto.
+3. Los usuarios son los de ese Keycloak (persisten en un volumen): crear el ADMIN desde
+   `https://<KEYCLOAK_DOMAIN>/admin`.
+
 ## Social login
 
 1. Crear las credenciales OAuth:

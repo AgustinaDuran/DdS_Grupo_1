@@ -1,18 +1,71 @@
-# Despliegue del Servicio de Logística (y del proveedor externo simulado) en el hosting.
+# Despliegue del Servicio de Logística (con su Keycloak y el proveedor externo simulado) en el hosting.
 #
 # En tu máquina (construir y subir las imágenes a Docker Hub):
 #   docker login
-#   docker compose -f docker-compose.deploy.yml build
-#   docker compose -f docker-compose.deploy.yml push
+#   docker compose -f docker-compose.deploy.yml --env-file .env.deploy.example build
+#   docker compose -f docker-compose.deploy.yml --env-file .env.deploy.example push
 #
-# En el servidor (sólo hacen falta este archivo y el .env, no el código):
+# En el servidor (sólo hacen falta este archivo, Caddyfile.deploy y el .env; no el código):
 #   cp .env.deploy.example .env      # y completar los valores
 #   docker compose -f docker-compose.deploy.yml pull
 #   docker compose -f docker-compose.deploy.yml up -d --no-build
 #
+# Puertos a abrir en el firewall del servidor: 80 y 443 (Keycloak por HTTPS) y 8083 (Logística).
+#
 # Para pausarlo hasta la defensa: docker compose -f docker-compose.deploy.yml stop
 
 services:
+  # Reverse proxy con HTTPS automático (Let's Encrypt) delante de Keycloak.
+  caddy:
+    image: caddy:2
+    container_name: logistica-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      KEYCLOAK_DOMAIN: ${KEYCLOAK_DOMAIN:?Definir KEYCLOAK_DOMAIN en .env}
+    volumes:
+      - ./Caddyfile.deploy:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - keycloak
+
+  # Proveedor de identidad (OpenID Connect). Logística valida contra él los tokens que recibe, así que
+  # el front y los demás servicios tienen que iniciar sesión contra ESTE Keycloak (https://KEYCLOAK_DOMAIN).
+  # No publica puertos: sólo se llega por Caddy (HTTPS) o, desde Logística, por la red interna.
+  keycloak:
+    build:
+      context: ./servicio-autenticacion
+    image: frantilve/donatrack-keycloak:latest
+    platform: linux/amd64
+    container_name: logistica-keycloak
+    restart: unless-stopped
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:?Definir KEYCLOAK_ADMIN_USERNAME en .env}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Definir KEYCLOAK_ADMIN_PASSWORD en .env}
+      # URL pública: es el emisor ("iss") de los tokens. Caddy termina el HTTPS y reenvía por HTTP.
+      KC_HOSTNAME: https://${KEYCLOAK_DOMAIN}
+      KC_PROXY_HEADERS: xforwarded
+      KC_HTTP_ENABLED: "true"
+      # Sin esto la JVM toma el 70% de la RAM del servidor.
+      JAVA_OPTS_KC_HEAP: -Xms64m -Xmx${KEYCLOAK_HEAP_MB:-384}m
+      KEYCLOAK_REGISTRATION_CLIENT_SECRET: ${KEYCLOAK_REGISTRATION_CLIENT_SECRET:?Definir KEYCLOAK_REGISTRATION_CLIENT_SECRET en .env}
+      # Los valores del realm (FRONTEND_URL, secreto, social login) sólo se leen en la PRIMERA importación:
+      # después quedan en el volumen. Para cambiarlos, usar la consola de Keycloak o borrar el volumen.
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      GOOGLE_LOGIN_ENABLED: ${GOOGLE_LOGIN_ENABLED:-false}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-sin-configurar}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-sin-configurar}
+      GITHUB_LOGIN_ENABLED: ${GITHUB_LOGIN_ENABLED:-false}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-sin-configurar}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-sin-configurar}
+    volumes:
+      # Usuarios, roles y claves de firma del realm: sobreviven a recrear el contenedor.
+      - keycloak-data:/opt/keycloak/data/h2
+
   # Base documental propia de Logística. No publica el 27017: sólo la ve Logística por la red interna.
   mongo-logistica:
     image: mongo:7
@@ -50,6 +103,9 @@ services:
       JAVA_TOOL_OPTIONS: -Xmx160m -XX:MaxMetaspaceSize=128m -Xss512k -XX:+UseSerialGC -XX:TieredStopAtLevel=1
       # URL pública a la que el planificador externo devuelve las rutas.
       LOGISTICA_CALLBACK_URL: ${PUBLIC_URL}/api/logistica/rutas
+      # Validación de tokens: el emisor es la URL pública de Keycloak; las claves se piden por la red interna.
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: https://${KEYCLOAK_DOMAIN}/realms/donatrack
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/donatrack/protocol/openid-connect/certs
     depends_on:
       mongo-logistica:
         condition: service_healthy
@@ -70,3 +126,6 @@ services:
 
 volumes:
   logistica-mongo-data:
+  keycloak-data:
+  caddy-data:
+  caddy-config:

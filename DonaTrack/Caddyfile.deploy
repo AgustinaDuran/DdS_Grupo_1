@@ -1,0 +1,8 @@
+# Reverse proxy del despliegue de Logística (docker-compose.deploy.yml).
+# Publica Keycloak por HTTPS (certificado automático): Keycloak no admite logins por HTTP fuera de localhost.
+# El dominio sale de KEYCLOAK_DOMAIN en el .env (ej: auth.68-211-177-89.sslip.io).
+
+{$KEYCLOAK_DOMAIN} {
+	encode gzip
+	reverse_proxy keycloak:8080
+}
