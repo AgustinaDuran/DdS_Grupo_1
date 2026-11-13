@@ -27,6 +27,8 @@ public class SecurityConfig {
                                 "/api/subcategorias/**",
                                 "/api/entidades-beneficiarias/**",
                                 "/api/donaciones/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/donantes/por-identidad/**")
+                            .hasAnyRole("DONANTE", "ADMIN")
                         .requestMatchers("/api/necesidades/**").hasAnyRole("ENTIDAD", "ADMIN")
                         .requestMatchers("/api/donantes/**", "/api/bienes/**", "/api/donaciones/**")
                             .hasRole("ADMIN")

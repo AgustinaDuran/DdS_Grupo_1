@@ -1,6 +1,7 @@
 package org.donatrack.integracion;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,8 @@ public class KeycloakUserClient {
     private final String realm;
     private final String clientId;
     private final String clientSecret;
+    private String tokenTecnico;
+    private Instant venceTokenTecnico = Instant.EPOCH;
 
     public KeycloakUserClient(RestClient.Builder restClientBuilder,
                               @Value("${services.keycloak.url:http://localhost:8084}") String keycloakUrl,
@@ -74,7 +77,14 @@ public class KeycloakUserClient {
         }
     }
 
-    private String obtenerTokenTecnico() {
+    /**
+     * Reutiliza el token de la cuenta técnica mientras siga vigente: la importación por CSV crea miles de
+     * cuentas seguidas y pedir un token por cada una sobrecarga a Keycloak.
+     */
+    private synchronized String obtenerTokenTecnico() {
+        if (tokenTecnico != null && Instant.now().isBefore(venceTokenTecnico)) {
+            return tokenTecnico;
+        }
         MultiValueMap<String, String> formulario = new LinkedMultiValueMap<>();
         formulario.add("grant_type", "client_credentials");
         formulario.add("client_id", clientId);
@@ -85,6 +95,10 @@ public class KeycloakUserClient {
         if (!(token instanceof String accessToken) || accessToken.isBlank()) {
             throw new IllegalStateException("Keycloak no devolvió un token técnico.");
         }
+        long segundos = respuesta.get("expires_in") instanceof Number expira ? expira.longValue() : 60;
+        // Margen de 30 s para no usar un token que vence en pleno request.
+        venceTokenTecnico = Instant.now().plusSeconds(Math.max(0, segundos - 30));
+        tokenTecnico = accessToken;
         return accessToken;
     }
 

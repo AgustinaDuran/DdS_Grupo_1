@@ -48,6 +48,15 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Definir KEYCLOAK_ADMIN_PASSWORD en .env}
       KC_HOSTNAME: http://localhost:8084
       KEYCLOAK_REGISTRATION_CLIENT_SECRET: ${KEYCLOAK_REGISTRATION_CLIENT_SECRET:?Definir KEYCLOAK_REGISTRATION_CLIENT_SECRET en .env}
+      # URL del front: arma las redirect URIs válidas del login y del logout.
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      # Social login (opcional). Ver servicio-autenticacion/README.md para obtener las credenciales.
+      GOOGLE_LOGIN_ENABLED: ${GOOGLE_LOGIN_ENABLED:-false}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-sin-configurar}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-sin-configurar}
+      GITHUB_LOGIN_ENABLED: ${GITHUB_LOGIN_ENABLED:-false}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-sin-configurar}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-sin-configurar}
 
   # Base documental del Servicio de Logística
   mongo:
@@ -86,6 +95,7 @@ services:
       SERVICES_LOGISTICA_MOCK_URL: http://servicio-logistica-mock:8088
       SERVICES_KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REGISTRATION_CLIENT_ID: donatrack-registration
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       KEYCLOAK_REGISTRATION_CLIENT_SECRET: ${KEYCLOAK_REGISTRATION_CLIENT_SECRET:?Definir KEYCLOAK_REGISTRATION_CLIENT_SECRET en .env}
       LOGISTICA_POLLING_INTERVALO_MS: 10000
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8084/realms/donatrack

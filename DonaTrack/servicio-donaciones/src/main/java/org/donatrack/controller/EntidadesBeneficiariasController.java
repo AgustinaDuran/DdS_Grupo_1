@@ -3,12 +3,14 @@ package org.donatrack.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.donatrack.config.IdentidadAutenticada;
 import org.donatrack.controller.dto.EntidadBeneficiaria.CrearEntidadBeneficiariaDTO;
 import org.donatrack.controller.dto.EntidadBeneficiaria.EntidadBeneficiariaDTO;
 import org.donatrack.dominio.entidadBeneficiaria.EntidadBeneficiaria;
 import org.donatrack.service.EntidadesBeneficiariasService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -44,7 +46,12 @@ public class EntidadesBeneficiariasController {
     }
 
     @GetMapping("/por-identidad/{keycloakUserId}")
-    public ResponseEntity<EntidadBeneficiariaDTO> obtenerPorIdentidad(@PathVariable String keycloakUserId) {
+    public ResponseEntity<EntidadBeneficiariaDTO> obtenerPorIdentidad(@PathVariable String keycloakUserId,
+                                                                      JwtAuthenticationToken autenticacion) {
+        // Una entidad no puede averiguar a qué entidad pertenece otra cuenta.
+        if (!IdentidadAutenticada.puedeConsultar(autenticacion, keycloakUserId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         EntidadBeneficiaria entidad = entidadesBeneficiariasService.obtenerPorIdentidad(keycloakUserId);
         return entidad == null
                 ? ResponseEntity.notFound().build()

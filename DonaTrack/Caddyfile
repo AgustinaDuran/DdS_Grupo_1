@@ -1,0 +1,23 @@
+# Reverse proxy de DonaTrack: un solo dominio HTTPS que enruta por path a cada servicio.
+# El dominio sale de la variable DOMAIN del .env (ej: 68-211-177-89.sslip.io).
+
+{$DOMAIN} {
+	encode gzip
+
+	handle /api/notificaciones* {
+		reverse_proxy servicio-notificaciones:8081
+	}
+	handle /api/incentivos* {
+		reverse_proxy servicio-incentivos:8082
+	}
+	handle /api/logistica* {
+		reverse_proxy servicio-logistica:8083
+	}
+	handle /v1/shipments* {
+		reverse_proxy servicio-logistica-mock:8088
+	}
+	# Todo lo demás (/api/donaciones, /api/donantes, /api/bienes, /api/asignaciones, ...) va a Donaciones
+	handle {
+		reverse_proxy servicio-donaciones:8080
+	}
+}

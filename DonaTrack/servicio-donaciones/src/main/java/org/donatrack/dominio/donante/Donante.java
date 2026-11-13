@@ -24,7 +24,19 @@ public abstract class Donante {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
 
+    /** Identificador (claim "sub") de la cuenta de Keycloak con la que inicia sesión el donante. */
+    @Column(name = "keycloak_user_id", unique = true)
+    protected String keycloakUserId;
+
     protected Donante() {
+    }
+
+    public String getKeycloakUserId() {
+        return keycloakUserId;
+    }
+
+    public void setKeycloakUserId(String keycloakUserId) {
+        this.keycloakUserId = keycloakUserId;
     }
     public Long getId() {
         return id;

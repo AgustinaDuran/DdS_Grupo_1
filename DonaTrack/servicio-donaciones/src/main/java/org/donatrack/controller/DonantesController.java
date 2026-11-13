@@ -3,6 +3,7 @@ package org.donatrack.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.donatrack.config.IdentidadAutenticada;
 import org.donatrack.controller.dto.Donantes.CrearDonanteDTO;
 import org.donatrack.controller.dto.Donantes.DonanteDTO;
 import org.donatrack.controller.dto.Donantes.ImportacionCsvResultadoDTO;
@@ -11,6 +12,7 @@ import org.donatrack.service.DonantesService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,6 +48,22 @@ public class DonantesController {
     public ResponseEntity<ImportacionCsvResultadoDTO> importarDonantes(@RequestParam("file") MultipartFile file) {
         ImportacionCsvResultadoDTO resultado = donantesService.importarDonantesMasivo(file);
         return ResponseEntity.ok(resultado);
+    }
+
+    /** Donante de la cuenta que inició sesión (claim "sub" de Keycloak). */
+    @GetMapping("/por-identidad/{keycloakUserId}")
+    public ResponseEntity<DonanteDTO> obtenerPorIdentidad(@PathVariable String keycloakUserId,
+                                                          JwtAuthenticationToken autenticacion) {
+        if (!IdentidadAutenticada.puedeConsultar(autenticacion, keycloakUserId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        // La vinculación por email solo se hace para la propia cuenta, nunca cuando consulta ADMIN.
+        String email = IdentidadAutenticada.esPropia(autenticacion, keycloakUserId)
+                ? IdentidadAutenticada.emailVerificado(autenticacion)
+                : null;
+        return donantesService.obtenerPorIdentidad(keycloakUserId, email)
+                .map(donante -> ResponseEntity.ok(new DonanteDTO(donante)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}")

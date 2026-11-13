@@ -1,5 +1,6 @@
 package org.donatrack.service;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +21,10 @@ import org.springframework.stereotype.Service;
 import org.donatrack.controller.dto.Usuarios.CrearUsuarioDTO;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.context.annotation.Lazy;
+import org.donatrack.integracion.DestinatarioResolver;
 import org.donatrack.integracion.KeycloakUserClient;
+import org.donatrack.integracion.NotificacionesClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -31,14 +35,23 @@ public class DonantesService {
 
     private final ImportacionDonantesService importacionDonantesService;
     private final KeycloakUserClient keycloakUserClient;
+    private final NotificacionesClient notificacionesClient;
+    private final DestinatarioResolver destinatarioResolver;
+    private final String frontendUrl;
 
     public DonantesService(DonantesRepository donantesRepository, UsuariosService usuariosService,
                            @Lazy ImportacionDonantesService importacionDonantesService,
-                           KeycloakUserClient keycloakUserClient) {
+                           KeycloakUserClient keycloakUserClient,
+                           NotificacionesClient notificacionesClient,
+                           DestinatarioResolver destinatarioResolver,
+                           @Value("${donatrack.frontend.url:http://localhost:3000}") String frontendUrl) {
         this.donantesRepository = donantesRepository;
         this.usuariosService = usuariosService;
         this.importacionDonantesService = importacionDonantesService;
         this.keycloakUserClient = keycloakUserClient;
+        this.notificacionesClient = notificacionesClient;
+        this.destinatarioResolver = destinatarioResolver;
+        this.frontendUrl = frontendUrl.replaceAll("/+$", "");
     }
 
     public List<Donante> obtenerDonantes() {
@@ -51,17 +64,38 @@ public class DonantesService {
 
     @Transactional
     public Donante registrarDonante(CrearDonanteDTO nuevoDonante) {
+        return registrar(nuevoDonante, true);
+    }
+
+    /**
+     * Alta desde la importación masiva por CSV. El import ya resolvió los duplicados con su índice por
+     * email, así que no se repite la búsqueda (recorre todos los donantes y con 20.000 filas no termina).
+     */
+    @Transactional
+    public Donante registrarDonanteImportado(CrearDonanteDTO nuevoDonante) {
+        return registrar(nuevoDonante, false);
+    }
+
+    private Donante registrar(CrearDonanteDTO nuevoDonante, boolean verificarDuplicado) {
         boolean usuarioNuevo = nuevoDonante.getUsuarioId() == null;
         String keycloakUserId = null;
+        String contrasenaGenerada = null;
         if (usuarioNuevo) {
             String email = emailDe(nuevoDonante);
-            validarCuentaNueva(email, nuevoDonante.getContrasenaTemporal());
-            if (buscarPorEmail(email).isPresent()) {
+            String contrasenaTemporal = nuevoDonante.getContrasenaTemporal();
+            // Si la administración no definió una contraseña temporal (siempre pasa en el CSV),
+            // se genera una aleatoria y se envía en el mail de bienvenida.
+            if (contrasenaTemporal == null || contrasenaTemporal.isBlank()) {
+                contrasenaGenerada = generarContrasenaTemporal();
+                contrasenaTemporal = contrasenaGenerada;
+            }
+            validarCuentaNueva(email, contrasenaTemporal);
+            if (verificarDuplicado && buscarPorEmail(email).isPresent()) {
                 throw new IllegalArgumentException("Ya existe un donante registrado con ese correo.");
             }
             keycloakUserId = keycloakUserClient.crearDonante(email,
                     nuevoDonante.getNombre() == null ? nuevoDonante.getRazonSocial() : nuevoDonante.getNombre(),
-                    nuevoDonante.getApellido(), nuevoDonante.getContrasenaTemporal());
+                    nuevoDonante.getApellido(), contrasenaTemporal);
         }
         try {
             DatosUsuario datosUsuario;
@@ -76,11 +110,37 @@ public class DonantesService {
                 case JURIDICA -> new DonanteJuridico(datosUsuario, nuevoDonante.getTipoPersonaJuridica(), nuevoDonante.getRubro());
                 case HUMANA -> new DonantePersona(datosUsuario);
             };
-            return donantesRepository.save(donante);
+            // Sin este vínculo el donante no se puede identificar cuando inicia sesión.
+            donante.setKeycloakUserId(keycloakUserId);
+            Donante guardado = donantesRepository.save(donante);
+            if (usuarioNuevo) {
+                notificacionesClient.enviar(destinatarioResolver.paraDonante(guardado,
+                        mensajeDeBienvenida(contrasenaGenerada)));
+            }
+            return guardado;
         } catch (RuntimeException exception) {
             if (usuarioNuevo) keycloakUserClient.eliminarCuenta(keycloakUserId);
             throw exception;
         }
+    }
+
+    /**
+     * Donante asociado a una cuenta de Keycloak. Si todavía no está vinculado (por ejemplo, un donante
+     * importado por CSV que entra por primera vez con Google), se vincula por email, pero solo cuando
+     * Keycloak informa ese email como verificado y el donante no está vinculado a otra cuenta.
+     */
+    @Transactional
+    public Optional<Donante> obtenerPorIdentidad(String keycloakUserId, String emailVerificado) {
+        Optional<Donante> vinculado = donantesRepository.findByKeycloakUserId(keycloakUserId);
+        if (vinculado.isPresent() || emailVerificado == null) {
+            return vinculado;
+        }
+        return buscarPorEmail(emailVerificado)
+                .filter(donante -> donante.getKeycloakUserId() == null)
+                .map(donante -> {
+                    donante.setKeycloakUserId(keycloakUserId);
+                    return donantesRepository.save(donante);
+                });
     }
 
     // por ahora es simple pero guardarDonante implicará varios chequeos y demás
@@ -201,6 +261,25 @@ public class DonantesService {
         return donante.getContactoDTOPredeterminado() == null
                 ? null
                 : donante.getContactoDTOPredeterminado().getValor();
+    }
+
+    private String mensajeDeBienvenida(String contrasenaGenerada) {
+        String credencial = contrasenaGenerada == null
+                ? "la contraseña temporal que te entregó la administración"
+                : "la contraseña temporal " + contrasenaGenerada;
+        return "Bienvenido a DonaTrack. Ya podés ingresar en " + frontendUrl + "/login con tu correo y "
+                + credencial + ". En el primer ingreso se te va a pedir que la cambies.";
+    }
+
+    private static final String ALFABETO_CONTRASENA = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    private static final SecureRandom ALEATORIO = new SecureRandom();
+
+    static String generarContrasenaTemporal() {
+        StringBuilder contrasena = new StringBuilder(12);
+        for (int i = 0; i < 12; i++) {
+            contrasena.append(ALFABETO_CONTRASENA.charAt(ALEATORIO.nextInt(ALFABETO_CONTRASENA.length())));
+        }
+        return contrasena.toString();
     }
 
     private static void validarCuentaNueva(String email, String contrasenaTemporal) {

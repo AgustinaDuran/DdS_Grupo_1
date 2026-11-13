@@ -3,6 +3,11 @@
   "displayName": "DonaTrack",
   "enabled": true,
   "passwordPolicy": "length(8)",
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
   "roles": {
     "realm": [
       { "name": "ADMIN" },
@@ -17,10 +22,13 @@
       "protocol": "openid-connect",
       "publicClient": true,
       "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": false,
-      "redirectUris": ["http://localhost:3000/auth/callback"],
+      "frontchannelLogout": true,
+      "redirectUris": ["${FRONTEND_URL:http://localhost:3000}/auth/callback"],
       "attributes": {
-        "pkce.code.challenge.method": "S256"
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "${FRONTEND_URL:http://localhost:3000}/"
       },
       "protocolMappers": [
         {
@@ -31,6 +39,7 @@
             "multivalued": "true",
             "id.token.claim": "true",
             "access.token.claim": "true",
+            "userinfo.token.claim": "true",
             "claim.name": "roles",
             "jsonType.label": "String"
           }
@@ -45,7 +54,8 @@
       "secret": "${KEYCLOAK_REGISTRATION_CLIENT_SECRET}",
       "standardFlowEnabled": false,
       "directAccessGrantsEnabled": false,
-      "serviceAccountsEnabled": true
+      "serviceAccountsEnabled": true,
+      "defaultClientScopes": ["web-origins", "acr", "roles", "profile", "basic", "email", "kc-admin-api"]
     }
   ],
   "users": [
@@ -56,6 +66,52 @@
       "clientRoles": {
         "realm-management": ["manage-users", "view-users", "query-users", "view-realm"]
       }
+    }
+  ],
+  "identityProviders": [
+    {
+      "alias": "google",
+      "displayName": "Google",
+      "providerId": "google",
+      "enabled": "${GOOGLE_LOGIN_ENABLED:false}",
+      "trustEmail": true,
+      "storeToken": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "clientId": "${GOOGLE_CLIENT_ID:sin-configurar}",
+        "clientSecret": "${GOOGLE_CLIENT_SECRET:sin-configurar}",
+        "defaultScope": "openid profile email",
+        "syncMode": "IMPORT"
+      }
+    },
+    {
+      "alias": "github",
+      "displayName": "GitHub",
+      "providerId": "github",
+      "enabled": "${GITHUB_LOGIN_ENABLED:false}",
+      "trustEmail": false,
+      "storeToken": false,
+      "firstBrokerLoginFlowAlias": "first broker login",
+      "config": {
+        "clientId": "${GITHUB_CLIENT_ID:sin-configurar}",
+        "clientSecret": "${GITHUB_CLIENT_SECRET:sin-configurar}",
+        "defaultScope": "user:email",
+        "syncMode": "IMPORT"
+      }
+    }
+  ],
+  "identityProviderMappers": [
+    {
+      "name": "rol-donante",
+      "identityProviderAlias": "google",
+      "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
+      "config": { "role": "DONANTE", "syncMode": "IMPORT" }
+    },
+    {
+      "name": "rol-donante",
+      "identityProviderAlias": "github",
+      "identityProviderMapper": "oidc-hardcoded-role-idp-mapper",
+      "config": { "role": "DONANTE", "syncMode": "IMPORT" }
     }
   ]
 }

@@ -99,7 +99,7 @@ public class ImportacionDonantesService {
     }
 
     private Donante generarDonante(DonanteImportadoDTO fila) {
-        Donante creado = donantesService.registrarDonante(mapearACrearDonanteDTO(fila));
+        Donante creado = donantesService.registrarDonanteImportado(mapearACrearDonanteDTO(fila));
         agregarTelefono(creado.getDatosUsuario(), fila.getTelefono());
         return creado;
     }

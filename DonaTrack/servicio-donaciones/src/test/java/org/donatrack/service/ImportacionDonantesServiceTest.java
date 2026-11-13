@@ -36,7 +36,7 @@ class ImportacionDonantesServiceTest {
         Donante creado = mock(Donante.class);
         Organizacion datosCreado = new Organizacion("Organizacion nueva", "30-nueva");
         when(creado.getDatosUsuario()).thenReturn(datosCreado);
-        when(donantesService.registrarDonante(any(CrearDonanteDTO.class))).thenReturn(creado);
+        when(donantesService.registrarDonanteImportado(any(CrearDonanteDTO.class))).thenReturn(creado);
 
         String csv = "TipoPersona,TipoDoc,Documento,Nombre/Razon Social,Email,Telefono\n"
                 + "HUMANA,DNI,123,Ana Actualizada,ANA@MAIL.COM,111\n"
@@ -54,6 +54,6 @@ class ImportacionDonantesServiceTest {
         assertThat(resultado.getErrores().get(0).getLinea()).isEqualTo(4);
         assertThat(datosExistente.getContactos()).extracting(Contacto::getValor).containsExactly("111");
         assertThat(datosCreado.getContactos()).extracting(Contacto::getValor).containsExactly("222");
-        verify(donantesService, times(1)).registrarDonante(any(CrearDonanteDTO.class));
+        verify(donantesService, times(1)).registrarDonanteImportado(any(CrearDonanteDTO.class));
     }
 }
