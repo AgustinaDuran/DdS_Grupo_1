@@ -8,16 +8,19 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.donatrack.controller.dto.Donantes.CrearDonanteDTO;
+import org.donatrack.controller.dto.Donantes.ActualizarDonanteDTO;
 import org.donatrack.controller.dto.Donantes.ImportacionCsvResultadoDTO;
+import org.donatrack.controller.dto.Donantes.ContactoDTO;
 import org.donatrack.dominio.contacto.Contacto;
 import org.donatrack.dominio.donante.Donante;
 import org.donatrack.dominio.donante.DonanteJuridico;
 import org.donatrack.dominio.donante.DonantePersona;
 import org.donatrack.dominio.usuario.DatosUsuario;
-import org.donatrack.dominio.usuario.persona.Persona;
 import org.donatrack.dominio.usuario.organizacion.Organizacion;
+import org.donatrack.dominio.usuario.persona.Persona;
 import org.donatrack.repository.DonantesRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.donatrack.controller.dto.Usuarios.CrearUsuarioDTO;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.context.annotation.Lazy;
@@ -25,7 +28,6 @@ import org.donatrack.integracion.DestinatarioResolver;
 import org.donatrack.integracion.KeycloakUserClient;
 import org.donatrack.integracion.NotificacionesClient;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DonantesService {
@@ -151,6 +153,91 @@ public class DonantesService {
     /** Alias de guardarDonante que respeta el nombre "actualizarDonante" del diagrama. */
     public Donante actualizarDonante(Donante donante) {
         return guardarDonante(donante);
+    }
+
+    @Transactional
+    public Donante actualizarDonante(Long id, ActualizarDonanteDTO datosActualizacion) {
+        Donante donante = donantesRepository.findById(id).orElse(null);
+        if (donante == null) {
+            return null;
+        }
+        DatosUsuario usuario = donante.getDatosUsuario();
+
+        if (usuario instanceof Persona persona) {
+            if (datosActualizacion.getTipoPersonaJuridica() != null
+                    || datosActualizacion.getRubro() != null
+                    || datosActualizacion.getRazonSocial() != null
+                    || datosActualizacion.getCuit() != null) {
+                throw new IllegalArgumentException("Los campos de organización no corresponden a un donante humano.");
+            }
+            if (datosActualizacion.getNombre() != null) {
+                persona.setNombre(datosActualizacion.getNombre());
+            }
+            if (datosActualizacion.getApellido() != null) {
+                persona.setApellido(datosActualizacion.getApellido());
+            }
+            if (datosActualizacion.getEdad() != null) {
+                persona.setEdad(datosActualizacion.getEdad());
+            }
+            if (datosActualizacion.getDni() != null) {
+                persona.setDni(datosActualizacion.getDni());
+            }
+            if (datosActualizacion.getGenero() != null) {
+                persona.setGenero(datosActualizacion.getGenero());
+            }
+            if (datosActualizacion.getDireccion() != null) {
+                persona.setDireccion(datosActualizacion.getDireccion());
+            }
+            if (datosActualizacion.getContactoPredeterminado() != null) {
+                persona.setContactoPredeterminado(contactoDesde(datosActualizacion.getContactoPredeterminado()));
+            }
+        } else if (usuario instanceof Organizacion organizacion) {
+            if (datosActualizacion.getNombre() != null
+                    || datosActualizacion.getApellido() != null
+                    || datosActualizacion.getEdad() != null
+                    || datosActualizacion.getDni() != null
+                    || datosActualizacion.getGenero() != null
+                    || datosActualizacion.getDireccion() != null
+                    || datosActualizacion.getContactoPredeterminado() != null) {
+                throw new IllegalArgumentException("Los campos de persona no corresponden a un donante jurídico.");
+            }
+            if (datosActualizacion.getRazonSocial() != null) {
+                organizacion.setRazonSocial(datosActualizacion.getRazonSocial());
+            }
+            if (datosActualizacion.getCuit() != null) {
+                organizacion.setCuit(datosActualizacion.getCuit());
+            }
+        } else {
+            throw new IllegalArgumentException("El donante no tiene un tipo de usuario compatible.");
+        }
+
+        if (datosActualizacion.getContactos() != null) {
+            usuario.getContactos().clear();
+            for (ContactoDTO contacto : datosActualizacion.getContactos()) {
+                usuario.agregarContacto(contactoDesde(contacto));
+            }
+        }
+
+        if (donante instanceof DonanteJuridico donanteJuridico) {
+            if (datosActualizacion.getTipoPersonaJuridica() != null) {
+                donanteJuridico.setTipoPersonaJuridica(datosActualizacion.getTipoPersonaJuridica());
+            }
+            if (datosActualizacion.getRubro() != null) {
+                donanteJuridico.setRubro(datosActualizacion.getRubro());
+            }
+        } else if (!(donante instanceof DonantePersona)) {
+            throw new IllegalArgumentException("Tipo de donante no compatible.");
+        }
+
+        usuariosService.guardarUsuario(usuario);
+        return donantesRepository.save(donante);
+    }
+
+    private Contacto contactoDesde(ContactoDTO contactoDTO) {
+        if (contactoDTO == null) {
+            throw new IllegalArgumentException("Los contactos no pueden ser nulos.");
+        }
+        return new Contacto(contactoDTO.getMedio(), contactoDTO.getValor());
     }
 
     public ImportacionCsvResultadoDTO importarDonantesMasivo(MultipartFile archivo) {

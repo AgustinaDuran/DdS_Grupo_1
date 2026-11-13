@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.donatrack.config.IdentidadAutenticada;
+import org.donatrack.controller.dto.Donantes.ActualizarDonanteDTO;
 import org.donatrack.controller.dto.Donantes.CrearDonanteDTO;
 import org.donatrack.controller.dto.Donantes.DonanteDTO;
 import org.donatrack.controller.dto.Donantes.ImportacionCsvResultadoDTO;
@@ -69,6 +70,16 @@ public class DonantesController {
     @GetMapping("/{id}")
     public ResponseEntity<DonanteDTO> obtenerDonantePorId(@PathVariable Long id) {
         Donante donante = donantesService.obtenerDonantePorId(id).orElse(null);
+        if (donante == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(new DonanteDTO(donante));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<DonanteDTO> actualizarDonante(
+            @PathVariable Long id, @RequestBody ActualizarDonanteDTO datosActualizacion) {
+        Donante donante = donantesService.actualizarDonante(id, datosActualizacion);
         if (donante == null) {
             return ResponseEntity.notFound().build();
         }

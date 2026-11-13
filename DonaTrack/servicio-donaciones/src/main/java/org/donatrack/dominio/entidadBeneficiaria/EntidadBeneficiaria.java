@@ -57,8 +57,16 @@ public class EntidadBeneficiaria {
     public TipoEntidadBeneficiaria getTipoEntidad() { 
         return tipoEntidad; }
 
+    public void setTipoEntidad(TipoEntidadBeneficiaria tipoEntidad) {
+        this.tipoEntidad = tipoEntidad;
+    }
+
     public String getDireccion() {
         return direccion; }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
 
     public Organizacion getOrganizacion() {
         return organizacion; }
