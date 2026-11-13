@@ -17,6 +17,7 @@ public class CrearDonanteDTO {
     private String rubro;
 
     private Long usuarioId;
+    private String contrasenaTemporal;
 
     // Campos CrearUsuarioDTO
     private RolUsuario tipoUsuario;
@@ -63,6 +64,12 @@ public class CrearDonanteDTO {
     }
     public void setUsuarioId(Long usuarioId) {
         this.usuarioId = usuarioId;
+    }
+    public String getContrasenaTemporal() {
+        return contrasenaTemporal;
+    }
+    public void setContrasenaTemporal(String contrasenaTemporal) {
+        this.contrasenaTemporal = contrasenaTemporal;
     }
     public RolUsuario getTipoUsuario() {
         return tipoUsuario;

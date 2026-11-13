@@ -141,4 +141,16 @@ public class AnaliticaService {
 
         return new PodioMensualDTO(ranking.GetIdPeriodo(), destacadosDTO);
     }
+
+    /**
+     * Períodos que ya fueron procesados. El identificador usa YearMonth (yyyy-MM),
+     * por lo que el orden descendente también es el cronológico.
+     */
+    @Transactional(readOnly = true)
+    public List<String> ObtenerPeriodosDeRanking() {
+        List<String> periodos = new ArrayList<>();
+        rankingRepository.findAll().forEach(ranking -> periodos.add(ranking.GetIdPeriodo()));
+        periodos.sort(Comparator.reverseOrder());
+        return periodos;
+    }
 }

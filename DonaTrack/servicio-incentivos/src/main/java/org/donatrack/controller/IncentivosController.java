@@ -63,6 +63,12 @@ public class IncentivosController {
         return ResponseEntity.ok(this.analiticaService.ObtenerPodioDestacadoDelMes(parsearPeriodo(periodo)));
     }
 
+    /** Lista los meses disponibles para que Administración pueda consultar el historial. */
+    @GetMapping("/rankings")
+    public ResponseEntity<List<String>> ObtenerPeriodosDeRanking() {
+        return ResponseEntity.ok(this.analiticaService.ObtenerPeriodosDeRanking());
+    }
+
     // PUT idempotente: genera (o regenera) el ranking del período indicado
     @PutMapping("/rankings/{periodo}")
     public ResponseEntity<PodioMensualDTO> GenerarRankingManual(@PathVariable String periodo) {
